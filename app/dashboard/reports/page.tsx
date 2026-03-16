@@ -17,7 +17,8 @@ import {
     Lightning,
     ShareNetwork,
     Target,
-    TrendUp
+    TrendUp,
+    Buildings
 } from '@phosphor-icons/react'
 import {
     format,
@@ -52,6 +53,7 @@ import {
 } from '@/components/ui/tooltip'
 import { DiverseCharts } from './components/diverse-charts'
 import { PerformanceCard } from './components/performance-card'
+import { PropFirmTab } from './components/propfirm-tab'
 
 // Dense Metric Block component
 function MetricBlock({
@@ -159,7 +161,7 @@ function SessionBlock({
 
 export default function ReportsPage() {
     const { accounts } = useData()
-    
+
     // Filter State
     const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -202,6 +204,43 @@ export default function ReportsPage() {
     const psychMetrics = reportData?.psychMetrics ?? null
     const sessionPerformance = reportData?.sessionPerformance ?? null
     const rMultipleDistribution = reportData?.rMultipleDistribution ?? null
+
+    // Pre-computed R-Multiple bars to avoid JSX IIFE type errors
+    const rMultipleBars = rMultipleDistribution ? (() => {
+        const maxCount = Math.max(...Object.values(rMultipleDistribution).map(Number), 0)
+        return Object.entries(rMultipleDistribution).map(([bucket, rawCount], i) => {
+            const count = Number(rawCount)
+            const height = maxCount > 0 ? (count / maxCount * 100) : 0
+            const isNegative = bucket.includes('<') || bucket.includes('-')
+            return (
+                <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
+                    <div className="w-full relative flex flex-col justify-end h-full">
+                        <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: `${height}%` }}
+                            className={cn(
+                                "w-full rounded-t-sm transition-all relative overflow-hidden",
+                                isNegative ? "bg-red-500/40 group-hover:bg-red-500/60" : "bg-long/40 group-hover:bg-long/60"
+                            )}
+                        >
+                            <div className={cn(
+                                "absolute top-0 left-0 w-full h-0.5",
+                                isNegative ? "bg-red-400" : "bg-long"
+                            )} />
+                        </motion.div>
+                        {count > 0 && (
+                            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                                {count}
+                            </span>
+                        )}
+                    </div>
+                    <span className="text-[8px] font-bold text-muted-foreground/60 whitespace-nowrap -rotate-45 origin-top-left mt-1">
+                        {bucket}
+                    </span>
+                </div>
+            )
+        })
+    })() : null
     const filteredTrades = reportData?.filteredTrades ?? []
     const filterOptions = reportData?.filterOptions ?? {
         symbols: [],
@@ -270,7 +309,7 @@ export default function ReportsPage() {
         setAdvancedFilters(prev => ({ ...prev, [key]: value }))
     }
 
-    const periodLabel = dateRange?.from && dateRange?.to 
+    const periodLabel = dateRange?.from && dateRange?.to
         ? `${format(dateRange.from, 'MMM d')} - ${format(dateRange.to, 'MMM d, yyyy')}`
         : 'Select Period'
 
@@ -332,7 +371,7 @@ export default function ReportsPage() {
                     </div>
                 </div>
 
-                <ReportFilters 
+                <ReportFilters
                     accounts={accounts || []}
                     selectedAccountId={selectedAccountId}
                     onAccountChange={setSelectedAccountId}
@@ -354,9 +393,9 @@ export default function ReportsPage() {
                     <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border/60 rounded-2xl bg-muted/5">
                         <Lightning weight="light" className="h-10 w-10 text-muted-foreground/30 mb-4" />
                         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/50 mb-4">Journal is empty for this period</h3>
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
+                        <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handlePresetSelect('ALL')}
                             className="text-[10px] font-black uppercase tracking-widest"
                         >
@@ -369,6 +408,10 @@ export default function ReportsPage() {
                             <TabsTrigger value="overview" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all">Overview Audit</TabsTrigger>
                             <TabsTrigger value="sessions" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all">Session Metrics</TabsTrigger>
                             <TabsTrigger value="spreadsheet" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all">Audit Spreadsheet</TabsTrigger>
+                            <TabsTrigger value="propfirm" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
+                                <Buildings weight="light" className="h-3.5 w-3.5" />
+                                Funded Accounts
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="overview" className="space-y-12 focus-visible:outline-none">
                             <div className="space-y-10">
@@ -455,38 +498,7 @@ export default function ReportsPage() {
                                         </div>
                                         <div className="bg-muted/10 border border-border/40 rounded-2xl p-6 flex flex-col justify-between h-[280px]">
                                             <div className="flex items-end justify-between h-40 gap-2 px-2">
-                                                {rMultipleDistribution && Object.entries(rMultipleDistribution).map(([bucket, count], i) => {
-                                                    const maxCount = Math.max(...Object.values(rMultipleDistribution))
-                                                    const height = maxCount > 0 ? (count / maxCount * 100) : 0
-                                                    const isNegative = bucket.includes('<') || bucket.includes('-')
-                                                    return (
-                                                        <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                                                            <div className="w-full relative flex flex-col justify-end h-full">
-                                                                <motion.div 
-                                                                    initial={{ height: 0 }} 
-                                                                    animate={{ height: `${height}%` }}
-                                                                    className={cn(
-                                                                        "w-full rounded-t-sm transition-all relative overflow-hidden",
-                                                                        isNegative ? "bg-short/40 group-hover:bg-short/60" : "bg-long/40 group-hover:bg-long/60"
-                                                                    )}
-                                                                >
-                                                                    <div className={cn(
-                                                                        "absolute top-0 left-0 w-full h-0.5",
-                                                                        isNegative ? "bg-short" : "bg-long"
-                                                                    )} />
-                                                                </motion.div>
-                                                                {count > 0 && (
-                                                                    <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        {count}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                            <span className="text-[8px] font-bold text-muted-foreground/60 whitespace-nowrap -rotate-45 origin-top-left mt-1">
-                                                                {bucket}
-                                                            </span>
-                                                        </div>
-                                                    )
-                                                })}
+                                                {rMultipleBars}
                                             </div>
                                             <p className="text-[9px] text-center text-muted-foreground/40 font-medium italic mt-4">
                                                 Frequency distribution of trades by risk-to-reward multiple
@@ -494,7 +506,7 @@ export default function ReportsPage() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {/* Rich Visualizations */}
                                 <DiverseCharts trades={filteredTrades} />
                             </div>
@@ -509,7 +521,7 @@ export default function ReportsPage() {
                         </TabsContent>
 
                         <TabsContent value="spreadsheet" className="focus-visible:outline-none">
-                             <div className="border border-border/40 rounded-xl overflow-hidden bg-card/50">
+                            <div className="border border-border/40 rounded-xl overflow-hidden bg-card/50">
                                 <Table>
                                     <TableHeader className="bg-muted/30">
                                         <TableRow className="border-border/40 hover:bg-transparent">
@@ -522,7 +534,7 @@ export default function ReportsPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {[...filteredTrades].sort((a,b) => new Date(b.entryDate!).getTime() - new Date(a.entryDate!).getTime()).map((trade: any) => {
+                                        {[...filteredTrades].sort((a, b) => new Date(b.entryDate!).getTime() - new Date(a.entryDate!).getTime()).map((trade: any) => {
                                             const netPnL = (trade.pnl || 0) + (trade.commission || 0)
                                             const outcome = classifyTrade(netPnL)
                                             return (
@@ -560,6 +572,10 @@ export default function ReportsPage() {
                                     </TableBody>
                                 </Table>
                             </div>
+                        </TabsContent>
+
+                        <TabsContent value="propfirm" className="focus-visible:outline-none">
+                            <PropFirmTab />
                         </TabsContent>
                     </Tabs>
                 )}

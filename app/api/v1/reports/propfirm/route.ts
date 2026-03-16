@@ -1,0 +1,50 @@
+/**
+ * Prop Firm Analytics API (v1)
+ *
+ * GET /api/v1/reports/propfirm
+ *
+ * Returns all funded/challenge account stats computed server-side.
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { getUserId } from '@/server/auth'
+import { calculatePropFirmStatistics } from '@/lib/statistics/propfirm-statistics'
+import { CacheHeaders } from '@/lib/api-cache-headers'
+import { applyRateLimit, apiLimiter } from '@/lib/rate-limiter'
+import { logger } from '@/lib/logger'
+import { prisma } from '@/lib/prisma'
+
+export async function GET(request: NextRequest) {
+  const rateLimitRes = await applyRateLimit(request, apiLimiter)
+  if (rateLimitRes) return rateLimitRes
+
+  const start = Date.now()
+  try {
+    const authUserId = await getUserId()
+
+    const userLookup = await prisma.user.findUnique({
+      where: { auth_user_id: authUserId },
+      select: { id: true },
+    })
+
+    if (!userLookup?.id) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    const result = await calculatePropFirmStatistics(userLookup.id)
+
+    const response = NextResponse.json(result)
+    Object.entries(CacheHeaders.privateShort).forEach(([k, v]) => response.headers.set(k, v))
+    logger.info('GET /api/v1/reports/propfirm', { latencyMs: Date.now() - start }, 'api')
+    return response
+  } catch (error: any) {
+    logger.error('GET /api/v1/reports/propfirm failed', { error: error?.message, latencyMs: Date.now() - start }, 'api')
+    if (error.message?.includes('not authenticated') || error.message?.includes('Unauthorized')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return NextResponse.json(
+      { error: error.message || 'Internal Server Error' },
+      { status: 500 }
+    )
+  }
+}

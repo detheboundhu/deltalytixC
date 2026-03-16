@@ -177,7 +177,7 @@ export async function calculateReportStatistics(
       orderBy: { name: 'asc' },
     }),
     prisma.trade.findMany({
-      where: { 
+      where: {
         userId,
         // When fetching options, we only filter by account if one is selected, 
         // ensuring the list adapts to the selected account but not the date range.
