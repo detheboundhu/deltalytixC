@@ -234,12 +234,9 @@ function buildFilterOptions(symbols: string[], strategies: Array<{ id: string; n
   return {
     symbols,
     sessions: [
-      'London Killzone',
-      'NY Killzone',
-      'London Close Killzone',
-      'Lunch Time',
-      'NY PM',
-      'Asian Killzone',
+      'New York',
+      'London',
+      'Asia',
       'Outside Session',
     ],
     outcomes: [

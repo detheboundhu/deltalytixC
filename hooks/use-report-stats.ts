@@ -32,7 +32,13 @@ export function useReportStats(filters: UseReportStatsFilters, enabled = true) {
   return useQuery<ReportStatsResponse>({
     // IMPORTANT: stable key (string), not object reference
     queryKey: ['report-stats', stableKey],
-    queryFn: () => postFetcher<ReportStatsResponse>('/api/v1/reports/stats', cleanedFilters),
+    queryFn: async () => {
+      const result = await postFetcher<ReportStatsResponse>('/api/v1/reports/stats', cleanedFilters) as any
+      // postFetcher wraps via fetchWithError → { data, error, ok, status }
+      // Unwrap the envelope so React Query receives the actual ReportStatsResponse
+      if (result?.data !== undefined) return result.data as ReportStatsResponse
+      return result as ReportStatsResponse
+    },
     enabled,
     staleTime: 60 * 1000, // Reports data is less volatile, 1 min stale
     gcTime: 5 * 60 * 1000,

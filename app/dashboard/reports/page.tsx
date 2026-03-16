@@ -28,7 +28,7 @@ import {
 } from 'date-fns'
 import { motion } from 'framer-motion'
 import html2canvas from 'html2canvas'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DateRange } from '@/components/ui/custom-date-range-picker'
 import { toast } from 'sonner'
 import { ReportFilters } from './components/report-filters'
@@ -189,6 +189,13 @@ export default function ReportsPage() {
         strategy: advancedFilters.strategy !== 'all' ? advancedFilters.strategy : undefined,
         ruleBroken: advancedFilters.ruleBroken !== 'all' ? advancedFilters.ruleBroken : undefined,
     })
+
+    // DEV: log to diagnose empty state
+    useEffect(() => {
+        if (process.env.NODE_ENV !== 'development') return
+        console.log('Report Data:', reportData)
+        console.log('Is Loading:', isLoading)
+    }, [reportData, isLoading])
 
     // Extract server-computed data
     const tradingActivity = reportData?.tradingActivity ?? null
@@ -356,7 +363,7 @@ export default function ReportsPage() {
                             View All Time
                         </Button>
                     </div>
-                ) : (tradingActivity && psychMetrics && filteredTrades.length > 0) ? (
+                ) : (
                     <Tabs defaultValue="overview" className="w-full" onValueChange={setSelectedTab}>
                         <TabsList className="mb-8 p-1 bg-muted/20 border border-border/40 rounded-xl no-export">
                             <TabsTrigger value="overview" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all">Overview Audit</TabsTrigger>
@@ -523,7 +530,7 @@ export default function ReportsPage() {
                                                     <TableCell className="text-[10px] font-bold font-mono py-2 opacity-60">
                                                         {trade.entryDate ? formatTimeInZone(trade.entryDate.includes('Z') ? trade.entryDate : `${trade.entryDate}Z`, 'yyyy-MM-dd HH:mm') : 'N/A'}
                                                     </TableCell>
-                                                    <TableCell className="text-[10px] font-black py-2">{trade.symbol}</TableCell>
+                                                    <TableCell className="text-[10px] font-black py-2">{trade.symbol || trade.instrument || '—'}</TableCell>
                                                     <TableCell className="py-2">
                                                         <span className={cn(
                                                             "text-[9px] font-black uppercase px-2 py-0.5 rounded-full",
@@ -555,14 +562,6 @@ export default function ReportsPage() {
                             </div>
                         </TabsContent>
                     </Tabs>
-                ) : (
-                    <div className="flex flex-col items-center justify-center py-32 border border-dashed border-border/40 rounded-3xl bg-muted/5">
-                        <Lightning weight="light" className="h-12 w-12 text-muted-foreground/20 mb-4 animate-pulse" />
-                        <h3 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground/40 text-center">
-                            Neural Journal is empty<br/>
-                            <span className="text-[10px] tracking-widest font-bold opacity-50 mt-2 block">ADJUST TEMPORAL FILTERS TO REVEAL DATA</span>
-                        </h3>
-                    </div>
                 )}
             </motion.div>
         </div>
