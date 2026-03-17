@@ -23,6 +23,7 @@ export async function GET() {
         email: true,
         firstName: true,
         lastName: true,
+        accentPack: true,
       }
     })
 
@@ -62,35 +63,39 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json()
 
-    const { firstName, lastName } = body
+    const { firstName, lastName, accentPack } = body
 
-    // Validate input
-    if (typeof firstName !== 'string' && firstName !== null) {
+    // Validate input — only check fields that are actually provided
+    if (firstName !== undefined && typeof firstName !== 'string' && firstName !== null) {
       return NextResponse.json(
         { error: 'Invalid firstName format' },
         { status: 400 }
       )
     }
 
-    if (typeof lastName !== 'string' && lastName !== null) {
+    if (lastName !== undefined && typeof lastName !== 'string' && lastName !== null) {
       return NextResponse.json(
         { error: 'Invalid lastName format' },
         { status: 400 }
       )
     }
 
+    // Build update data — only include fields that were sent
+    const updateData: Record<string, any> = {}
+    if (firstName !== undefined) updateData.firstName = firstName?.trim() || null
+    if (lastName !== undefined) updateData.lastName = lastName?.trim() || null
+    if (accentPack && typeof accentPack === 'string') updateData.accentPack = accentPack
+
     // Update user profile in database
     const updatedUser = await prisma.user.update({
       where: { auth_user_id: userId },
-      data: {
-        firstName: firstName?.trim() || null,
-        lastName: lastName?.trim() || null,
-      },
+      data: updateData,
       select: {
         id: true,
         email: true,
         firstName: true,
         lastName: true,
+        accentPack: true,
       }
     })
 

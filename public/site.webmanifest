@@ -2,9 +2,12 @@
   "name": "Deltalytix",
   "short_name": "Deltalytix",
   "description": "Next generation trading dashboard",
-  "start_url": "/",
+  "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
+  "theme_color": "#09090b",
+  "background_color": "#09090b",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -19,4 +22,4 @@
       "purpose": "any maskable"
     }
   ]
-} 
+}

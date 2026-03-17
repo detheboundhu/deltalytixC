@@ -36,6 +36,7 @@ interface ReportFiltersProps {
     dateRange: DateRange | undefined
     onDateRangeChange: (range: DateRange | undefined) => void
     onPresetSelect: (range: string) => void
+    activePreset?: string
     // Advanced Filters
     filters: {
         symbol: string
@@ -60,6 +61,7 @@ export function ReportFilters({
     dateRange,
     onDateRangeChange,
     onPresetSelect,
+    activePreset,
     filters,
     options,
     onFilterChange
@@ -98,10 +100,15 @@ export function ReportFilters({
                     {['7D', '30D', '90D', 'YTD', 'ALL'].map(preset => (
                         <Button
                             key={preset}
-                            variant="ghost"
+                            variant={activePreset === preset ? 'default' : 'ghost'}
                             size="sm"
                             onClick={() => onPresetSelect(preset)}
-                            className="h-7 px-3 text-[9px] font-black tracking-widest hover:bg-primary/10 hover:text-primary transition-all"
+                            className={cn(
+                                "h-7 px-3 text-[9px] font-black tracking-widest transition-all",
+                                activePreset === preset
+                                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                    : "hover:bg-primary/10 hover:text-primary"
+                            )}
                         >
                             {preset}
                         </Button>

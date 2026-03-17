@@ -344,6 +344,7 @@ model User {
   accountFilterSettings  String?
   goalSettings           Json?
   backtestInputMode      String                   @default("manual")
+  accentPack             String                   @default("classic")
   Account                Account[]
   BacktestTrade          BacktestTrade[]
   DailyNote              DailyNote[]

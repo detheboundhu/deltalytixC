@@ -3,8 +3,8 @@
 import React from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { useData } from '@/context/data-provider'
-import TradeEditDialog from './tables/trade-edit-dialog'
-import { TradeDetailView } from './tables/trade-detail-view'
+import { TradeEditPanel } from './tables/trade-edit-panel'
+import { TradeDetailPanel } from './tables/trade-detail-panel'
 import { ensureExtendedTrade } from '@/lib/utils'
 
 export function GlobalTradeController() {
@@ -38,22 +38,25 @@ export function GlobalTradeController() {
 
   if (action === 'edit') {
     return (
-      <TradeEditDialog 
-        isOpen={true} 
-        onClose={handleClose} 
-        trade={ensureExtendedTrade(trade)} 
-        onSave={handleSave} 
-      />
+      <div className="w-full h-[calc(100vh-3.5rem)]">
+        <TradeEditPanel
+          trade={ensureExtendedTrade(trade)}
+          onClose={handleClose}
+          onSave={handleSave}
+        />
+      </div>
     )
   }
 
   if (action === 'view') {
     return (
-      <TradeDetailView 
-        isOpen={true} 
-        onClose={handleClose} 
-        trade={trade} 
-      />
+      <div className="w-full h-[calc(100vh-3.5rem)]">
+        <TradeDetailPanel
+          trade={trade}
+          onClose={handleClose}
+          basePath={pathname}
+        />
+      </div>
     )
   }
 

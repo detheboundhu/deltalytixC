@@ -18,7 +18,10 @@ import {
     ShareNetwork,
     Target,
     TrendUp,
-    Buildings
+    Buildings,
+    Clock,
+    Rows,
+    Table as TableIcon
 } from '@phosphor-icons/react'
 import {
     format,
@@ -170,6 +173,7 @@ export default function ReportsPage() {
     })
     const [selectedTab, setSelectedTab] = useState('overview')
     const [isExporting, setIsExporting] = useState(false)
+    const [activePreset, setActivePreset] = useState<string>('90D')
 
     // Advanced Filters State
     const [advancedFilters, setAdvancedFilters] = useState({
@@ -220,12 +224,12 @@ export default function ReportsPage() {
                             animate={{ height: `${height}%` }}
                             className={cn(
                                 "w-full rounded-t-sm transition-all relative overflow-hidden",
-                                isNegative ? "bg-red-500/40 group-hover:bg-red-500/60" : "bg-long/40 group-hover:bg-long/60"
+                            isNegative ? "bg-destructive/40 group-hover:bg-destructive/60" : "bg-long/40 group-hover:bg-long/60"
                             )}
                         >
                             <div className={cn(
                                 "absolute top-0 left-0 w-full h-0.5",
-                                isNegative ? "bg-red-400" : "bg-long"
+                                isNegative ? "bg-destructive" : "bg-long"
                             )} />
                         </motion.div>
                         {count > 0 && (
@@ -251,6 +255,7 @@ export default function ReportsPage() {
 
     const handlePresetSelect = (preset: string) => {
         const today = new Date()
+        setActivePreset(preset)
         switch (preset) {
             case '7D':
                 setDateRange({ from: subDays(today, 7), to: today })
@@ -266,6 +271,7 @@ export default function ReportsPage() {
                 break
             case 'ALL':
                 setDateRange({ from: new Date(2000, 0, 1), to: today })
+                setActivePreset('ALL')
                 break
         }
     }
@@ -378,6 +384,7 @@ export default function ReportsPage() {
                     dateRange={dateRange}
                     onDateRangeChange={setDateRange}
                     onPresetSelect={handlePresetSelect}
+                    activePreset={activePreset}
                     filters={advancedFilters}
                     options={filterOptions}
                     onFilterChange={handleFilterChange}
@@ -405,9 +412,18 @@ export default function ReportsPage() {
                 ) : (
                     <Tabs defaultValue="overview" className="w-full" onValueChange={setSelectedTab}>
                         <TabsList className="mb-8 p-1 bg-muted/20 border border-border/40 rounded-xl no-export">
-                            <TabsTrigger value="overview" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all">Overview Audit</TabsTrigger>
-                            <TabsTrigger value="sessions" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all">Session Metrics</TabsTrigger>
-                            <TabsTrigger value="spreadsheet" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all">Audit Spreadsheet</TabsTrigger>
+                            <TabsTrigger value="overview" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
+                                <TrendUp weight="light" className="h-3.5 w-3.5" />
+                                Overview Audit
+                            </TabsTrigger>
+                            <TabsTrigger value="sessions" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
+                                <Clock weight="light" className="h-3.5 w-3.5" />
+                                Session Metrics
+                            </TabsTrigger>
+                            <TabsTrigger value="spreadsheet" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
+                                <Rows weight="light" className="h-3.5 w-3.5" />
+                                Audit Spreadsheet
+                            </TabsTrigger>
                             <TabsTrigger value="propfirm" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
                                 <Buildings weight="light" className="h-3.5 w-3.5" />
                                 Funded Accounts
@@ -479,6 +495,26 @@ export default function ReportsPage() {
                                                             <span className="text-long">{psychMetrics.longestWinStreak}W</span> / <span className="text-short">{psychMetrics.longestLoseStreak}L</span>
                                                         </TableCell>
                                                     </TableRow>
+                                                    <TableRow className="border-border/10 hover:bg-transparent">
+                                                        <TableCell className="text-[10px] font-black uppercase text-muted-foreground/60 py-3">Most Traded Day</TableCell>
+                                                        <TableCell className="text-right font-bold py-3">{tradingActivity.mostTradedDay || '—'}</TableCell>
+                                                    </TableRow>
+                                                    <TableRow className="border-border/10 hover:bg-transparent">
+                                                        <TableCell className="text-[10px] font-black uppercase text-muted-foreground/60 py-3">Most Profitable Day</TableCell>
+                                                        <TableCell className="text-right font-bold py-3 text-long">{tradingActivity.mostProfitableDay || '—'}</TableCell>
+                                                    </TableRow>
+                                                    <TableRow className="border-border/10 hover:bg-transparent">
+                                                        <TableCell className="text-[10px] font-black uppercase text-muted-foreground/60 py-3">Most Profitable Pair</TableCell>
+                                                        <TableCell className="text-right font-bold py-3 text-long">{tradingActivity.mostProfitablePair || '—'}</TableCell>
+                                                    </TableRow>
+                                                    <TableRow className="border-border/10 hover:bg-transparent">
+                                                        <TableCell className="text-[10px] font-black uppercase text-muted-foreground/60 py-3">Most Losing Day</TableCell>
+                                                        <TableCell className="text-right font-bold py-3 text-short">{tradingActivity.mostLosingDay || '—'}</TableCell>
+                                                    </TableRow>
+                                                    <TableRow className="border-border/10 hover:bg-transparent">
+                                                        <TableCell className="text-[10px] font-black uppercase text-muted-foreground/60 py-3">Most Losing Pair</TableCell>
+                                                        <TableCell className="text-right font-bold py-3 text-short">{tradingActivity.mostLosingPair || '—'}</TableCell>
+                                                    </TableRow>
                                                     <TableRow className="border-none hover:bg-transparent">
                                                         <TableCell className="text-[10px] font-black uppercase text-muted-foreground/60 py-3">Account Yield</TableCell>
                                                         <TableCell className={cn("text-right font-black py-3", psychMetrics.totalNetPnL >= 0 ? "text-long" : "text-short")}>
@@ -497,7 +533,7 @@ export default function ReportsPage() {
                                             <h2 className="text-[11px] uppercase tracking-[0.2em] font-black text-muted-foreground">R-Multiple Distribution</h2>
                                         </div>
                                         <div className="bg-muted/10 border border-border/40 rounded-2xl p-6 flex flex-col justify-between h-[280px]">
-                                            <div className="flex items-end justify-between h-40 gap-2 px-2">
+                                            <div className="flex items-end justify-between flex-1 gap-2 px-2">
                                                 {rMultipleBars}
                                             </div>
                                             <p className="text-[9px] text-center text-muted-foreground/40 font-medium italic mt-4">

@@ -63,6 +63,13 @@ export default async function RootLayout({
                 document.documentElement.classList.remove('light', 'dark');
                 document.documentElement.classList.add(effective);
                 document.documentElement.style.colorScheme = effective;
+
+                // Restore accent pack
+                var accent = localStorage.getItem('accentPack') || 'classic';
+                document.documentElement.classList.remove('accent-reports');
+                if (accent === 'reports') {
+                  document.documentElement.classList.add('accent-reports');
+                }
               } catch (e) {
                 document.documentElement.classList.add('dark');
                 document.documentElement.style.colorScheme = 'dark';

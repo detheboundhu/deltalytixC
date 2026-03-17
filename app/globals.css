@@ -115,7 +115,7 @@
     --chart-profit: 160 84% 31%;        /* #059669 */
     --chart-loss: 0 72% 51%;            /* #DC2626 */
     --chart-bullish: 123 27% 62%;       /* #83b885 */
-    --chart-bearish: 0 0% 0%;           /* #000000 */
+    --chart-bearish: 25 70% 45%;         /* Deep amber/copper */
 
     --chart-1: 217 91% 53%;             /* #2563EB - Blue */
     --chart-2: 263 70% 58%;             /* #7C3AED - Purple */
@@ -185,7 +185,7 @@
     --chart-profit: 160 84% 39%;        /* #10B981 */
     --chart-loss: 0 84% 60%;            /* #EF4444 */
     --chart-bullish: 123 27% 62%;       /* #83b885 */
-    --chart-bearish: 0 0% 0%;           /* #000000 */
+    --chart-bearish: 25 70% 45%;         /* Deep amber/copper */
 
     --chart-1: 213 97% 68%;             /* #60A5FA - Blue */
     --chart-2: 255 92% 76%;             /* #A78BFA - Purple */
@@ -202,6 +202,26 @@
     --sidebar-accent-foreground: 213 27% 84%;
     --sidebar-border: 215 24% 18%;      /* Match border */
     --sidebar-ring: 210 40% 98%;
+  }
+
+  /* Accent Pack: Reports Aesthetic — sage green + deep amber */
+  .accent-reports {
+    --success: 123 27% 62%;               /* Sage green (matches --chart-bullish) */
+    --success-foreground: 0 0% 100%;
+    --destructive: 25 70% 45%;            /* Deep amber/copper */
+    --destructive-foreground: 0 0% 100%;
+    --chart-profit: 123 27% 62%;
+    --chart-loss: 25 70% 45%;
+  }
+
+  .dark.accent-reports,
+  .accent-reports.dark {
+    --success: 123 27% 62%;
+    --success-foreground: 0 0% 100%;
+    --destructive: 25 70% 50%;            /* Slightly brighter amber on dark */
+    --destructive-foreground: 0 0% 100%;
+    --chart-profit: 123 27% 62%;
+    --chart-loss: 25 70% 50%;
   }
 }
 

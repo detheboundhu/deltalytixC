@@ -48,8 +48,8 @@ import { toast } from 'sonner'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useData } from '@/context/data-provider'
 import { useModalStateStore } from '@/store/modal-state-store'
-import TradeEditDialog from '@/app/dashboard/components/tables/trade-edit-dialog'
-import { TradeDetailView } from '@/app/dashboard/components/tables/trade-detail-view'
+import { TradeEditPanel } from '@/app/dashboard/components/tables/trade-edit-panel'
+import { TradeDetailPanel } from '@/app/dashboard/components/tables/trade-detail-panel'
 import { Trade } from '@prisma/client'
 import { groupTradesByExecution, formatCurrency, BREAK_EVEN_THRESHOLD } from '@/lib/utils'
 import Fuse from 'fuse.js'
@@ -458,6 +458,31 @@ export function JournalClient() {
     return <JournalSkeleton />
   }
 
+  // If detail or edit view is active, show the panel instead of journal cards
+  if (view === 'details' && matchedTrade) {
+    return (
+      <div className="w-full h-[calc(100vh-3.5rem)]">
+        <TradeDetailPanel
+          trade={matchedTrade as Trade}
+          onClose={() => router.push('/dashboard/journal')}
+          basePath="/dashboard/journal"
+        />
+      </div>
+    )
+  }
+
+  if (view === 'edit' && matchedTrade) {
+    return (
+      <div className="w-full h-[calc(100vh-3.5rem)]">
+        <TradeEditPanel
+          trade={ensureExtendedTrade(matchedTrade as Trade)}
+          onClose={() => router.push(`/dashboard/journal?view=details&tradeId=${matchedTrade.id}`)}
+          onSave={handleSaveTrade}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="w-full max-w-full py-6 px-4 sm:px-6 space-y-6">
       {/* Header */}
@@ -751,23 +776,7 @@ export function JournalClient() {
         )}
       </AnimatePresence>
 
-      {/* URL-based Dialogs & Views */}
-      {view === 'edit' && matchedTrade && (
-        <TradeEditDialog
-          isOpen={true}
-          onClose={() => router.push('/dashboard/journal', { scroll: false })}
-          trade={ensureExtendedTrade(matchedTrade as Trade)}
-          onSave={handleSaveTrade}
-        />
-      )}
-
-      {view === 'details' && matchedTrade && (
-        <TradeDetailView
-          isOpen={true}
-          onClose={() => router.push('/dashboard/journal')}
-          trade={matchedTrade as Trade}
-        />
-      )}
+      {/* Panels are now rendered above as early returns */}
 
 
 

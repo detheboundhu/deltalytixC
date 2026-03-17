@@ -99,7 +99,7 @@ function SettingRow({
 }
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, accentPack, setAccentPack } = useTheme()
   const user = useUserStore(state => state.supabaseUser)
   const timezone = useUserStore(state => state.timezone)
   const setTimezone = useUserStore(state => state.setTimezone)
@@ -123,6 +123,14 @@ export default function SettingsPage() {
     setTheme(value as "light" | "dark" | "system")
     toast.success("Theme updated", {
       description: `Theme changed to ${value === 'system' ? 'system default' : value} mode.`,
+      duration: 2000
+    })
+  }
+
+  const handleAccentChange = (value: 'classic' | 'reports') => {
+    setAccentPack(value)
+    toast.success("Color accent updated", {
+      description: `Accent changed to ${value === 'reports' ? 'Sage & Amber' : 'Classic'}.`,
       duration: 2000
     })
   }
@@ -380,6 +388,46 @@ export default function SettingsPage() {
                       <Laptop className="mr-2 h-4 w-4" weight="light" />
                       System
                       {theme === 'system' && <Check weight="light" className="ml-auto h-4 w-4" />}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              }
+            />
+
+            <Separator />
+
+            {/* Color Accent */}
+            <SettingRow
+              icon={Palette}
+              label="Color Accent"
+              description={accentPack === 'reports' ? 'Sage & Amber' : 'Classic (Red & Green)'}
+              action={
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2 min-w-[120px]">
+                      {accentPack === 'reports' ? 'Sage & Amber' : 'Classic'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleAccentChange('classic')}>
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <div className="w-3 h-3 rounded-full bg-[hsl(160,84%,39%)]" />
+                          <div className="w-3 h-3 rounded-full bg-[hsl(0,84%,60%)]" />
+                        </div>
+                        Classic
+                      </div>
+                      {accentPack === 'classic' && <Check weight="light" className="ml-auto h-4 w-4" />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleAccentChange('reports')}>
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <div className="w-3 h-3 rounded-full bg-[hsl(123,27%,62%)]" />
+                          <div className="w-3 h-3 rounded-full bg-[hsl(25,70%,45%)]" />
+                        </div>
+                        Sage & Amber
+                      </div>
+                      {accentPack === 'reports' && <Check weight="light" className="ml-auto h-4 w-4" />}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

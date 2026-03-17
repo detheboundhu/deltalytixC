@@ -31,8 +31,8 @@ function statusLabel(phaseStatus: string, masterStatus: string) {
 
 function statusColor(phaseStatus: string, masterStatus: string) {
     const label = statusLabel(phaseStatus, masterStatus)
-    if (label === 'Blown') return 'text-red-400 bg-red-400/10 border-red-400/20'
-    if (label === 'Passed') return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20'
+    if (label === 'Blown') return 'text-short bg-short/10 border-short/20'
+    if (label === 'Passed') return 'text-long bg-long/10 border-long/20'
     if (label === 'Funded') return 'text-primary bg-primary/10 border-primary/20'
     if (label === 'Active') return 'text-blue-400 bg-blue-400/10 border-blue-400/20'
     return 'text-muted-foreground bg-muted/30 border-border/40'
@@ -58,7 +58,7 @@ function Chip({ label, value, color }: { label: string; value: string | number; 
 function AccountCard({ account }: { account: any }) {
     const label = statusLabel(account.phaseStatus, account.masterStatus)
     const colorClass = statusColor(account.phaseStatus, account.masterStatus)
-    const pnlColor = account.totalNetPnL >= 0 ? 'text-emerald-400' : 'text-red-400'
+    const pnlColor = account.totalNetPnL >= 0 ? 'text-long' : 'text-short'
 
     // Progress toward profit target
     const profitTargetDollar = account.accountSize * (account.profitTargetPercent / 100)
@@ -100,7 +100,7 @@ function AccountCard({ account }: { account: any }) {
                     </div>
                     <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden">
                         <div
-                            className={cn("h-full rounded-full transition-all", account.totalNetPnL >= 0 ? "bg-emerald-400" : "bg-red-400")}
+                            className={cn("h-full rounded-full transition-all", account.totalNetPnL >= 0 ? "bg-long" : "bg-short")}
                             style={{ width: `${progressPct}%` }}
                         />
                     </div>
@@ -114,11 +114,11 @@ function AccountCard({ account }: { account: any }) {
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-4 border-t border-border/30 pt-4">
                 <Chip label="Win Rate" value={`${account.winRate}%`}
-                    color={parseFloat(account.winRate) >= 50 ? 'text-emerald-400' : 'text-red-400'} />
+                    color={parseFloat(account.winRate) >= 50 ? 'text-long' : 'text-short'} />
                 <Chip label="Profit Factor" value={account.profitFactor}
-                    color={parseFloat(account.profitFactor) >= 1 ? 'text-emerald-400' : 'text-red-400'} />
+                    color={parseFloat(account.profitFactor) >= 1 ? 'text-long' : 'text-short'} />
                 <Chip label="Expectancy" value={`$${account.expectancy}`}
-                    color={parseFloat(account.expectancy) >= 0 ? 'text-emerald-400' : 'text-red-400'} />
+                    color={parseFloat(account.expectancy) >= 0 ? 'text-long' : 'text-short'} />
                 <Chip label="Trades" value={account.totalTrades} />
                 <Chip label="Active Days" value={account.tradingDaysActive} />
                 <Chip label="Duration" value={`${account.durationDays}d`} />
@@ -127,20 +127,20 @@ function AccountCard({ account }: { account: any }) {
             {/* Risk Row */}
             <div className="grid grid-cols-2 gap-3 border-t border-border/30 pt-3">
                 <div className="flex items-center gap-1.5">
-                    <TrendDown weight="light" className="h-3 w-3 text-red-400/70" />
+                    <TrendDown weight="light" className="h-3 w-3 text-short/70" />
                     <div className="flex flex-col">
                         <span className="text-[8px] text-muted-foreground/50 uppercase font-bold tracking-wider">Max DD</span>
-                        <span className="text-[10px] font-black font-mono text-red-400">
+                        <span className="text-[10px] font-black font-mono text-short">
                             ${account.maxDrawdown.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                             <span className="text-muted-foreground/40 font-medium ml-1">({account.maxDrawdownPct}%)</span>
                         </span>
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <TrendUp weight="light" className="h-3 w-3 text-emerald-400/70" />
+                    <TrendUp weight="light" className="h-3 w-3 text-long/70" />
                     <div className="flex flex-col">
                         <span className="text-[8px] text-muted-foreground/50 uppercase font-bold tracking-wider">Peak Profit</span>
-                        <span className="text-[10px] font-black font-mono text-emerald-400">
+                        <span className="text-[10px] font-black font-mono text-long">
                             ${account.peakProfit.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                         </span>
                     </div>
@@ -200,52 +200,50 @@ export function PropFirmTab() {
         )
     }
 
-    const summaryStats = [
+    const accountStats = [
         { label: 'Total Accounts', value: data.totalAccounts, icon: Buildings, color: 'text-foreground' },
         { label: 'Active', value: data.activeAccounts, icon: Pulse, color: 'text-blue-400' },
         { label: 'Funded', value: data.fundedAccounts, icon: CheckCircle, color: 'text-primary' },
-        { label: 'Failed', value: data.failedAccounts, icon: XCircle, color: 'text-red-400' },
-        { label: 'Phases Passed', value: data.passedPhases, icon: Trophy, color: 'text-emerald-400' },
+        { label: 'Failed', value: data.failedAccounts, icon: XCircle, color: 'text-short' },
+        { label: 'Phases Passed', value: data.passedPhases, icon: Trophy, color: 'text-long' },
         { label: 'Total Breaches', value: data.totalBreaches, icon: Warning, color: 'text-amber-400' },
     ]
 
     return (
         <div className="space-y-8">
-            {/* Summary Bar */}
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                {summaryStats.map(({ label, value, icon: Icon, color }) => (
-                    <div key={label} className="flex flex-col items-center justify-center gap-1.5 bg-muted/10 border border-border/40 rounded-xl p-3">
-                        <Icon weight="light" className={cn("h-4 w-4", color)} />
-                        <span className={cn("text-xl font-black font-mono", color)}>{value}</span>
-                        <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50 text-center">{label}</span>
+            {/* KPI — 2 Container Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Container 1: Account Stats */}
+                <div className="bg-muted/10 border border-border/40 rounded-2xl p-5">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-4 block">Account Overview</span>
+                    <div className="grid grid-cols-3 gap-4">
+                        {accountStats.map(({ label, value, icon: Icon, color }) => (
+                            <div key={label} className="flex items-center gap-2.5">
+                                <Icon weight="light" className={cn("h-4 w-4 shrink-0", color)} />
+                                <div className="flex flex-col gap-0.5">
+                                    <span className={cn("text-lg font-black font-mono leading-none", color)}>{value}</span>
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50">{label}</span>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-
-            {/* Aggregate P&L + Payouts */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="sm:col-span-2 bg-muted/10 border border-border/40 rounded-2xl p-6 flex flex-col gap-2">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Combined Net P&L Across All Accounts</span>
-                    <span className={cn("text-4xl font-black font-mono tracking-tighter", data.totalNetPnL >= 0 ? 'text-emerald-400' : 'text-red-400')}>
-                        {data.totalNetPnL >= 0 ? '+' : ''}${data.totalNetPnL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </span>
-                    {data.bestAccount && (
-                        <span className="text-[9px] text-muted-foreground/40 font-medium mt-2">
-                            🏆 Best: <span className="text-foreground/60 font-bold">{data.bestAccount}</span>
-                        </span>
-                    )}
-                    {data.worstAccount && data.failedAccounts > 0 && (
-                        <span className="text-[9px] text-muted-foreground/40 font-medium">
-                            💀 Worst: <span className="text-red-400/70 font-bold">{data.worstAccount}</span>
-                        </span>
-                    )}
                 </div>
-                <div className="bg-muted/10 border border-border/40 rounded-2xl p-6 flex flex-col gap-2 justify-center">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Total Payouts Received</span>
-                    <span className="text-3xl font-black font-mono tracking-tighter text-primary">
-                        ${data.totalPayoutsReceived.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </span>
-                    <span className="text-[9px] text-muted-foreground/40 font-medium">Across {data.fundedAccounts} funded account{data.fundedAccounts !== 1 ? 's' : ''}</span>
+
+                {/* Container 2: Financials */}
+                <div className="bg-muted/10 border border-border/40 rounded-2xl p-5 flex flex-col justify-between">
+                    <div className="flex flex-col gap-1.5">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Combined Net P&L</span>
+                        <span className={cn("text-4xl font-black font-mono tracking-tighter", data.totalNetPnL >= 0 ? 'text-long' : 'text-short')}>
+                            {data.totalNetPnL >= 0 ? '+' : ''}${data.totalNetPnL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2.5 mt-4 pt-4 border-t border-border/20">
+                        <CurrencyDollar weight="light" className="h-4 w-4 shrink-0 text-primary" />
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-lg font-black font-mono leading-none text-primary">${data.totalPayoutsReceived.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50">Total Payouts</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 

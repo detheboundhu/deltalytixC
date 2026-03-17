@@ -65,6 +65,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import { calculateAccountBalances } from "@/lib/utils/balance-calculator"
+import { groupTradesByExecution } from "@/lib/utils"
 import { useLiveAccountTransactions } from '@/hooks/use-live-account-transactions'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -261,17 +262,44 @@ export default function AccountsPage() {
     })
   }, [accounts, searchQuery, filterType, filterStatus])
 
-  // Calculate real equity
+  // Calculate real equity and grouped trade counts
   const accountsWithRealEquity = useMemo(() => {
     const accountEquities = calculateAccountBalances(filteredAccounts, allTrades, transactions, {
       excludeFailedAccounts: false,
       includePayouts: true
     })
 
-    return filteredAccounts.map(account => ({
-      ...account,
-      calculatedEquity: accountEquities.get(account.number) || account.startingBalance || 0
-    }))
+    // Pre-group trades by account number and phase ID for efficient grouped count
+    const tradesByAccountNumber = new Map<string, any[]>()
+    const tradesByPhaseId = new Map<string, any[]>()
+    allTrades.forEach(trade => {
+      if (trade.accountNumber) {
+        if (!tradesByAccountNumber.has(trade.accountNumber)) tradesByAccountNumber.set(trade.accountNumber, [])
+        tradesByAccountNumber.get(trade.accountNumber)!.push(trade)
+      }
+      if (trade.phaseAccountId) {
+        if (!tradesByPhaseId.has(trade.phaseAccountId)) tradesByPhaseId.set(trade.phaseAccountId, [])
+        tradesByPhaseId.get(trade.phaseAccountId)!.push(trade)
+      }
+    })
+
+    return filteredAccounts.map(account => {
+      // Get trades for this account (same logic as balance-calculator)
+      let accountTrades: any[] = []
+      if (account.accountType === 'prop-firm') {
+        accountTrades = tradesByPhaseId.get(account.id) || tradesByAccountNumber.get(account.number) || []
+      } else {
+        accountTrades = tradesByAccountNumber.get(account.number) || []
+      }
+      // Group by execution to match reports page counting
+      const groupedCount = accountTrades.length > 0 ? groupTradesByExecution(accountTrades as any).length : 0
+
+      return {
+        ...account,
+        calculatedEquity: accountEquities.get(account.number) || account.startingBalance || 0,
+        tradeCount: groupedCount
+      }
+    })
   }, [filteredAccounts, allTrades, transactions])
 
   // Stats
@@ -279,30 +307,8 @@ export default function AccountsPage() {
     const totalEquity = accountsWithRealEquity.reduce((sum, account) => sum + account.calculatedEquity, 0)
     const pnl = totalEquity - accountsWithRealEquity.reduce((sum, acc) => sum + (acc.startingBalance || 0), 0)
 
-    // Calculate total trades with aggregation for failed accounts (same logic as AccountCard)
-    const totalTrades = filteredAccounts.reduce((sum, account) => {
-      // For failed prop firm accounts, sum all phases' tradeCounts from the same master account
-      if (account.status === 'failed' && account.accountType === 'prop-firm' && account.currentPhaseDetails?.masterAccountId) {
-        const masterId = account.currentPhaseDetails.masterAccountId
-        const allPhases = accounts.filter(acc =>
-          acc.accountType === 'prop-firm' &&
-          acc.currentPhaseDetails?.masterAccountId === masterId
-        )
-        // Only count this once per master account (use the first failed phase we encounter)
-        const isFirstFailedPhase = filteredAccounts.findIndex(a =>
-          a.status === 'failed' &&
-          a.accountType === 'prop-firm' &&
-          a.currentPhaseDetails?.masterAccountId === masterId
-        ) === filteredAccounts.indexOf(account)
-
-        if (isFirstFailedPhase) {
-          return sum + allPhases.reduce((phaseSum, phase) => phaseSum + (phase.tradeCount || 0), 0)
-        }
-        return sum // Skip other phases of the same master account
-      }
-      // For non-failed accounts, use individual count
-      return sum + (account.tradeCount || 0)
-    }, 0)
+    // Use the grouped trade counts already computed in accountsWithRealEquity
+    const totalTrades = accountsWithRealEquity.reduce((sum, account) => sum + (account.tradeCount || 0), 0)
 
     return {
       total: filteredAccounts.length,
@@ -313,7 +319,7 @@ export default function AccountsPage() {
       pnl,
       totalTrades
     }
-  }, [filteredAccounts, accountsWithRealEquity, accounts])
+  }, [filteredAccounts, accountsWithRealEquity])
 
   // Handlers
   const handleRefresh = useCallback(async () => {
@@ -817,21 +823,8 @@ function AccountCard({
   const pnl = equity - startingBalance
   const pnlPercent = startingBalance > 0 ? (pnl / startingBalance) * 100 : 0
 
-  // For failed phases, calculate sum of all phases' tradeCounts from the same master account
-  // But keep the account's own tradeCount unchanged (for balance/PnL calculations)
-  const displayTradeCount = useMemo(() => {
-    if (isFailed && isPropFirm && account.currentPhaseDetails?.masterAccountId) {
-      const masterId = account.currentPhaseDetails.masterAccountId
-      const allPhases = allAccounts.filter(acc =>
-        acc.accountType === 'prop-firm' &&
-        acc.currentPhaseDetails?.masterAccountId === masterId
-      )
-      // Sum all phases' tradeCounts
-      return allPhases.reduce((sum, phase) => sum + (phase.tradeCount || 0), 0)
-    }
-    // For non-failed accounts, show individual count
-    return account.tradeCount || 0
-  }, [isFailed, isPropFirm, account.currentPhaseDetails?.masterAccountId, account.tradeCount, allAccounts])
+  // tradeCount is pre-computed with groupTradesByExecution in accountsWithRealEquity
+  const displayTradeCount = account.tradeCount || 0
 
   const isAtRisk = isPropFirm && !isFailed && (
     (account.dailyDrawdownRemaining && account.dailyDrawdownRemaining < 500) ||

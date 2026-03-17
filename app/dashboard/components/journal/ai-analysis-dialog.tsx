@@ -263,13 +263,13 @@ export function AIAnalysisDialog({ isOpen, onClose, accountId }: AIAnalysisDialo
                   <Card>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <Target className="h-5 w-5 text-green-400 mt-0.5" weight="light" />
+                        <Target className="h-5 w-5 text-long mt-0.5" weight="light" />
                         <div className="space-y-2 flex-1">
                           <h3 className="font-semibold text-sm">Performance Insights</h3>
                           <ul className="space-y-2">
                             {analysis.performanceInsights.map((insight, index) => (
                               <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                                <span className="text-green-400 mt-0.5">•</span>
+                                <span className="text-long mt-0.5">•</span>
                                 <span className="flex-1">{cleanContent(insight)}</span>
                               </li>
                             ))}
@@ -292,7 +292,7 @@ export function AIAnalysisDialog({ isOpen, onClose, accountId }: AIAnalysisDialo
                           <ul className="space-y-1.5">
                             {analysis.strengths.map((strength, index) => (
                               <li key={index} className="text-xs text-muted-foreground flex items-start gap-2">
-                                <span className="text-green-400">✓</span>
+                                <span className="text-long">✓</span>
                                 <span className="flex-1">{cleanContent(strength)}</span>
                               </li>
                             ))}

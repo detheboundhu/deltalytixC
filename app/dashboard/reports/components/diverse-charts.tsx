@@ -25,7 +25,7 @@ interface DiverseChartsProps {
 
 const COLORS = {
     bullish: 'hsl(var(--chart-bullish))',
-    bearish: 'hsl(0, 84%, 60%)',       // Bright red — visible on dark bg
+    bearish: 'hsl(var(--chart-bearish))', // Deep amber/copper — matches aesthetic
     muted: 'hsl(220, 15%, 55%)'        // Visible neutral grey
 }
 

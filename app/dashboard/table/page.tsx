@@ -7,8 +7,10 @@ import TradeReplay from '../components/trades/trade-replay'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from '@phosphor-icons/react'
 import { Suspense } from 'react'
-import { cn, classifyTrade } from '@/lib/utils'
+import { cn, classifyTrade, ensureExtendedTrade } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { TradeDetailPanel } from '../components/tables/trade-detail-panel'
+import { TradeEditPanel } from '../components/tables/trade-edit-panel'
 
 // Lazy load the trade table component
 const TradeTableReview = dynamic(
@@ -16,15 +18,7 @@ const TradeTableReview = dynamic(
   { ssr: false }
 )
 
-const TradeDetailView = dynamic<any>(
-  () => import('../components/tables/trade-detail-view').then(mod => mod.TradeDetailView),
-  { ssr: false }
-)
 
-const TradeEditDialog = dynamic<any>(
-  () => import('../components/tables/trade-edit-dialog'),
-  { ssr: false }
-)
 
 function TableView() {
   const searchParams = useSearchParams()
@@ -108,11 +102,13 @@ function TableView() {
     const trade = formattedTrades.find((t: any) => t.id === tradeId)
     if (trade) {
       return (
-        <TradeDetailView
-          isOpen={true}
-          onClose={() => router.push('/dashboard/table')}
-          trade={trade}
-        />
+        <div className="w-full h-[calc(100vh-3.5rem)]">
+          <TradeDetailPanel
+            trade={trade}
+            onClose={() => router.push('/dashboard/table')}
+            basePath="/dashboard/table"
+          />
+        </div>
       )
     }
   }
@@ -121,14 +117,15 @@ function TableView() {
     const trade = formattedTrades.find((t: any) => t.id === tradeId)
     if (trade) {
       return (
-        <TradeEditDialog
-          isOpen={true}
-          onClose={() => router.push(`/dashboard/table?view=details&tradeId=${tradeId}`)}
-          trade={trade as any}
-          onSave={async (data: any) => {
-            await updateTrades([tradeId], data)
-          }}
-        />
+        <div className="w-full h-[calc(100vh-3.5rem)]">
+          <TradeEditPanel
+            trade={ensureExtendedTrade(trade as any)}
+            onClose={() => router.push(`/dashboard/table?view=details&tradeId=${tradeId}`)}
+            onSave={async (data: any) => {
+              await updateTrades([tradeId], data)
+            }}
+          />
+        </div>
       )
     }
   }

@@ -25,6 +25,11 @@ export interface TradingActivityDTO {
   winRate: string
   avgTradesPerMonth: number
   tradingDaysActive: number
+  mostTradedDay: string | null
+  mostProfitableDay: string | null
+  mostProfitablePair: string | null
+  mostLosingDay: string | null
+  mostLosingPair: string | null
 }
 
 export interface PsychMetricsDTO {
@@ -129,11 +134,23 @@ export async function calculateReportStatistics(
   }
 
   if (filters.outcome && filters.outcome !== 'all') {
-    whereClause.outcome = filters.outcome
+    if (filters.outcome === 'WIN') {
+      // PnL-based: positive net PnL
+      whereClause.pnl = { gt: 0 }
+    } else if (filters.outcome === 'LOSS') {
+      // PnL-based: negative net PnL
+      whereClause.pnl = { lt: 0 }
+    } else {
+      whereClause.outcome = filters.outcome
+    }
   }
 
   if (filters.strategy && filters.strategy !== 'all') {
-    whereClause.modelId = filters.strategy
+    if (filters.strategy === 'unassigned') {
+      whereClause.modelId = null
+    } else {
+      whereClause.modelId = filters.strategy
+    }
   }
 
   if (filters.ruleBroken && filters.ruleBroken !== 'all') {
@@ -240,13 +257,18 @@ function buildFilterOptions(symbols: string[], strategies: Array<{ id: string; n
       'Outside Session',
     ],
     outcomes: [
+      { value: 'WIN', label: 'Win' },
+      { value: 'LOSS', label: 'Loss' },
       { value: 'GOOD_WIN', label: 'Good Win' },
       { value: 'BAD_WIN', label: 'Bad Win' },
       { value: 'GOOD_LOSS', label: 'Good Loss' },
       { value: 'BAD_LOSS', label: 'Bad Loss' },
       { value: 'BREAKEVEN', label: 'Breakeven' },
     ],
-    strategies,
+    strategies: [
+      { id: 'unassigned', name: 'No Strategy' },
+      ...strategies,
+    ],
   }
 }
 
@@ -305,6 +327,12 @@ function computeAllMetrics(
     '>3R': 0,
   }
 
+  // New metrics: day-of-week and pair aggregation
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  const dayTradeCount: Record<string, number> = {}
+  const dayPnL: Record<string, number> = {}
+  const pairPnL: Record<string, number> = {}
+
   // Single pass through all trades
   for (const trade of sorted) {
     const netPnL = (trade.pnl || 0) + (trade.commission || 0)
@@ -348,10 +376,21 @@ function computeAllMetrics(
       }
     }
 
-    // Trading days
+    // Trading days + day-of-week tracking
     if (trade.entryDate) {
-      const dateStr = new Date(trade.entryDate).toISOString().split('T')[0]
+      const d = new Date(trade.entryDate)
+      const dateStr = d.toISOString().split('T')[0]
       tradeDates.add(dateStr)
+
+      const dayName = dayNames[d.getDay()]
+      dayTradeCount[dayName] = (dayTradeCount[dayName] || 0) + 1
+      dayPnL[dayName] = (dayPnL[dayName] || 0) + netPnL
+    }
+
+    // Pair P&L tracking
+    const pairName = (trade.symbol || trade.instrument || '').trim()
+    if (pairName) {
+      pairPnL[pairName] = (pairPnL[pairName] || 0) + netPnL
     }
 
     // Holding time
@@ -441,12 +480,43 @@ function computeAllMetrics(
     : 30
   const monthsInRange = Math.max(1, Math.ceil(daysInRange / 30))
 
+  // New metrics: most traded day, most profitable/losing day & pair
+  let mostTradedDay: string | null = null
+  let mostTradedDayCount = 0
+  let mostProfitableDay: string | null = null
+  let mostProfitableDayPnL = -Infinity
+  let mostLosingDay: string | null = null
+  let mostLosingDayPnL = Infinity
+
+  for (const [day, count] of Object.entries(dayTradeCount)) {
+    if (count > mostTradedDayCount) { mostTradedDayCount = count; mostTradedDay = day }
+  }
+  for (const [day, pnl] of Object.entries(dayPnL)) {
+    if (pnl > mostProfitableDayPnL) { mostProfitableDayPnL = pnl; mostProfitableDay = day }
+    if (pnl < mostLosingDayPnL) { mostLosingDayPnL = pnl; mostLosingDay = day }
+  }
+
+  let mostProfitablePair: string | null = null
+  let mostProfitablePairPnL = -Infinity
+  let mostLosingPair: string | null = null
+  let mostLosingPairPnL = Infinity
+
+  for (const [pair, pnl] of Object.entries(pairPnL)) {
+    if (pnl > mostProfitablePairPnL) { mostProfitablePairPnL = pnl; mostProfitablePair = pair }
+    if (pnl < mostLosingPairPnL) { mostLosingPairPnL = pnl; mostLosingPair = pair }
+  }
+
   return {
     tradingActivity: {
       totalTrades: sorted.length,
       winRate,
       avgTradesPerMonth: Math.round(sorted.length / monthsInRange),
       tradingDaysActive: tradeDates.size,
+      mostTradedDay,
+      mostProfitableDay,
+      mostProfitablePair,
+      mostLosingDay,
+      mostLosingPair,
     },
     psychMetrics: {
       longestWinStreak: maxWinStreak,

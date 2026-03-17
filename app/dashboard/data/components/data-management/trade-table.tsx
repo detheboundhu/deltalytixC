@@ -12,8 +12,8 @@ import { ArrowsDownUp, Trash, CaretLeft, CaretRight, PencilSimple, CircleNotch, 
 import { toast } from "sonner"
 import { deleteTradesByIdsAction } from '@/server/accounts'
 import { useData } from '@/context/data-provider'
-import TradeEditDialog from '@/app/dashboard/components/tables/trade-edit-dialog'
-import { TradeDetailView } from '@/app/dashboard/components/tables/trade-detail-view'
+import { TradeEditPanel } from '@/app/dashboard/components/tables/trade-edit-panel'
+import { TradeDetailPanel } from '@/app/dashboard/components/tables/trade-detail-panel'
 import { Badge } from "@/components/ui/badge"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
@@ -649,26 +649,37 @@ export default function TradeTable() {
         </div>
       </div>
 
-      {/* Trade Detail View Dialog */}
-      <TradeDetailView
-        isOpen={isDetailViewOpen}
-        onClose={() => {
-          setIsDetailViewOpen(false)
-          setSelectedTradeForView(null)
-        }}
-        trade={selectedTradeForView}
-      />
+      {/* Trade Detail View Panel */}
+      {isDetailViewOpen && selectedTradeForView && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <div className="w-full h-screen overflow-auto">
+            <TradeDetailPanel
+              trade={selectedTradeForView}
+              onClose={() => {
+                setIsDetailViewOpen(false)
+                setSelectedTradeForView(null)
+              }}
+              basePath="/dashboard/data"
+            />
+          </div>
+        </div>
+      )}
 
-      {/* Enhanced Edit Trade Dialog */}
-      <TradeEditDialog
-        isOpen={isEnhancedEditOpen}
-        onClose={() => {
-          setIsEnhancedEditOpen(false)
-          setSelectedTradeForEdit(null)
-        }}
-        trade={selectedTradeForEdit ? ensureExtendedTrade(selectedTradeForEdit) : null}
-        onSave={handleSaveTrade}
-      />
+      {/* Enhanced Edit Trade Panel */}
+      {isEnhancedEditOpen && selectedTradeForEdit && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <div className="w-full h-screen overflow-auto">
+            <TradeEditPanel
+              trade={ensureExtendedTrade(selectedTradeForEdit)}
+              onClose={() => {
+                setIsEnhancedEditOpen(false)
+                setSelectedTradeForEdit(null)
+              }}
+              onSave={handleSaveTrade}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

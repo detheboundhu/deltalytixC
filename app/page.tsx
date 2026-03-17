@@ -81,12 +81,6 @@ export default function RootPage() {
   return (
     <div className="min-h-screen bg-background overflow-hidden relative flex flex-col items-center justify-center selection:bg-primary/30">
 
-      {/* Subtle Background Prism/Aura */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[30%] -left-20 w-[600px] h-[600px] bg-primary/5 rounded-full" />
-        <div className="absolute bottom-[20%] -right-20 w-[500px] h-[500px] bg-chart-1/5 rounded-full" />
-      </div>
-
       {/* Main Content */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -101,7 +95,7 @@ export default function RootPage() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="mb-8"
           >
-            <Logo className="w-14 h-14 fill-white" />
+            <Logo className="w-14 h-14" />
           </motion.div>
 
           <div className="text-center space-y-2">
@@ -119,7 +113,7 @@ export default function RootPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <div className="relative z-10 w-full max-w-sm bg-card border border-border/50 rounded-2xl shadow-md p-8 sm:p-10">
+          <div className="relative z-10 w-full max-w-sm bg-card border border-border/40 rounded-2xl shadow-sm p-8 sm:p-10">
             <UserAuthForm />
           </div>
         </motion.div>
