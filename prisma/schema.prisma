@@ -355,9 +355,26 @@ model User {
   TradeTag               TradeTag[]
   TradingModel           TradingModel[]
   WeeklyReview           WeeklyReview[]
+  ActivityLog            ActivityLog[]
 
   @@index([auth_user_id])
   @@index([email])
+  @@schema("public")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // e.g. TRADE_CREATED, ACCOUNT_RENAMED, BACKUP_RESTORED
+  entity    String   // e.g. Trade, Account, Profile
+  entityId  String?  // ID of affected resource (nullable for bulk ops)
+  metadata  Json?    // Additional context (old/new values, counts, etc.)
+  ipAddress String?
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([action])
   @@schema("public")
 }
 

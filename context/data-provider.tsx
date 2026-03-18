@@ -625,6 +625,38 @@ export const DataProvider: React.FC<{
     }
   }, [])
 
+  // ============================================
+  // SUPABASE KEEP-ALIVE HEARTBEAT
+  // Pings DB every 4 hours to prevent free-tier pause
+  // ============================================
+  useEffect(() => {
+    const FOUR_HOURS = 4 * 60 * 60 * 1000
+
+    const ping = () => {
+      if (document.visibilityState === 'visible') {
+        fetch('/api/health/ping').catch(() => {})
+      }
+    }
+
+    // Initial ping on mount
+    ping()
+
+    const intervalId = setInterval(ping, FOUR_HOURS)
+
+    // Also ping when tab becomes visible after being hidden
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        ping()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
+
   const refreshTrades = useCallback(async () => {
     if (!user?.id) return
     setIsLoading(true)

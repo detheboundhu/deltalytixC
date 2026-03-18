@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useMemo, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Trade } from '@prisma/client'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
@@ -29,17 +29,30 @@ type PnlFilter = 'all' | 'wins' | 'losses'
 
 export default function TradeTable() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { refreshTrades, formattedTrades, updateTrades } = useData()
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'entryDate', direction: 'desc' })
   const [selectedTrades, setSelectedTrades] = useState<Set<string>>(new Set())
   const [selectAll, setSelectAll] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [tradesPerPage, setTradesPerPage] = useState(50)
-  const [selectedTradeForEdit, setSelectedTradeForEdit] = useState<Trade | null>(null)
-  const [isEnhancedEditOpen, setIsEnhancedEditOpen] = useState(false)
-  const [selectedTradeForView, setSelectedTradeForView] = useState<Trade | null>(null)
-  const [isDetailViewOpen, setIsDetailViewOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // URL-based view/edit panel state
+  const activeView = searchParams.get('view') as 'details' | 'edit' | null
+  const activeTradeId = searchParams.get('tradeId')
+  const selectedTradeForView = useMemo(() => {
+    if (activeView !== 'details' || !activeTradeId) return null
+    return formattedTrades.find(t => t.id === activeTradeId) || null
+  }, [activeView, activeTradeId, formattedTrades])
+  const selectedTradeForEdit = useMemo(() => {
+    if (activeView !== 'edit' || !activeTradeId) return null
+    return formattedTrades.find(t => t.id === activeTradeId) || null
+  }, [activeView, activeTradeId, formattedTrades])
+
+  const handleClosePanel = useCallback(() => {
+    router.push('/dashboard/data?tab=trades')
+  }, [router])
 
   // Modern Filters
   const [selectedInstruments, setSelectedInstruments] = useState<string[]>([])
@@ -572,20 +585,14 @@ export default function TradeTable() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            setSelectedTradeForView(trade)
-                            setIsDetailViewOpen(true)
-                          }}
+                          onClick={() => router.push(`/dashboard/data?tab=trades&view=details&tradeId=${trade.id}`)}
                         >
                           View
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            setSelectedTradeForEdit(trade)
-                            setIsEnhancedEditOpen(true)
-                          }}
+                          onClick={() => router.push(`/dashboard/data?tab=trades&view=edit&tradeId=${trade.id}`)}
                         >
                           <PencilSimple className="w-4 h-4 mr-1" weight="light" />
                           Edit
@@ -607,21 +614,25 @@ export default function TradeTable() {
           </p>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">Show:</span>
-            <select
-              value={tradesPerPage}
-              onChange={(e) => {
-                setTradesPerPage(Number(e.target.value))
-                setCurrentPage(1) // Reset to first page when changing page size
+            <Select
+              value={String(tradesPerPage)}
+              onValueChange={(value) => {
+                setTradesPerPage(Number(value))
+                setCurrentPage(1)
               }}
-              className="text-sm border rounded px-2 py-1"
             >
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-              <option value={250}>250</option>
-              <option value={500}>500</option>
-              <option value={filteredAndSortedTrades.length}>All ({filteredAndSortedTrades.length})</option>
-            </select>
+              <SelectTrigger className="h-8 w-[100px] text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+                <SelectItem value="250">250</SelectItem>
+                <SelectItem value="500">500</SelectItem>
+                <SelectItem value={String(filteredAndSortedTrades.length)}>All ({filteredAndSortedTrades.length})</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -649,32 +660,26 @@ export default function TradeTable() {
         </div>
       </div>
 
-      {/* Trade Detail View Panel */}
-      {isDetailViewOpen && selectedTradeForView && (
+      {/* Trade Detail View Panel (URL-based) */}
+      {activeView === 'details' && selectedTradeForView && (
         <div className="fixed inset-0 z-50 bg-background">
-          <div className="w-full h-screen overflow-auto">
+          <div className="w-full h-screen overflow-hidden">
             <TradeDetailPanel
               trade={selectedTradeForView}
-              onClose={() => {
-                setIsDetailViewOpen(false)
-                setSelectedTradeForView(null)
-              }}
+              onClose={handleClosePanel}
               basePath="/dashboard/data"
             />
           </div>
         </div>
       )}
 
-      {/* Enhanced Edit Trade Panel */}
-      {isEnhancedEditOpen && selectedTradeForEdit && (
+      {/* Enhanced Edit Trade Panel (URL-based) */}
+      {activeView === 'edit' && selectedTradeForEdit && (
         <div className="fixed inset-0 z-50 bg-background">
-          <div className="w-full h-screen overflow-auto">
+          <div className="w-full h-screen overflow-hidden">
             <TradeEditPanel
               trade={ensureExtendedTrade(selectedTradeForEdit)}
-              onClose={() => {
-                setIsEnhancedEditOpen(false)
-                setSelectedTradeForEdit(null)
-              }}
+              onClose={handleClosePanel}
               onSave={handleSaveTrade}
             />
           </div>

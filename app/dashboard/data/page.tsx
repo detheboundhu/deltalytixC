@@ -1,7 +1,8 @@
 'use client'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useEffect, lazy, Suspense } from "react"
+import { useEffect, lazy, Suspense, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Skeleton } from "@/components/ui/skeleton"
 
 // Force dynamic rendering to avoid static generation issues
@@ -22,9 +23,17 @@ function TableSkeleton() {
 }
 
 function DashboardContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const activeTab = searchParams.get('tab') || 'accounts'
+
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
+
+  const handleTabChange = useCallback((value: string) => {
+    router.push(`/dashboard/data?tab=${value}`)
+  }, [router])
 
   return (
     <div className="w-full max-w-full px-4 sm:px-6 py-6">
@@ -34,7 +43,7 @@ function DashboardContent() {
           <p className="text-muted-foreground text-sm sm:text-base">Manage your trading accounts and trades</p>
         </div>
 
-        <Tabs defaultValue="accounts" className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList>
             <TabsTrigger value="accounts">Accounts</TabsTrigger>
             <TabsTrigger value="trades">Trades</TabsTrigger>
@@ -61,4 +70,4 @@ export default function DashboardPage() {
       <DashboardContent />
     </Suspense>
   )
-}
+}

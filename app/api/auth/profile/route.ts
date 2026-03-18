@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getUserId } from '@/server/auth'
+import { logActivity, getClientIp } from '@/lib/activity-logger'
 
 // GET /api/auth/profile - Get user profile information
 export async function GET() {
@@ -97,6 +98,14 @@ export async function PATCH(request: NextRequest) {
         lastName: true,
         accentPack: true,
       }
+    })
+
+    logActivity({
+      userId: updatedUser.id,
+      action: 'PROFILE_UPDATED',
+      entity: 'Profile',
+      metadata: { updatedFields: Object.keys(updateData) },
+      ipAddress: getClientIp(request),
     })
 
     return NextResponse.json({

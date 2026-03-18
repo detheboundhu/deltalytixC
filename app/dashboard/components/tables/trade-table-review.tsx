@@ -652,7 +652,7 @@ export function TradeTableReview() {
 
       <div className="rounded-3xl border border-border bg-background shadow-md">
         {isMobile ? (
-          <div className="p-4 space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto">
+          <div className="p-4 space-y-3">
             {table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => {
                 const trade = row.original

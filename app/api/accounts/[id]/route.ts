@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { getUserId } from '@/server/auth'
+import { logActivity, getClientIp } from '@/lib/activity-logger'
 
 interface RouteParams {
   params: {
@@ -173,6 +174,19 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       await invalidateUserCaches(userId)
     }
 
+    const action = typeof isArchived === 'boolean'
+      ? (isArchived ? 'ACCOUNT_ARCHIVED' : 'ACCOUNT_UNARCHIVED')
+      : 'ACCOUNT_RENAMED'
+
+    logActivity({
+      userId,
+      action,
+      entity: 'Account',
+      entityId: accountId,
+      metadata: { updatedFields: Object.keys(updateData), accountNumber: updatedAccount.number },
+      ipAddress: getClientIp(request),
+    })
+
     return NextResponse.json({
       success: true,
       data: {
@@ -226,6 +240,15 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Invalidate all cache tags to ensure fresh data
     const { invalidateUserCaches } = await import('@/server/accounts')
     await invalidateUserCaches(userId)
+
+    logActivity({
+      userId,
+      action: 'ACCOUNT_DELETED',
+      entity: 'Account',
+      entityId: accountId,
+      metadata: { accountNumber: existingAccount.number },
+      ipAddress: getClientIp(request),
+    })
 
     return NextResponse.json({
       success: true,

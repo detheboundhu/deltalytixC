@@ -6,6 +6,7 @@ import { DataSerializer } from '@/lib/data-serialization'
 import { createSuccessResponse, createErrorResponse, ErrorResponses } from '@/lib/api-response'
 import { tradeQuerySchema, tradeDeleteSchema } from '@/lib/validation/trade-schemas'
 import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
+import { logActivity, getClientIp } from '@/lib/activity-logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -266,6 +267,15 @@ export async function PUT(request: NextRequest) {
       })
     }
 
+    logActivity({
+      userId,
+      action: 'TRADE_UPDATED',
+      entity: 'Trade',
+      entityId: id,
+      metadata: { updatedFields: Object.keys(updateData) },
+      ipAddress: getClientIp(request),
+    })
+
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json(
@@ -287,7 +297,19 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    const userId = await getUserIdSafe()
     const result = await deleteTrade(tradeId)
+
+    if (userId) {
+      logActivity({
+        userId,
+        action: 'TRADE_DELETED',
+        entity: 'Trade',
+        entityId: tradeId,
+        ipAddress: getClientIp(request),
+      })
+    }
+
     return NextResponse.json(result)
   } catch (error) {
     return NextResponse.json(
