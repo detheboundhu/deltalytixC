@@ -102,10 +102,10 @@ function TableView() {
     const trade = formattedTrades.find((t: any) => t.id === tradeId)
     if (trade) {
       return (
-        <div className="w-full h-[calc(100vh-3.5rem)]">
+        <div className="fixed inset-0 z-50 bg-background">
           <TradeDetailPanel
             trade={trade}
-            onClose={() => router.push('/dashboard/table')}
+            onClose={() => router.replace('/dashboard/table')}
             basePath="/dashboard/table"
           />
         </div>
@@ -117,10 +117,10 @@ function TableView() {
     const trade = formattedTrades.find((t: any) => t.id === tradeId)
     if (trade) {
       return (
-        <div className="w-full h-[calc(100vh-3.5rem)]">
+        <div className="fixed inset-0 z-50 bg-background">
           <TradeEditPanel
             trade={ensureExtendedTrade(trade as any)}
-            onClose={() => router.push(`/dashboard/table?view=details&tradeId=${tradeId}`)}
+            onClose={() => router.replace(`/dashboard/table?view=details&tradeId=${tradeId}`)}
             onSave={async (data: any) => {
               await updateTrades([tradeId], data)
             }}

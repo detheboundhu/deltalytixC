@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { 
     Calendar as CalendarIcon, 
-    Funnel, 
     Wallet,
     CaretDown,
     Hash,
@@ -69,18 +68,18 @@ export function ReportFilters({
     const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
     return (
-        <div className="flex flex-col space-y-4 mb-8 no-export">
-            <div className="flex flex-col md:flex-row items-center gap-3 bg-muted/10 p-2 rounded-2xl border border-border/40">
+        <div className="flex flex-col space-y-3 mb-6 no-export">
+            <div className="flex flex-wrap items-center gap-2 bg-muted/10 p-2 rounded-2xl border border-border/40">
                 {/* Account Selector */}
-                <div className="flex items-center gap-2 px-3 py-1.5 border-r border-border/40">
-                    <Wallet weight="light" className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2 px-3 py-1.5 border-r border-border/40 max-sm:border-r-0">
+                    <Wallet weight="light" className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div className="flex flex-col">
                         <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-0.5">Account</span>
                         <Select
                             value={selectedAccountId || 'all'}
                             onValueChange={(val) => onAccountChange(val === 'all' ? null : val)}
                         >
-                            <SelectTrigger className="w-[160px] border-none bg-transparent hover:bg-muted/50 transition-colors h-7 p-0 text-[10px] font-black uppercase tracking-widest focus:ring-0">
+                            <SelectTrigger className="w-[140px] border-none bg-transparent hover:bg-muted/50 transition-colors h-7 p-0 text-[10px] font-black uppercase tracking-widest focus:ring-0">
                                 <SelectValue placeholder="All Accounts" />
                             </SelectTrigger>
                             <SelectContent>
@@ -104,7 +103,7 @@ export function ReportFilters({
                             size="sm"
                             onClick={() => onPresetSelect(preset)}
                             className={cn(
-                                "h-7 px-3 text-[9px] font-black tracking-widest transition-all",
+                                "h-7 px-2.5 text-[9px] font-black tracking-widest transition-all",
                                 activePreset === preset
                                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                                     : "hover:bg-primary/10 hover:text-primary"
@@ -124,7 +123,7 @@ export function ReportFilters({
                             variant="outline"
                             size="sm"
                             className={cn(
-                                "h-9 flex flex-col items-start gap-0.5 border-border/40 bg-background hover:bg-muted/30 px-3 min-w-[180px]",
+                                "h-9 flex flex-col items-start gap-0.5 border-border/40 bg-background hover:bg-muted/30 px-3 min-w-[160px]",
                                 !dateRange && "text-muted-foreground"
                             )}
                         >
@@ -163,22 +162,12 @@ export function ReportFilters({
                         />
                     </PopoverContent>
                 </Popover>
-
-                <div className="flex-1" />
-
-                {/* Quick Filter Status Indicator */}
-                <div className="hidden xl:flex items-center gap-2 px-4 py-1.5 bg-primary/5 rounded-full border border-primary/10">
-                    <Funnel weight="fill" className="h-3 w-3 text-primary animate-pulse" />
-                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">
-                        Live Analysis Active
-                    </span>
-                </div>
             </div>
 
             {/* Advanced Filters Row */}
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                 {/* Symbol */}
-                <div className="flex flex-col gap-1 min-w-[120px]">
+                <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
                         <Hash weight="light" className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Symbol</span>
@@ -197,7 +186,7 @@ export function ReportFilters({
                 </div>
 
                 {/* Session */}
-                <div className="flex flex-col gap-1 min-w-[120px]">
+                <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
                         <Clock weight="light" className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Session</span>
@@ -216,7 +205,7 @@ export function ReportFilters({
                 </div>
 
                 {/* Outcome */}
-                <div className="flex flex-col gap-1 min-w-[120px]">
+                <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
                         <CheckCircle weight="light" className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Outcome</span>
@@ -235,7 +224,7 @@ export function ReportFilters({
                 </div>
 
                 {/* Strategy */}
-                <div className="flex flex-col gap-1 min-w-[120px]">
+                <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
                         <Target weight="light" className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Strategy</span>
@@ -254,7 +243,7 @@ export function ReportFilters({
                 </div>
 
                 {/* Rule Broken */}
-                <div className="flex flex-col gap-1 min-w-[120px]">
+                <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
                         <WarningCircle weight="light" className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Rule Status</span>

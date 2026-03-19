@@ -296,36 +296,31 @@ export function TradeEditPanel({ trade, onClose, onSave }: TradeEditPanelProps) 
 
   return (
     <>
-      <div className="flex flex-col h-full min-h-0">
-        {/* ── Header ── */}
-        <div className="px-4 sm:px-8 py-4 sm:py-5 border-b border-border/40 shrink-0 bg-gradient-to-r from-muted/10 to-transparent">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0">
+      <div className="flex flex-col h-full">
+        {/* ── Header (compact single row) ── */}
+        <div className="px-4 sm:px-6 py-3 border-b border-border/40 shrink-0">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
               <Button variant="ghost" size="sm" onClick={handleCloseAttempt} className="h-8 px-2 text-xs hover:bg-accent/50 shrink-0">
-                <ArrowLeft className="mr-1.5 h-3.5 w-3.5" weight="light" />
+                <ArrowLeft className="mr-1 h-3.5 w-3.5" weight="light" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
-              <div className="h-4 w-px bg-border/60 hidden sm:block" />
-              <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-muted/30 border border-border/30">
-                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Editing Trade</span>
-              </div>
+              <div className="h-4 w-px bg-border/40 shrink-0" />
+              <h2 className="text-base sm:text-lg font-black tracking-tight truncate">{tradeData.instrument}</h2>
+              <Badge variant={isLong ? 'default' : 'destructive'} className="text-[10px] px-1.5 py-0 h-5 uppercase font-bold shrink-0">
+                {isLong ? 'Buy' : 'Sell'}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-xs font-mono font-bold px-2 py-0 h-5 shrink-0",
+                  isWin ? "border-long/40 text-long bg-long/5" : isLoss ? "border-short/40 text-short bg-short/5" : "border-border text-muted-foreground"
+                )}
+              >
+                {formatCurrency(netPnL)}
+              </Badge>
             </div>
-          </div>
-          {/* Edit Hero */}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight">{tradeData.instrument}</h2>
-            <Badge variant={isLong ? 'default' : 'destructive'} className="text-[10px] px-2 py-0.5 h-5 uppercase font-bold">
-              {isLong ? 'Buy' : 'Sell'}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={cn(
-                "text-sm font-mono font-bold px-3 py-0.5 h-7 border-2",
-                isWin ? "border-long/40 text-long bg-long/5" : isLoss ? "border-short/40 text-short bg-short/5" : "border-border text-muted-foreground"
-              )}
-            >
-              {formatCurrency(netPnL)}
-            </Badge>
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 hidden sm:inline shrink-0">Editing</span>
           </div>
         </div>
 

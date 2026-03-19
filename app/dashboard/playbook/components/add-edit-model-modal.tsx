@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Plus, X, Warning } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -200,16 +201,17 @@ export function AddEditModelModal({ isOpen, onClose, onSave, model, mode }: AddE
               <div className="space-y-3">
                 {rules.map((rule, index) => (
                   <div key={index} className="flex items-center gap-3">
-                    <select
-                      className="h-10 px-3 rounded-lg bg-muted/40 border border-border/40 text-[10px] font-black uppercase tracking-tighter focus:outline-none focus:ring-1 focus:ring-primary/50"
-                      value={rule.category}
-                      onChange={(e) => handleRuleChange(index, 'category', e.target.value as any)}
-                    >
-                      <option value="entry">Entry</option>
-                      <option value="exit">Exit</option>
-                      <option value="risk">Risk</option>
-                      <option value="general">Gen</option>
-                    </select>
+                    <Select value={rule.category} onValueChange={(v) => handleRuleChange(index, 'category', v as any)}>
+                      <SelectTrigger className="h-10 w-[90px] shrink-0 text-[10px] font-black uppercase tracking-tighter border-border/40 bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="entry" className="text-[10px] font-bold uppercase">Entry</SelectItem>
+                        <SelectItem value="exit" className="text-[10px] font-bold uppercase">Exit</SelectItem>
+                        <SelectItem value="risk" className="text-[10px] font-bold uppercase">Risk</SelectItem>
+                        <SelectItem value="general" className="text-[10px] font-bold uppercase">Gen</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Input
                       placeholder="Define specific condition..."
                       className="font-medium text-sm h-10 bg-muted/10 border-border/40"

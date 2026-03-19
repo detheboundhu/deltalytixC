@@ -38,7 +38,7 @@ export function GlobalTradeController() {
 
   if (action === 'edit') {
     return (
-      <div className="w-full h-[calc(100vh-3.5rem)]">
+      <div className="fixed inset-0 z-50 bg-background">
         <TradeEditPanel
           trade={ensureExtendedTrade(trade)}
           onClose={handleClose}
@@ -50,7 +50,7 @@ export function GlobalTradeController() {
 
   if (action === 'view') {
     return (
-      <div className="w-full h-[calc(100vh-3.5rem)]">
+      <div className="fixed inset-0 z-50 bg-background">
         <TradeDetailPanel
           trade={trade}
           onClose={handleClose}

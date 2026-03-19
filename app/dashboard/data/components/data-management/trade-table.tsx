@@ -51,7 +51,7 @@ export default function TradeTable() {
   }, [activeView, activeTradeId, formattedTrades])
 
   const handleClosePanel = useCallback(() => {
-    router.push('/dashboard/data?tab=trades')
+    router.replace('/dashboard/data?tab=trades')
   }, [router])
 
   // Modern Filters

@@ -33,6 +33,7 @@ import {
 import { motion } from 'framer-motion'
 import html2canvas from 'html2canvas'
 import { useState, useEffect } from 'react'
+import { useUserStore } from '@/store/user-store'
 import { DateRange } from '@/components/ui/custom-date-range-picker'
 import { toast } from 'sonner'
 import { ReportFilters } from './components/report-filters'
@@ -164,6 +165,7 @@ function SessionBlock({
 
 export default function ReportsPage() {
     const { accounts } = useData()
+    const user = useUserStore(state => state.user)
 
     // Filter State
     const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
@@ -211,19 +213,25 @@ export default function ReportsPage() {
 
     // Pre-computed R-Multiple bars to avoid JSX IIFE type errors
     const rMultipleBars = rMultipleDistribution ? (() => {
-        const maxCount = Math.max(...Object.values(rMultipleDistribution).map(Number), 0)
+        const maxCount = Math.max(...Object.values(rMultipleDistribution).map(Number), 1)
         return Object.entries(rMultipleDistribution).map(([bucket, rawCount], i) => {
             const count = Number(rawCount)
             const height = maxCount > 0 ? (count / maxCount * 100) : 0
             const isNegative = bucket.includes('<') || bucket.includes('-')
             return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                    <div className="w-full relative flex flex-col justify-end h-full">
+                <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
+                    <div className="w-full relative flex flex-col justify-end" style={{ height: '180px' }}>
+                        {count > 0 && (
+                            <span className="text-[9px] font-bold text-center mb-1 text-muted-foreground">
+                                {count}
+                            </span>
+                        )}
                         <motion.div
                             initial={{ height: 0 }}
-                            animate={{ height: `${height}%` }}
+                            animate={{ height: `${Math.max(height, count > 0 ? 2 : 0)}%` }}
+                            transition={{ duration: 0.6, ease: 'easeOut' }}
                             className={cn(
-                                "w-full rounded-t-sm transition-all relative overflow-hidden",
+                                "w-full rounded-t-sm relative overflow-hidden",
                             isNegative ? "bg-destructive/40 group-hover:bg-destructive/60" : "bg-long/40 group-hover:bg-long/60"
                             )}
                         >
@@ -232,13 +240,8 @@ export default function ReportsPage() {
                                 isNegative ? "bg-destructive" : "bg-long"
                             )} />
                         </motion.div>
-                        {count > 0 && (
-                            <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                                {count}
-                            </span>
-                        )}
                     </div>
-                    <span className="text-[8px] font-bold text-muted-foreground/60 whitespace-nowrap -rotate-45 origin-top-left mt-1">
+                    <span className="text-[7px] font-bold text-muted-foreground/60 whitespace-nowrap text-center leading-tight">
                         {bucket}
                     </span>
                 </div>
@@ -320,7 +323,7 @@ export default function ReportsPage() {
         : 'Select Period'
 
     return (
-        <div className="w-full max-w-7xl mx-auto py-8 px-4 sm:px-6 pb-20 md:pb-8" id="report-content">
+        <div className="w-full max-w-7xl mx-auto py-8 px-4 sm:px-6 pb-20 md:pb-8 overflow-hidden" id="report-content">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 pb-6 border-b border-border/50">
@@ -368,9 +371,13 @@ export default function ReportsPage() {
                                                     tradingDays: tradingActivity.tradingDaysActive,
                                                     avgTradesPerMonth: tradingActivity.avgTradesPerMonth
                                                 }}
+                                                userName={user?.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : undefined}
                                             />
                                         </div>
                                     )}
+                                    <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
+                                        <span>Trader: <span className="font-semibold text-foreground">{user?.firstName ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}` : 'Set your name in settings'}</span></span>
+                                    </div>
                                 </div>
                             </DialogContent>
                         </Dialog>
@@ -411,53 +418,49 @@ export default function ReportsPage() {
                     </div>
                 ) : (
                     <Tabs defaultValue="overview" className="w-full" onValueChange={setSelectedTab}>
-                        <TabsList className="mb-8 p-1 bg-muted/20 border border-border/40 rounded-xl no-export">
-                            <TabsTrigger value="overview" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
-                                <TrendUp weight="light" className="h-3.5 w-3.5" />
-                                Overview Audit
+                        <TabsList className="mb-8 p-1 bg-muted/20 border border-border/40 rounded-xl no-export overflow-x-auto w-full justify-start sm:justify-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                            <TabsTrigger value="overview" className="px-3 sm:px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 whitespace-nowrap">
+                                <TrendUp weight="light" className="h-3.5 w-3.5 shrink-0" />
+                                Overview
                             </TabsTrigger>
-                            <TabsTrigger value="sessions" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
-                                <Clock weight="light" className="h-3.5 w-3.5" />
-                                Session Metrics
+                            <TabsTrigger value="sessions" className="px-3 sm:px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 whitespace-nowrap">
+                                <Clock weight="light" className="h-3.5 w-3.5 shrink-0" />
+                                Sessions
                             </TabsTrigger>
-                            <TabsTrigger value="spreadsheet" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
-                                <Rows weight="light" className="h-3.5 w-3.5" />
-                                Audit Spreadsheet
+                            <TabsTrigger value="spreadsheet" className="px-3 sm:px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 whitespace-nowrap">
+                                <Rows weight="light" className="h-3.5 w-3.5 shrink-0" />
+                                Spreadsheet
                             </TabsTrigger>
-                            <TabsTrigger value="propfirm" className="px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5">
-                                <Buildings weight="light" className="h-3.5 w-3.5" />
-                                Funded Accounts
+                            <TabsTrigger value="propfirm" className="px-3 sm:px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 whitespace-nowrap">
+                                <Buildings weight="light" className="h-3.5 w-3.5 shrink-0" />
+                                Funded
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="overview" className="space-y-12 focus-visible:outline-none">
                             <div className="space-y-10">
                                 {/* Main KPI Bar */}
-                                <div className="flex flex-wrap items-stretch justify-between gap-6 py-6 border-y border-border/40">
-                                    <div className="flex flex-col min-w-[120px]">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 py-6 border-y border-border/40">
+                                    <div className="flex flex-col">
                                         <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">Total P/L</p>
-                                        <p className={cn("text-3xl font-black font-mono tracking-tighter", psychMetrics.totalNetPnL >= 0 ? "text-long" : "text-short")}>
+                                        <p className={cn("text-2xl sm:text-3xl font-black font-mono tracking-tighter", psychMetrics.totalNetPnL >= 0 ? "text-long" : "text-short")}>
                                             ${psychMetrics.totalNetPnL.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                         </p>
                                     </div>
-                                    <div className="w-px bg-border/40 hidden md:block" />
-                                    <div className="flex flex-col min-w-[120px]">
+                                    <div className="flex flex-col">
                                         <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">Win Rate</p>
-                                        <p className="text-3xl font-black font-mono tracking-tighter text-foreground">{tradingActivity.winRate}%</p>
+                                        <p className="text-2xl sm:text-3xl font-black font-mono tracking-tighter text-foreground">{tradingActivity.winRate}%</p>
                                     </div>
-                                    <div className="w-px bg-border/40 hidden lg:block" />
-                                    <div className="flex flex-col min-w-[120px]">
+                                    <div className="flex flex-col">
                                         <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">Profit Factor</p>
-                                        <p className="text-3xl font-black font-mono tracking-tighter text-primary">{psychMetrics.profitFactor}</p>
+                                        <p className="text-2xl sm:text-3xl font-black font-mono tracking-tighter text-primary">{psychMetrics.profitFactor}</p>
                                     </div>
-                                    <div className="w-px bg-border/40 hidden lg:block" />
-                                    <div className="flex flex-col min-w-[120px]">
+                                    <div className="flex flex-col">
                                         <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">Expectancy</p>
-                                        <p className="text-3xl font-black font-mono tracking-tighter text-foreground">${psychMetrics.expectancy}</p>
+                                        <p className="text-2xl sm:text-3xl font-black font-mono tracking-tighter text-foreground">${psychMetrics.expectancy}</p>
                                     </div>
-                                    <div className="w-px bg-border/40 hidden xl:block" />
-                                    <div className="flex flex-col min-w-[120px]">
+                                    <div className="flex flex-col">
                                         <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">Max Drawdown</p>
-                                        <p className="text-3xl font-black font-mono tracking-tighter text-short">${psychMetrics.maxDrawdown}</p>
+                                        <p className="text-2xl sm:text-3xl font-black font-mono tracking-tighter text-short">${psychMetrics.maxDrawdown}</p>
                                     </div>
                                 </div>
 
