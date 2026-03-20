@@ -32,7 +32,7 @@ import {
 } from 'date-fns'
 import { motion } from 'framer-motion'
 import html2canvas from 'html2canvas'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useUserStore } from '@/store/user-store'
 import { DateRange } from '@/components/ui/custom-date-range-picker'
 import { toast } from 'sonner'
@@ -470,14 +470,14 @@ export default function ReportsPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:items-stretch">
                                     {/* Detailed Metrics Table */}
                                     <div className="lg:col-span-7 space-y-6">
                                         <div className="flex items-center gap-2">
                                             <TrendUp weight="light" className="h-4 w-4 text-primary" />
                                             <h2 className="text-[11px] uppercase tracking-[0.2em] font-black text-muted-foreground">Detailed Performance Audit</h2>
                                         </div>
-                                        <div className="border border-border/40 rounded-2xl overflow-hidden bg-muted/5">
+                                        <div className="border border-border/40 rounded-2xl overflow-hidden bg-muted/5 h-full">
                                             <Table>
                                                 <TableBody>
                                                     <TableRow className="border-border/10 hover:bg-transparent">
@@ -536,18 +536,86 @@ export default function ReportsPage() {
                                     </div>
 
                                     {/* R-Multiple Distribution Chart */}
-                                    <div className="lg:col-span-5 space-y-6">
-                                        <div className="flex items-center gap-2">
-                                            <Target weight="light" className="h-4 w-4 text-primary" />
-                                            <h2 className="text-[11px] uppercase tracking-[0.2em] font-black text-muted-foreground">R-Multiple Distribution</h2>
-                                        </div>
-                                        <div className="bg-muted/10 border border-border/40 rounded-2xl p-6 flex flex-col justify-between h-[280px]">
-                                            <div className="flex items-end justify-between flex-1 gap-2 px-2">
-                                                {rMultipleBars}
+                                    <div className="lg:col-span-5 space-y-4 flex flex-col">
+                                        <div className="flex flex-col space-y-6">
+                                            <div className="space-y-4">
+                                                <h2 className="text-[11px] uppercase tracking-[0.2em] font-black text-muted-foreground">R-Multiple Distribution</h2>
+                                                <div className="bg-muted/5 border border-border/40 rounded-2xl p-6 h-[280px] flex flex-col">
+                                                    <div className="flex-1 w-full">
+                                                        <ResponsiveContainer width="100%" height="100%">
+                                                            <AreaChart data={rMultipleChartData} margin={{ top: 10, right: 10, left: -30, bottom: 0 }}>
+                                                                <defs>
+                                                                    <linearGradient id="colorRMultiple" x1="0" y1="0" x2="0" y2="1">
+                                                                        <stop offset="5%" stopColor="hsl(var(--foreground))" stopOpacity={0.15}/>
+                                                                        <stop offset="95%" stopColor="hsl(var(--foreground))" stopOpacity={0}/>
+                                                                    </linearGradient>
+                                                                </defs>
+                                                                <XAxis 
+                                                                    dataKey="name" 
+                                                                    axisLine={false} 
+                                                                    tickLine={false} 
+                                                                    tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                                                                />
+                                                                <YAxis hide />
+                                                                <RechartsTooltip content={<RMultipleTooltip />} cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                                                                <Area 
+                                                                    type="monotone" 
+                                                                    dataKey="count" 
+                                                                    stroke="hsl(var(--foreground))" 
+                                                                    strokeWidth={2}
+                                                                    fillOpacity={1} 
+                                                                    fill="url(#colorRMultiple)"
+                                                                    animationDuration={1000}
+                                                                />
+                                                            </AreaChart>
+                                                        </ResponsiveContainer>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <p className="text-[9px] text-center text-muted-foreground/40 font-medium italic mt-4">
-                                                Frequency distribution of trades by risk-to-reward multiple
-                                            </p>
+
+                                            {/* Clever Gap Filler: Risk Intelligence Audit */}
+                                            <div className="bg-muted/5 border border-border/40 rounded-2xl p-6 flex-1 flex flex-col justify-center">
+                                                <div className="flex items-center justify-between mb-6">
+                                                    <h3 className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-[0.2em]">Risk Intelligence Audit</h3>
+                                                    <div className="h-1 w-1 rounded-full bg-muted-foreground/20" />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                                                    <div className="space-y-1">
+                                                        <p className="text-[8px] uppercase font-bold text-muted-foreground/50 tracking-widest">RR Efficiency</p>
+                                                        <p className="text-xl font-black font-mono tracking-tighter">
+                                                            {(parseFloat(psychMetrics.avgWin.replace(/[$,]/g, '')) / Math.abs(parseFloat(psychMetrics.avgLoss.replace(/[$,]/g, '')) || 1)).toFixed(2)}
+                                                        </p>
+                                                        <div className="h-1 w-full bg-muted/20 rounded-full overflow-hidden">
+                                                            <div 
+                                                                className="h-full bg-long transition-all duration-1000" 
+                                                                style={{ width: `${Math.min(100, (parseFloat(psychMetrics.avgWin.replace(/[$,]/g, '')) / Math.abs(parseFloat(psychMetrics.avgLoss.replace(/[$,]/g, '')) || 1)) * 40)}%` }} 
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-[8px] uppercase font-bold text-muted-foreground/50 tracking-widest">Recovery Factor</p>
+                                                        <p className="text-xl font-black font-mono tracking-tighter">
+                                                            {(psychMetrics.totalNetPnL / Math.abs(parseFloat(psychMetrics.maxDrawdown.replace(/[$,]/g, '')) || 1)).toFixed(2)}
+                                                        </p>
+                                                        <div className="h-1 w-full bg-muted/20 rounded-full overflow-hidden">
+                                                            <div 
+                                                                className="h-full bg-primary transition-all duration-1000" 
+                                                                style={{ width: `${Math.min(100, (psychMetrics.totalNetPnL / Math.abs(parseFloat(psychMetrics.maxDrawdown.replace(/[$,]/g, '')) || 1)) * 20)}%` }} 
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-[8px] uppercase font-bold text-muted-foreground/50 tracking-widest">Expectancy / Trade</p>
+                                                        <p className="text-xl font-black font-mono tracking-tighter text-foreground">${psychMetrics.expectancy}</p>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-[8px] uppercase font-bold text-muted-foreground/50 tracking-widest">Consistency Score</p>
+                                                        <p className="text-xl font-black font-mono tracking-tighter">
+                                                            {Math.min(100, (parseFloat(tradingActivity.winRate) * 0.6 + (parseFloat(psychMetrics.profitFactor) * 20))).toFixed(0)}%
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
