@@ -348,7 +348,7 @@ export function groupTradesByExecution(trades: Trade[]): GroupedTrade[] {
   return Array.from(groups.values())
 }
 
-export function calculateStatistics(trades: Trade[], accounts: Account[] = []): StatisticsProps {
+export function calculateStatistics(trades: Trade[], accounts: Account[] = [], preGrouped?: GroupedTrade[]): StatisticsProps {
   if (!trades.length) {
     return {
       cumulativeFees: 0,
@@ -364,20 +364,18 @@ export function calculateStatistics(trades: Trade[], accounts: Account[] = []): 
       profitFactor: 0,
       grossLosses: 0,
       grossWin: 0,
-      // New metrics for enhanced statistics
       biggestWin: 0,
       biggestLoss: 0,
       averageWin: 0,
       averageLoss: 0,
-      // Payout statistics
       totalPayouts: 0,
       nbPayouts: 0,
       totalPnL: 0,
     }
   }
 
-  // CRITICAL: Group trades by execution to handle partial closes correctly
-  const groupedTrades = groupTradesByExecution(trades)
+  // PERF: Use pre-grouped trades if provided, otherwise group now
+  const groupedTrades = preGrouped ?? groupTradesByExecution(trades)
 
   // Create a map of accounts for quick lookup
   const accountMap = new Map(accounts.map(account => [account.number, account]));
@@ -558,9 +556,9 @@ export function calculateStatistics(trades: Trade[], accounts: Account[] = []): 
   return statistics;
 }
 
-export function formatCalendarData(trades: Trade[], accounts: Account[] = [], timezone: string = 'UTC') {
-  // CRITICAL: Group trades by execution to handle partial closes correctly
-  const groupedTrades = groupTradesByExecution(trades)
+export function formatCalendarData(trades: Trade[], accounts: Account[] = [], timezone: string = 'UTC', preGrouped?: GroupedTrade[]) {
+  // PERF: Use pre-grouped trades if provided, otherwise group now
+  const groupedTrades = preGrouped ?? groupTradesByExecution(trades)
 
   // Create a map of accounts for quick lookup
   const accountMap = new Map(accounts.map(account => [account.number, account]));

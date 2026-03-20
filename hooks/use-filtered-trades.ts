@@ -71,7 +71,7 @@ export function useFilteredTrades(filters: TradeFilters, enabled = true) {
       return res.json()
     },
     enabled,
-    staleTime: 30 * 1000, // 30s stale for dashboard responsiveness
+    staleTime: 2 * 60 * 1000, // 2 min — realtime subscriptions handle live updates
     gcTime: 5 * 60 * 1000,
   })
 }
