@@ -15,6 +15,14 @@ import { prisma } from '@/lib/prisma'
 import { getUserId } from '@/server/auth'
 import { convertDecimal } from '@/lib/utils/decimal'
 import { calculateStatistics, formatCalendarData, groupTradesByExecution } from '@/lib/utils'
+import {
+  calculateDayOfWeekPerformance,
+  calculateOutcomeDistribution,
+  calculateEquityCurve,
+  calculateNetDailyPnl,
+  calculateDailyCumulativePnl,
+  calculateAccountBalanceChart,
+} from '@/lib/dashboard-math'
 import { CacheHeaders } from '@/lib/api-cache-headers'
 import { applyRateLimit, apiLimiter } from '@/lib/rate-limiter'
 import { logger } from '@/lib/logger'
@@ -176,6 +184,18 @@ export async function GET(request: NextRequest) {
     const statistics = includeStats ? calculateStatistics(trades, accounts, grouped) : null
     const calendarData = includeCalendar ? formatCalendarData(trades, accounts, timezone, grouped) : null
 
+    // PERF: Compute all widget chart data server-side (trades already in memory)
+    // This eliminates 6 separate /api/v1/dashboard/widgets calls
+    const includeWidgets = params.get('includeWidgets') !== 'false'
+    const widgets = includeWidgets ? {
+      equityCurve: calculateEquityCurve(trades),
+      netDailyPnl: calculateNetDailyPnl(trades),
+      dailyCumulativePnl: calculateDailyCumulativePnl(trades),
+      outcomeDistribution: calculateOutcomeDistribution(trades),
+      dayOfWeekPerformance: calculateDayOfWeekPerformance(trades),
+      accountBalanceChart: calculateAccountBalanceChart(trades, accounts),
+    } : null
+
     const total = trades.length
     const pagedTrades = pageLimit !== null && pageLimit > 0
       ? trades.slice(Math.max(0, pageOffset), Math.max(0, pageOffset) + pageLimit)
@@ -187,6 +207,7 @@ export async function GET(request: NextRequest) {
       page: pageLimit !== null ? { limit: pageLimit, offset: Math.max(0, pageOffset) } : null,
       statistics,
       calendarData,
+      widgets,
     })
     Object.entries(CacheHeaders.privateShort).forEach(([k, v]) => response.headers.set(k, v))
 

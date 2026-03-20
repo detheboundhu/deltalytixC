@@ -179,9 +179,10 @@ interface DataContextType {
   hourFilter: HourFilter
   setHourFilter: React.Dispatch<React.SetStateAction<HourFilter>>
 
-  // Statistics and calendar
+  // Statistics, calendar, and widget data
   statistics: StatisticsProps
   calendarData: CalendarData
+  widgetData: Record<string, any> | null
 
   // Accounts
   accounts: Account[]
@@ -941,9 +942,10 @@ export const DataProvider: React.FC<{
     hourFilter,
     setHourFilter,
 
-    // Statistics and calendar
+    // Statistics, calendar, and widget data
     statistics,
     calendarData,
+    widgetData: serverTradeData?.widgets ?? null,
 
     // Accounts
     accounts,

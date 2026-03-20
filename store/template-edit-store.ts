@@ -42,10 +42,8 @@ export const useTemplateEditStore = create<TemplateEditState>((set, get) => ({
 
   updateLayout: (layout) => {
     const { currentLayout } = get()
-    // Only update if layout actually changed
-    if (JSON.stringify(currentLayout) === JSON.stringify(layout)) {
-      return
-    }
+    // Reference check only — avoids JSON.stringify on every drag frame
+    if (currentLayout === layout) return
     set({
       currentLayout: layout,
       hasUnsavedChanges: true,

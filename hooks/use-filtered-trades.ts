@@ -35,6 +35,7 @@ export interface FilteredTradesResponse {
   page?: { limit: number; offset: number } | null
   statistics: any | null
   calendarData: any | null
+  widgets: Record<string, any> | null
 }
 
 function buildQueryString(filters: TradeFilters): string {
