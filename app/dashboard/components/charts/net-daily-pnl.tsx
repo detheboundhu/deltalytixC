@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import { WidgetCard } from '../widget-card'
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from '@/hooks/use-widget-data'
 import { cn, formatCurrency, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
 import {
@@ -149,43 +149,8 @@ function formatAxisValue(value: number): string {
 // ============================================================================
 
 export default function NetDailyPnL({ size = 'small-long' }: NetDailyPnLProps) {
-  // ---------------------------------------------------------------------------
-  // DATA HOOKS (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const { calendarData, formattedTrades } = useData()
-
-  // ---------------------------------------------------------------------------
-  // DATA PROCESSING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const chartData = React.useMemo(() => {
-    const { groupTradesByExecution } = require('@/lib/utils')
-    const groupedTrades = groupTradesByExecution(formattedTrades)
-
-    const tradesByDate = groupedTrades.reduce((acc: Record<string, { wins: number; losses: number }>, trade: any) => {
-      const date = trade.entryDate.split('T')[0]
-      if (!acc[date]) {
-        acc[date] = { wins: 0, losses: 0 }
-      }
-      const netPnL = trade.pnl - (trade.commission || 0)
-      if (netPnL > BREAK_EVEN_THRESHOLD) {
-        acc[date].wins++
-      } else if (netPnL < -BREAK_EVEN_THRESHOLD) {
-        acc[date].losses++
-      }
-      return acc
-    }, {})
-
-    return Object.entries(calendarData)
-      .map(([date, values]) => ({
-        date,
-        pnl: values.pnl,
-        shortNumber: values.shortNumber,
-        longNumber: values.longNumber,
-        wins: tradesByDate[date]?.wins || 0,
-        losses: tradesByDate[date]?.losses || 0,
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-  }, [calendarData, formattedTrades])
+  const { data: rawChartData, isLoading } = useWidgetData('netDailyPnl')
+  const chartData = rawChartData || []
 
   // ---------------------------------------------------------------------------
   // Y-AXIS DOMAIN CALCULATION (PRESERVED - DO NOT MODIFY)
@@ -198,7 +163,7 @@ export default function NetDailyPnL({ size = 'small-long' }: NetDailyPnLProps) {
       }
     }
 
-    const pnls = chartData.map((item) => item.pnl)
+    const pnls = chartData.map((item: any) => item.pnl)
     const minValue = Math.min(0, ...pnls)
     const maxValue = Math.max(0, ...pnls)
     const maxAbs = Math.max(Math.abs(minValue), Math.abs(maxValue))
@@ -219,6 +184,26 @@ export default function NetDailyPnL({ size = 'small-long' }: NetDailyPnLProps) {
   }, [chartData])
 
   const isCompact = size === 'small' || size === 'small-long'
+
+  if (isLoading) {
+    return (
+      <WidgetCard title="Net Daily P/L">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-full h-[200px] bg-muted/20 rounded-xl" />
+        </div>
+      </WidgetCard>
+    )
+  }
+
+  if (chartData.length === 0) {
+    return (
+      <WidgetCard title="Net Daily P/L">
+        <div className="flex items-center justify-center h-full text-muted-foreground/50 text-sm">
+          No trade data available
+        </div>
+      </WidgetCard>
+    )
+  }
 
   return (
     <WidgetCard title="Net Daily P/L">
@@ -275,7 +260,7 @@ export default function NetDailyPnL({ size = 'small-long' }: NetDailyPnLProps) {
             radius={CHART_CONFIG.barRadius}
             maxBarSize={60}
           >
-            {chartData.map((entry, index) => (
+            {chartData.map((entry: any, index: number) => (
               <Cell
                 key={`cell-${index}`}
                 fill={entry.pnl > BREAK_EVEN_THRESHOLD ? COLORS.profit : entry.pnl < -BREAK_EVEN_THRESHOLD ? COLORS.loss : 'hsl(var(--muted-foreground)/0.4)'}

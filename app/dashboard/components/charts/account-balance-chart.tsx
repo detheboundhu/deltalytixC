@@ -21,7 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { WidgetCard } from '../widget-card'
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from '@/hooks/use-widget-data'
 import { useUserStore } from "@/store/user-store"
 import { cn, formatCurrency, formatNumber, formatPercent, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
@@ -172,113 +172,32 @@ function formatAxisValue(value: number): string {
 // ============================================================================
 
 function AccountBalanceChart({ size = 'small-long' }: AccountBalanceChartProps) {
-  // ---------------------------------------------------------------------------
-  // DATA HOOKS (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const { calendarData, formattedTrades, accountNumbers } = useData()
-  const allAccounts = useUserStore(state => state.accounts)
+  const { data: chartData, isLoading } = useWidgetData('accountBalanceChart')
 
-  // ---------------------------------------------------------------------------
-  // ACCOUNT FILTERING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const accounts = React.useMemo(() => {
-    if (!allAccounts || allAccounts.length === 0) return []
-    if (!accountNumbers || accountNumbers.length === 0) {
-      return allAccounts
-    }
-    return allAccounts.filter(acc => accountNumbers.includes(acc.number))
-  }, [allAccounts, accountNumbers])
+  if (isLoading) {
+    return (
+      <WidgetCard title="Account Balance">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-full h-[200px] bg-muted/20 rounded-xl" />
+        </div>
+      </WidgetCard>
+    )
+  }
 
-  // ---------------------------------------------------------------------------
-  // DATA PROCESSING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const chartData = React.useMemo(() => {
-    const initialBalance = calculateTotalStartingBalance(accounts)
-
-    if (accounts.length === 0 || initialBalance === 0) {
-      return []
-    }
-
-    const { groupTradesByExecution } = require('@/lib/utils')
-    const groupedTrades = groupTradesByExecution(formattedTrades)
-
-    const tradesByDate = groupedTrades.reduce((acc: Record<string, { wins: number; losses: number; trades: number }>, trade: any) => {
-      const date = trade.entryDate.split('T')[0]
-      if (!acc[date]) {
-        acc[date] = { wins: 0, losses: 0, trades: 0 }
-      }
-      acc[date].trades++
-      const netPnL = trade.pnl - (trade.commission || 0)
-      if (netPnL > BREAK_EVEN_THRESHOLD) {
-        acc[date].wins++
-      } else if (netPnL < -BREAK_EVEN_THRESHOLD) {
-        acc[date].losses++
-      }
-      return acc
-    }, {})
-
-    const sortedData = Object.entries(calendarData)
-      .map(([date, values]) => ({
-        date,
-        dailyPnL: values.pnl,
-        trades: tradesByDate[date]?.trades || 0,
-        wins: tradesByDate[date]?.wins || 0,
-        losses: tradesByDate[date]?.losses || 0,
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-
-    const daysWithActivity = sortedData.filter(item => item.trades > 0)
-
-    if (daysWithActivity.length === 0) {
-      return []
-    }
-
-    const firstTradeDate = daysWithActivity[0].date
-    const dayBeforeFirstTrade = new Date(firstTradeDate + 'T00:00:00Z')
-    dayBeforeFirstTrade.setDate(dayBeforeFirstTrade.getDate() - 1)
-    const startingPointDate = dayBeforeFirstTrade.toISOString().split('T')[0]
-
-    const result: ChartDataPoint[] = [{
-      date: startingPointDate,
-      balance: initialBalance,
-      change: 0,
-      changePercent: 0,
-      trades: 0,
-      wins: 0,
-      losses: 0,
-      hasActivity: false,
-    }]
-
-    let runningBalance = initialBalance
-    let previousBalance = initialBalance
-
-    const activityPoints = daysWithActivity.map((item) => {
-      runningBalance += item.dailyPnL
-      const change = runningBalance - previousBalance
-      const changePercent = previousBalance !== 0 ? (change / Math.abs(previousBalance)) * 100 : 0
-
-      const point = {
-        date: item.date,
-        balance: runningBalance,
-        change: change,
-        changePercent: changePercent,
-        trades: item.trades,
-        wins: item.wins,
-        losses: item.losses,
-        hasActivity: true,
-      }
-
-      previousBalance = runningBalance
-      return point
-    })
-
-    return [...result, ...activityPoints]
-  }, [calendarData, formattedTrades, accounts])
+  if (!chartData || chartData.length === 0) {
+    return (
+      <WidgetCard title="Account Balance">
+        <div className="flex items-center justify-center h-full text-muted-foreground/50 text-sm">
+          No trade data available
+        </div>
+      </WidgetCard>
+    )
+  }
 
   // ---------------------------------------------------------------------------
   // LINE COLOR DETERMINATION (PRESERVED - DO NOT MODIFY)
   // ---------------------------------------------------------------------------
-  const initialBalance = React.useMemo(() => calculateTotalStartingBalance(accounts), [accounts])
+  const initialBalance = chartData.length > 0 ? chartData[0].balance : 0
   const currentBalance = chartData.length > 0 ? chartData[chartData.length - 1].balance : initialBalance
   const isPositive = currentBalance >= initialBalance
 

@@ -229,13 +229,11 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
   return (
     <div id="advanced-calendar-capture" ref={calendarRef} data-screenshot-wrap className={cn("h-full w-full", className)}>
       <WidgetCard
-        title={viewMode === 'daily' ? 'Calendar' : 'Yearly Calendar'}
-        headerRight={headerControls}
         noPadding
-        className="overflow-hidden"
+        className="overflow-hidden flex flex-col h-full"
       >
-        {/* Sub-header: Navigation + Stats + View Switcher */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 px-5 py-3 border-b border-border/20 bg-muted/5">
+        {/* Unified Header: Navigation + Stats + Controls */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 px-5 py-3 border-b border-border/20 bg-muted/5 flex-shrink-0">
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {/* Navigation Group */}
             <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30 font-bold shrink-0">
@@ -255,57 +253,67 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
               </Button>
             </div>
 
-            {/* Stats Badges */}
-            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider">
-              <div className={cn(
-                "px-1.5 py-0.5 rounded border shadow-sm flex items-center",
-                isPositive ? "bg-long/10 border-long/20 text-long" : "bg-short/10 border-short/20 text-short"
-              )}>
-                {formatCompact(displayTotal)}
-              </div>
-              <div className="px-1.5 py-0.5 rounded bg-chart-2/10 border border-chart-2/20 text-chart-2 border-dashed shadow-sm">
-                {tradedDaysCount}d
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            {/* View Switcher */}
-            <div className="flex items-center p-0.5 bg-muted/30 border border-border/30 rounded-lg">
-              <button
-                onClick={() => setViewMode('daily')}
-                className={cn(
-                  "px-2.5 py-1 text-[10px] font-black rounded-md transition-all",
-                  viewMode === 'daily'
-                    ? "bg-background shadow-sm text-foreground border border-border/40"
-                    : "text-muted-foreground/50 hover:text-foreground"
-                )}
-              >
-                Daily
-              </button>
-              <button
-                onClick={() => setViewMode('weekly')}
-                className={cn(
-                  "px-2.5 py-1 text-[10px] font-black rounded-md transition-all",
-                  viewMode === 'weekly'
-                    ? "bg-background shadow-sm text-foreground border border-border/40"
-                    : "text-muted-foreground/50 hover:text-foreground"
-                )}
-              >
-                Yearly
-              </button>
-            </div>
-
             <Button
               onClick={() => setCurrentDate(new Date())}
               variant="outline"
               size="sm"
-              className="h-7 px-2 text-[10px] font-black bg-muted/20 hover:bg-muted border-border/40 transition-colors"
-              title="Go to Today"
+              className="h-7 px-2.5 text-[10px] font-black bg-muted/20 hover:bg-muted border-border/40 transition-colors hidden sm:inline-flex"
             >
-              <span className="sm:hidden text-xs">T</span>
-              <span className="hidden sm:inline">Today</span>
+              This month
             </Button>
+          </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+            <div className="hidden sm:flex items-center gap-1.5">
+              <span className="text-[10px] font-bold text-muted-foreground mr-1">
+                {viewMode === 'daily' ? 'Monthly stats:' : 'Yearly stats:'}
+              </span>
+
+              {/* Stats Badges */}
+              <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider">
+                <div className={cn(
+                  "px-1.5 py-0.5 rounded border shadow-sm flex items-center",
+                  isPositive ? "bg-long/10 border-long/20 text-long" : "bg-short/10 border-short/20 text-short"
+                )}>
+                  {formatCompact(displayTotal)}
+                </div>
+                <div className="px-1.5 py-0.5 rounded bg-chart-4/10 border border-chart-4/20 text-chart-4 border-solid shadow-sm">
+                  {tradedDaysCount} d
+                </div>
+              </div>
+            </div>
+
+            <div className="w-px h-4 bg-border/40 hidden sm:block" />
+
+            <div className="flex items-center gap-2">
+              {/* View Switcher Controls Container */}
+              <div className="flex items-center p-0.5 bg-muted/30 border border-border/30 rounded-lg mr-2 hidden md:flex">
+                <button
+                  onClick={() => setViewMode('daily')}
+                  className={cn(
+                    "px-2.5 py-1 text-[10px] font-black rounded-md transition-all",
+                    viewMode === 'daily'
+                      ? "bg-background shadow-sm text-foreground border border-border/40"
+                      : "text-muted-foreground/50 hover:text-foreground"
+                  )}
+                >
+                  Daily
+                </button>
+                <button
+                  onClick={() => setViewMode('weekly')}
+                  className={cn(
+                    "px-2.5 py-1 text-[10px] font-black rounded-md transition-all",
+                    viewMode === 'weekly'
+                      ? "bg-background shadow-sm text-foreground border border-border/40"
+                      : "text-muted-foreground/50 hover:text-foreground"
+                  )}
+                >
+                  Yearly
+                </button>
+              </div>
+
+              {headerControls}
+            </div>
           </div>
         </div>
 

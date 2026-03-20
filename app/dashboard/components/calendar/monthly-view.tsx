@@ -192,7 +192,7 @@ export default function MonthlyView({
 
             {/* Grid */}
             <div className={cn(
-                "grid gap-1 md:gap-3 flex-1 p-2 md:p-4 pt-0 overflow-y-auto min-h-0",
+                "grid gap-1 md:gap-3 flex-1 p-2 md:p-4 pt-0 overflow-y-auto min-h-0 auto-rows-fr",
                 showWeekNumbers ? "grid-cols-[repeat(7,1fr)_20px] md:grid-cols-[repeat(7,1fr)_30px]" : "grid-cols-7"
             )}>
                 {weeks.map((week, weekIndex) => (

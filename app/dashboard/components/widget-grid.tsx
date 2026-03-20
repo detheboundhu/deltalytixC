@@ -1,7 +1,32 @@
 'use client'
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
-import { Responsive, useContainerWidth, verticalCompactor } from 'react-grid-layout'
+import { Responsive, verticalCompactor } from 'react-grid-layout'
+
+function useGridContainerWidth() {
+  const [width, setWidth] = useState(1200)
+  const [mounted, setMounted] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+    if (!containerRef.current) return
+
+    const observeTarget = containerRef.current
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setWidth(observeTarget.offsetWidth || entry.contentRect.width)
+      }
+    })
+
+    resizeObserver.observe(observeTarget)
+    setWidth(observeTarget.offsetWidth)
+
+    return () => resizeObserver.disconnect()
+  }, [])
+
+  return { width, containerRef, mounted }
+}
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { X, Plus, DotsSixVertical } from '@phosphor-icons/react'
@@ -46,7 +71,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
   const { accounts } = useAccounts()
   const [showWidgetLibrary, setShowWidgetLibrary] = useState(false)
   const [showKpiSelector, setShowKpiSelector] = useState(false)
-  const { width: containerWidth, containerRef: gridContainerRef, mounted: gridMounted } = useContainerWidth()
+  const { width: containerWidth, containerRef: gridContainerRef, mounted: gridMounted } = useGridContainerWidth()
   const [targetSlot, setTargetSlot] = useState<{
     slotIndex?: number
     x?: number
@@ -105,8 +130,8 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
     return {
       xl: desktopLayout,
       lg: desktopLayout,
-      md: desktopLayout.map(l => ({ ...l, w: 12, x: 0 })), // Stack on tablet
-      sm: desktopLayout.map(l => ({ ...l, w: 12, x: 0 })), // Stack on mobile
+      md: desktopLayout.map(l => ({ ...l, w: 1, x: 0 })), // Stack on tablet
+      sm: desktopLayout.map(l => ({ ...l, w: 1, x: 0 })), // Stack on mobile
     }
   }, [gridWidgets, isEditMode])
 
@@ -248,9 +273,9 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-3">
             {kpiLayout.map((widget, index) => (
-              <div key={`kpi-slot-${index}`} className="relative w-full">
+              <div key={`kpi-slot-${index}`} className="relative w-full h-full">
                 {widget ? (
-                  <div className="relative group">
+                  <div className="relative group h-full">
                     {/* Edit mode controls */}
                     {isEditMode && (
                       <>

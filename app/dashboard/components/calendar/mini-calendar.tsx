@@ -153,50 +153,64 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
   return (
     <div ref={calendarRef} data-screenshot-wrap className="w-full h-full">
       <WidgetCard
-        title="Mini Calendar"
         noPadding
-        className="overflow-hidden"
-        headerRight={
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleScreenshot}
-            className="h-6 px-1.5 text-[10px] font-bold gap-1.5 hover:bg-primary/5 hover:text-primary transition-all"
-            title="Snapshot"
-          >
-            <Camera className="h-3 w-3" weight="light" />
-            <span className="hidden sm:inline">Snapshot</span>
-          </Button>
-        }
+        className="overflow-hidden flex flex-col h-full"
       >
-        {/* Sub-header: Nav + Stats */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-border/20 bg-muted/5">
+        {/* Unified Header: Nav + Stats + Snapshot */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/20 bg-muted/5 flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30 font-bold shrink-0">
-              <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-5 w-5 hover:bg-background" aria-label="Previous month">
-                <CaretLeft className="h-3 w-3" weight="light" />
+              <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-6 w-6 hover:bg-background" aria-label="Previous month">
+                <CaretLeft className="h-3.5 w-3.5" weight="light" />
               </Button>
-              <div className="px-1 min-w-[70px] text-center">
-                <span className="text-[10px] font-black capitalize tracking-tight">
+              <div className="px-2 min-w-[80px] text-center">
+                <span className="text-[11px] font-black capitalize tracking-tight">
                   {format(currentDate, 'MMM yyyy')}
                 </span>
               </div>
-              <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-5 w-5 hover:bg-background" aria-label="Next month">
-                <CaretRight className="h-3 w-3" weight="light" />
+              <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-6 w-6 hover:bg-background" aria-label="Next month">
+                <CaretRight className="h-3.5 w-3.5" weight="light" />
               </Button>
             </div>
 
-            <div data-stats-group className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider shrink-0">
-              <div className={cn(
-                "px-1 py-0.5 rounded border shadow-sm flex items-center",
-                isProfitTotal ? "bg-long/10 border-long/20 text-long" : isLossTotal ? "bg-short/10 border-short/20 text-short" : "bg-muted/10 border-border/20 text-muted-foreground"
-              )}>
-                {formatCompact(monthlyTotal)}
-              </div>
-              <div className="px-1 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary border-dashed shadow-sm">
-                {tradedDaysCount}d
-              </div>
-            </div>
+            <Button
+              onClick={() => setCurrentDate(new Date())}
+              variant="outline"
+              size="sm"
+              className="h-7 px-2.5 text-[10px] font-black bg-muted/20 hover:bg-muted border-border/40 transition-colors hidden sm:flex"
+            >
+              This month
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-3">
+             <div className="hidden sm:flex items-center gap-1.5">
+               <span className="text-[10px] font-bold text-muted-foreground">Monthly stats:</span>
+               <div data-stats-group className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider shrink-0">
+                 <div className={cn(
+                   "px-1.5 py-0.5 rounded border shadow-sm flex items-center",
+                   isProfitTotal ? "bg-long/10 border-long/20 text-long" : isLossTotal ? "bg-short/10 border-short/20 text-short" : "bg-muted/10 border-border/20 text-muted-foreground"
+                 )}>
+                   {formatCompact(monthlyTotal)}
+                 </div>
+                 <div className="px-1.5 py-0.5 rounded bg-chart-4/10 border border-chart-4/20 text-chart-4 border-solid shadow-sm">
+                   {tradedDaysCount} d
+                 </div>
+               </div>
+             </div>
+
+             <div className="w-px h-4 bg-border/40 hidden sm:block" />
+
+             <Button
+               variant="ghost"
+               size="sm"
+               onClick={handleScreenshot}
+               className="h-7 px-2 text-[10px] font-bold gap-1.5 hover:bg-primary/5 hover:text-primary transition-all bg-muted/20 border border-border/30 rounded-lg"
+               title="Snapshot"
+             >
+               <Camera className="h-3.5 w-3.5" weight="light" />
+               <span className="hidden sm:inline">Snapshot</span>
+             </Button>
           </div>
         </div>
 
@@ -215,7 +229,7 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
           </div>
 
           {/* Calendar Grid - removed fixed column for wk on mobile */}
-          <div className="grid grid-cols-5 sm:grid-cols-6 gap-1 md:gap-2 flex-1">
+          <div className="grid grid-cols-5 sm:grid-cols-6 gap-1 md:gap-2 flex-1 auto-rows-fr">
             {(() => {
               const rows = [];
               for (let i = 0; i < calendarDays.length; i += 7) {
@@ -255,13 +269,13 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
                   <div
                     style={gridColumn ? { gridColumn } : undefined}
                     className={cn(
-                      "flex flex-col rounded-lg p-1 sm:p-2 border transition-all duration-200 min-h-[45px] sm:min-h-[60px] lg:min-h-[82px] cursor-default group",
+                      "flex flex-col rounded-md p-1 sm:p-1.5 border transition-all duration-200 min-h-[40px] cursor-default group",
                       hasTrades
                         ? isProfit
                           ? "bg-long/10 border-long/30 hover:bg-long/20 hover:border-long/50"
                           : isLoss
                             ? "bg-short/10 border-short/30 hover:bg-short/20 hover:border-short/50"
-                            : "bg-muted/10 border-border/30 hover:bg-muted/20 hover:border-border/50"
+                            : "bg-card/40 border-border/30"
                         : "bg-card/40 border-border/30",
                       !isCurrentMonth && "opacity-20 grayscale",
                       isTodayDate && "border-primary/30",

@@ -1,31 +1,23 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { useData } from '@/context/data-provider'
+import { useWidgetData } from '@/hooks/use-widget-data'
 import { WidgetCard, ChartTooltip, CHART_COLORS } from '../widget-card'
 import { format } from 'date-fns'
 
 export default function EquityCurveWidget() {
-  const { formattedTrades } = useData()
+  const { data: chartData, isLoading } = useWidgetData('equityCurve')
 
-  const chartData = useMemo(() => {
-    if (!formattedTrades || formattedTrades.length === 0) return []
-
-    const sorted = [...formattedTrades].sort(
-      (a, b) => new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
+  if (isLoading) {
+    return (
+      <WidgetCard title="Cumulative Equity Curve">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-full h-[150px] bg-muted/20 rounded-xl" />
+        </div>
+      </WidgetCard>
     )
-
-    let cumulative = 0
-    return sorted.map((trade) => {
-      const netPnl = (trade.pnl || 0) + (trade.commission || 0)
-      cumulative += netPnl
-      return {
-        date: format(new Date(trade.entryDate), 'MMM dd'),
-        equity: parseFloat(cumulative.toFixed(2)),
-      }
-    })
-  }, [formattedTrades])
+  }
 
   if (chartData.length === 0) {
     return (

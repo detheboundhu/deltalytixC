@@ -21,7 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { WidgetCard } from '../widget-card'
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from '@/hooks/use-widget-data'
 import { cn, formatCurrency, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
 
@@ -135,36 +135,8 @@ function formatAxisValue(value: number): string {
 // ============================================================================
 
 export default function DailyCumulativePnL({ size = 'small-long' }: DailyCumulativePnLProps) {
-  // ---------------------------------------------------------------------------
-  // DATA HOOKS (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const { calendarData } = useData()
-
-  // ---------------------------------------------------------------------------
-  // DATA PROCESSING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const chartData = React.useMemo(() => {
-    const sortedData = Object.entries(calendarData)
-      .map(([date, values]) => ({
-        date,
-        dailyPnL: values.pnl,
-        trades: values.shortNumber + values.longNumber,
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-
-    let cumulative = 0
-    const result: ChartDataPoint[] = []
-
-    sortedData.forEach((item) => {
-      cumulative += item.dailyPnL
-      result.push({
-        ...item,
-        cumulativePnL: cumulative,
-      })
-    })
-
-    return result
-  }, [calendarData])
+  const { data: rawChartData, isLoading } = useWidgetData('dailyCumulativePnl')
+  const chartData = rawChartData || []
 
   // ---------------------------------------------------------------------------
   // GRADIENT OFFSET CALCULATION (PRESERVED - DO NOT MODIFY)
@@ -172,8 +144,8 @@ export default function DailyCumulativePnL({ size = 'small-long' }: DailyCumulat
   const gradientOffset = React.useMemo(() => {
     if (chartData.length === 0) return 0
 
-    const dataMax = Math.max(...chartData.map((i) => i.cumulativePnL))
-    const dataMin = Math.min(...chartData.map((i) => i.cumulativePnL))
+    const dataMax = Math.max(...chartData.map((i: any) => i.cumulativePnL))
+  const dataMin = Math.min(...chartData.map((i: any) => i.cumulativePnL))
 
     if (dataMax <= 0) return 0
     if (dataMin >= 0) return 1
@@ -181,10 +153,27 @@ export default function DailyCumulativePnL({ size = 'small-long' }: DailyCumulat
     return dataMax / (dataMax - dataMin)
   }, [chartData])
 
-  // ---------------------------------------------------------------------------
-  // SIZE-RESPONSIVE VALUES
-  // ---------------------------------------------------------------------------
   const isCompact = size === 'small' || size === 'small-long'
+
+  if (isLoading) {
+    return (
+      <WidgetCard title="Cumulative P/L">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-full h-[200px] bg-muted/20 rounded-xl" />
+        </div>
+      </WidgetCard>
+    )
+  }
+
+  if (chartData.length === 0) {
+    return (
+      <WidgetCard title="Cumulative P/L">
+        <div className="flex items-center justify-center h-full text-muted-foreground/50 text-sm">
+          No trade data available
+        </div>
+      </WidgetCard>
+    )
+  }
 
   // ---------------------------------------------------------------------------
   // RENDER

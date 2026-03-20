@@ -1,35 +1,25 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import { useData } from '@/context/data-provider'
+import { useWidgetData } from '@/hooks/use-widget-data'
 import { WidgetCard, CHART_COLORS } from '../widget-card'
 import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
 
 export default function OutcomeDistributionWidget() {
-  const { formattedTrades } = useData()
+  const { data: widgetData, isLoading } = useWidgetData('outcomeDistribution')
 
-  const { data, totalTrades } = useMemo(() => {
-    if (!formattedTrades || formattedTrades.length === 0) return { data: [], totalTrades: 0 }
+  if (isLoading) {
+    return (
+      <WidgetCard title="Outcome Distribution">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-[150px] h-[150px] rounded-full bg-muted/20" />
+        </div>
+      </WidgetCard>
+    )
+  }
 
-    let wins = 0, losses = 0, breakeven = 0
-
-    formattedTrades.forEach((trade) => {
-      const netPnl = (trade.pnl || 0) + (trade.commission || 0)
-      if (netPnl > BREAK_EVEN_THRESHOLD) wins++
-      else if (netPnl < -BREAK_EVEN_THRESHOLD) losses++
-      else breakeven++
-    })
-
-    return {
-      data: [
-        { name: 'Wins', value: wins, color: CHART_COLORS.bullish },
-        { name: 'Losses', value: losses, color: CHART_COLORS.bearish },
-        { name: 'Breakeven', value: breakeven, color: CHART_COLORS.muted },
-      ].filter(d => d.value > 0),
-      totalTrades: wins + losses + breakeven,
-    }
-  }, [formattedTrades])
+  const { data = [], totalTrades = 0 } = widgetData || {}
 
   if (data.length === 0) {
     return (
@@ -57,7 +47,7 @@ export default function OutcomeDistributionWidget() {
                 dataKey="value"
                 stroke="none"
               >
-                {data.map((entry, index) => (
+                {data.map((entry: any, index: number) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -87,7 +77,7 @@ export default function OutcomeDistributionWidget() {
 
         {/* Legend */}
         <div className="flex items-center gap-4">
-          {data.map((entry) => (
+          {data.map((entry: any) => (
             <div key={entry.name} className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
               <span className="text-[10px] font-bold text-muted-foreground">

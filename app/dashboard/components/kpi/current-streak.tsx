@@ -100,7 +100,7 @@ export default function CurrentStreak({ size }: CurrentStreakProps) {
 
   return (
     <WidgetCard isKpi>
-      <div className="h-full flex flex-col justify-between">
+      <div className="h-full flex flex-col justify-center gap-3">
         <div className="flex justify-between items-start">
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
