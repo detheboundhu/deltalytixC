@@ -8,85 +8,82 @@ function isLocalDevelopment() {
   const isVercel = process.env.VERCEL === '1'
   return process.env.NODE_ENV === 'development' && !isVercel
 }
-// The client you created from the Server-Side Auth instructions
+
+// Race a promise against a timeout — rejects with a descriptive error
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    ),
+  ])
+}
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const error_code = searchParams.get('error_code')
-  const error_description = searchParams.get('error_description')
-  // if "next" is in param, use it as the redirect URL
   const next = searchParams.get('next')
   const action = searchParams.get('action')
+  const baseUrl = isLocalDevelopment() ? 'http://localhost:3000' : origin
 
   // Handle OAuth errors from the provider
   if (error_code) {
-    const baseUrl = isLocalDevelopment() ? 'http://localhost:3000' : origin
-    
     if (error_code === 'bad_oauth_state') {
-      // OAuth state mismatch - redirect to authentication to retry
-      return NextResponse.redirect(new URL('/', origin))
+      return NextResponse.redirect(new URL('/', baseUrl))
     }
-    
-    return NextResponse.redirect(new URL('/dashboard', origin))
+    return NextResponse.redirect(new URL('/dashboard', baseUrl))
   }
 
-   // Redirect to the decoded 'next' URL if it exists, otherwise to the homepage
-   let decodedNext: string | null = null;
-   if (next) {
-    decodedNext = decodeURIComponent(next)
-  }
-  
+  const decodedNext = next ? decodeURIComponent(next) : null
+
   if (code) {
     try {
       const supabase = await createClient()
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+      // ── 1. Exchange code for session — 15 s hard cap ──
+      const { data, error } = await withTimeout(
+        supabase.auth.exchangeCodeForSession(code),
+        15_000,
+        'exchangeCodeForSession'
+      )
 
       if (!error && data.user) {
-        // Ensure user exists in database and preload dashboard layout
+        // ── 2. DB sync — 8 s cap, non-blocking on failure ──
         try {
-          // const locale = await getCurrentLocale()
-          await ensureUserInDatabase(data.user, 'en')
-
-          // Note: Dashboard layout moved to DashboardTemplate model
-          // Template is now auto-created on first dashboard visit
-        } catch (dbError) {
-          // Continue with redirect - user authentication succeeded
+          await withTimeout(
+            ensureUserInDatabase(data.user, 'en'),
+            8_000,
+            'ensureUserInDatabase'
+          )
+        } catch {
+          // Auth succeeded — DB sync can happen on the next page load
         }
 
+        // Fire-and-forget (already non-blocking)
         logActivity({ userId: data.user.id, action: 'USER_LOGIN', entity: 'Auth' })
 
         // Handle identity linking redirect
         if (action === 'link') {
           const forwardedHost = request.headers.get('host')
-          const baseUrl = isLocalDevelopment()
+          const linkBase = isLocalDevelopment()
             ? `${origin}/dashboard/settings`
             : `https://${forwardedHost || origin}/dashboard/settings`
-          return NextResponse.redirect(new URL('/dashboard/settings?linked=true', baseUrl))
+          return NextResponse.redirect(new URL('/dashboard/settings?linked=true', linkBase))
         }
 
-        const baseUrl = isLocalDevelopment() ? 'http://localhost:3000' : origin
-
-        // Redirect to dashboard after successful authentication
         const redirectPath = decodedNext || '/dashboard'
         return NextResponse.redirect(new URL(redirectPath, baseUrl))
       }
-      
-      // Handle specific auth errors
-      const baseUrl = isLocalDevelopment() ? 'http://localhost:3000' : origin
 
-      if (error?.message?.includes('timeout') || error?.message?.includes('fetch failed')) {
-        return NextResponse.redirect(new URL('/', baseUrl))
-      }
-
+      // Auth error — redirect home
       return NextResponse.redirect(new URL('/', baseUrl))
-    } catch (networkError) {
-      const baseUrl = isLocalDevelopment() ? 'http://localhost:3000' : origin
+    } catch {
+      // Timeout or network failure — redirect home instead of 504
       return NextResponse.redirect(new URL('/', baseUrl))
     }
   }
 
-  // return the user to the authentication page
-  const baseUrl = isLocalDevelopment() ? 'http://localhost:3000' : origin
+  // No code param — send user to login
   return NextResponse.redirect(new URL('/', baseUrl))
 }

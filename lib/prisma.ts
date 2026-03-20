@@ -17,11 +17,11 @@ function buildDatabaseUrl(): string {
   try {
     const url = new URL(baseUrl)
 
-    // Standard limits and timeouts
+    // Fail-fast timeouts — must stay well under Vercel's 30 s function limit
     url.searchParams.set('connection_limit', '5')
-    url.searchParams.set('pool_timeout', '20') 
-    url.searchParams.set('connect_timeout', '10') 
-    url.searchParams.set('socket_timeout', '30') 
+    url.searchParams.set('pool_timeout', '10')
+    url.searchParams.set('connect_timeout', '5')
+    url.searchParams.set('socket_timeout', '15')
 
     // Enable prepared statements for better performance with pgbouncer
     // Required for Supabase Transaction mode (port 6543)
