@@ -1,6 +1,7 @@
 'use server'
 import { createClient, ensureUserInDatabase } from '@/server/auth'
 import { NextResponse } from 'next/server'
+import { logActivity } from '@/lib/activity-logger'
 
 // Helper function to determine if we're in local development
 function isLocalDevelopment() {
@@ -52,6 +53,8 @@ export async function GET(request: Request) {
         } catch (dbError) {
           // Continue with redirect - user authentication succeeded
         }
+
+        logActivity({ userId: data.user.id, action: 'USER_LOGIN', entity: 'Auth' })
 
         // Handle identity linking redirect
         if (action === 'link') {

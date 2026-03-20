@@ -5,6 +5,7 @@ import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { getUserId } from '@/server/auth'
 import { getActiveAccountsWhereClause } from '@/lib/utils/account-filters'
+import { logActivity, getClientIp } from '@/lib/activity-logger'
 
 // PATCH /api/accounts - Clear cache
 export async function PATCH(request: NextRequest) {

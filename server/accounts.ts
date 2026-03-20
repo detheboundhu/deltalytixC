@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma'
 import { convertDecimal } from '@/lib/utils/decimal'
 import { NotificationService } from './services/notification-service'
 import { NotificationType } from '@prisma/client'
+import { logActivity } from '@/lib/activity-logger'
 
 /**
  * Helper function to determine if a phase number represents the funded stage
@@ -1072,6 +1073,18 @@ export async function saveAndLinkTrades(accountId: string, trades: any[]) {
       isDuplicate: false
     }
 
+    logActivity({
+      userId,
+      action: 'TRADES_IMPORTED',
+      entity: 'Trade',
+      metadata: { 
+        count: totalCreated, 
+        totalTrades: newTrades.length,
+        accountId: isPropFirm ? phaseAccountId : regularAccountId,
+        accountName
+      },
+    })
+
     // AUTO-EVALUATION: Check for breaches synchronously (FAST - breach detection only)
     if (result.isPropFirm && result.phaseAccountId && result.masterAccountId) {
       try {
@@ -1324,6 +1337,90 @@ export async function saveAndLinkTrades(accountId: string, trades: any[]) {
 
     // Invalidate caches after successful import
     await invalidateUserCaches(userId)
+
+    // STEP 4: ACCOUNT DATE ADJUSTMENT CHECK
+    // Only check if trades were actually created
+    if (totalCreated > 0) {
+      // Find the earliest entryDate among the NEW trades
+      const validEntryDates = newTrades
+        .map(t => t.entryDate)
+        .filter(d => d && !isNaN(new Date(d).getTime()))
+        .map(d => new Date(d))
+      
+      if (validEntryDates.length > 0) {
+        const earliestTradeDate = new Date(Math.min(...validEntryDates.map(d => d.getTime())))
+        // Set to start of day as per user request
+        earliestTradeDate.setHours(0, 0, 0, 0)
+
+        // Get account creation date
+        let accountCreatedAt: Date | null = null
+        if (isPropFirm && masterAccountId) {
+          const ma = await prisma.masterAccount.findUnique({
+            where: { id: masterAccountId },
+            select: { createdAt: true }
+          })
+          accountCreatedAt = ma?.createdAt || null
+        } else if (regularAccountId) {
+          const ra = await prisma.account.findUnique({
+            where: { id: regularAccountId },
+            select: { createdAt: true }
+          })
+          accountCreatedAt = ra?.createdAt || null
+        }
+
+        if (accountCreatedAt && earliestTradeDate < accountCreatedAt) {
+          // Get user preference
+          const userPref = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { autoAdjustAccountDate: true }
+          })
+
+          if (userPref?.autoAdjustAccountDate) {
+            // AUTO ADJUST
+            if (isPropFirm && masterAccountId) {
+              await prisma.masterAccount.update({
+                where: { id: masterAccountId },
+                data: { createdAt: earliestTradeDate }
+              })
+            } else if (regularAccountId) {
+              await prisma.account.update({
+                where: { id: regularAccountId },
+                data: { createdAt: earliestTradeDate }
+              })
+            }
+
+            // Informational notification
+            await NotificationService.send({
+              userId,
+              type: NotificationType.SYSTEM,
+              title: 'Account Date Adjusted',
+              message: `The creation date for ${accountName} was automatically adjusted to ${earliestTradeDate.toLocaleDateString()} to match your first trade.`,
+              data: {
+                accountId: isPropFirm ? masterAccountId : regularAccountId,
+                isPropFirm,
+                newDate: earliestTradeDate.toISOString()
+              }
+            })
+          } else {
+            // MANUAL ADJUST (Action Required)
+            await NotificationService.send({
+              userId,
+              type: NotificationType.SYSTEM,
+              title: 'Adjust Account Date?',
+              message: `Your first trade in ${accountName} is older than the account creation date. Would you like to adjust the account date to ${earliestTradeDate.toLocaleDateString()}?`,
+              data: {
+                accountId: isPropFirm ? masterAccountId : regularAccountId,
+                isPropFirm,
+                newDate: earliestTradeDate.toISOString(),
+                currentDate: accountCreatedAt.toISOString()
+              },
+              actionRequired: true,
+              invalidationKey: `adjust-date-${isPropFirm ? masterAccountId : regularAccountId}`
+            })
+          }
+        }
+      }
+    }
 
     return result
   } catch (error) {

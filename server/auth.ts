@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { prisma, safeDbOperation } from '@/lib/prisma'
 import { headers } from "next/headers"
+import { logActivity } from '@/lib/activity-logger'
 // Removed locales import - using plain English strings
 
 // Helper function to determine if we're in local development
@@ -118,6 +119,10 @@ export async function signInWithGoogle(next: string | null = null) {
 
 export async function signOut() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    logActivity({ userId: user.id, action: 'USER_LOGOUT', entity: 'Auth' })
+  }
   await supabase.auth.signOut()
   redirect('/?logout=true')
 }
@@ -292,6 +297,8 @@ export async function ensureUserInDatabase(user: SupabaseUser, locale?: string) 
         throw new Error('Failed to create user record in database');
       }
 
+      logActivity({ userId: newUser.id, action: 'USER_SIGNUP', entity: 'Auth' })
+
       // Create default dashboard template for new user (non-blocking)
       try {
         const { ensureDefaultTemplate } = await import('./seed-default-template')
@@ -427,6 +434,8 @@ export async function verifyOtp(email: string, token: string, type: 'email' | 's
         // Don't throw - authentication succeeded, database sync is secondary
         // The app will work with just Supabase auth, database sync can happen later
       }
+
+      logActivity({ userId: data.user.id, action: 'USER_LOGIN', entity: 'Auth' })
 
       // Return the successful authentication data
       return data

@@ -46,7 +46,8 @@ import {
   Sun,
   Trash,
   User,
-  WarningCircle
+  WarningCircle,
+  Calendar
 } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
 import Link from 'next/link'
@@ -113,7 +114,8 @@ export default function SettingsPage() {
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
-    email: user?.email || ''
+    email: user?.email || '',
+    autoAdjustAccountDate: false
   })
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
@@ -146,7 +148,8 @@ export default function SettingsPage() {
           setProfileData({
             firstName: result.data.firstName || '',
             lastName: result.data.lastName || '',
-            email: result.data.email || ''
+            email: result.data.email || '',
+            autoAdjustAccountDate: result.data.autoAdjustAccountDate || false
           })
         }
       } catch (error) {
@@ -166,7 +169,8 @@ export default function SettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           firstName: profileData.firstName,
-          lastName: profileData.lastName
+          lastName: profileData.lastName,
+          autoAdjustAccountDate: profileData.autoAdjustAccountDate
         })
       })
 
@@ -196,6 +200,12 @@ export default function SettingsPage() {
       description: `Timezone changed to ${value.replace('_', ' ')}.`,
       duration: 2000
     })
+  }
+
+  const handleAutoAdjustChange = (checked: boolean) => {
+    setProfileData(prev => ({ ...prev, autoAdjustAccountDate: checked }))
+    // Automatically trigger update for this setting
+    handleProfileUpdate()
   }
 
   const handleDeleteAccount = async () => {
@@ -492,6 +502,26 @@ export default function SettingsPage() {
                     </DropdownMenuRadioGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              }
+            />
+
+            <Separator />
+
+            {/* Auto-adjust Account Date */}
+            <SettingRow
+              icon={Calendar}
+              label="Auto-adjust Account Date"
+              description="Automatically set account start date to your first trade"
+              action={
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant={profileData.autoAdjustAccountDate ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleAutoAdjustChange(!profileData.autoAdjustAccountDate)}
+                  >
+                    {profileData.autoAdjustAccountDate ? "Enabled" : "Disabled"}
+                  </Button>
+                </div>
               }
             />
           </CardContent>

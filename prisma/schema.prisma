@@ -345,6 +345,7 @@ model User {
   goalSettings           Json?
   backtestInputMode      String                   @default("manual")
   accentPack             String                   @default("classic")
+  autoAdjustAccountDate  Boolean                  @default(false)
   Account                Account[]
   BacktestTrade          BacktestTrade[]
   DailyNote              DailyNote[]

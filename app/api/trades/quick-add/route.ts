@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUserId } from '@/server/auth'
 import { prisma } from '@/lib/prisma'
 import { randomUUID } from 'crypto'
+import { logActivity, getClientIp } from '@/lib/activity-logger'
 
 export async function POST(req: NextRequest) {
     try {
@@ -56,6 +57,15 @@ export async function POST(req: NextRequest) {
                 commission: 0,
                 userId
             }
+        })
+
+        logActivity({
+            userId,
+            action: 'TRADE_CREATED',
+            entity: 'Trade',
+            entityId: trade.id,
+            metadata: { instrument, accountNumber: targetAccount },
+            ipAddress: getClientIp(req),
         })
 
         return NextResponse.json({ success: true, trade })

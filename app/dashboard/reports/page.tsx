@@ -38,6 +38,20 @@ import { DateRange } from '@/components/ui/custom-date-range-picker'
 import { toast } from 'sonner'
 import { ReportFilters } from './components/report-filters'
 import { useReportStats } from '@/hooks/use-report-stats'
+import { 
+    Area, 
+    AreaChart, 
+    ResponsiveContainer, 
+    Tooltip as RechartsTooltip, 
+    XAxis, 
+    YAxis 
+} from 'recharts'
+
+const COLORS = {
+    bullish: 'hsl(var(--chart-bullish))',
+    bearish: 'hsl(var(--chart-bearish))',
+    muted: 'hsl(220, 15%, 55%)'
+}
 
 import { Button } from '@/components/ui/button'
 import {
@@ -211,43 +225,35 @@ export default function ReportsPage() {
     const sessionPerformance = reportData?.sessionPerformance ?? null
     const rMultipleDistribution = reportData?.rMultipleDistribution ?? null
 
-    // Pre-computed R-Multiple bars to avoid JSX IIFE type errors
-    const rMultipleBars = rMultipleDistribution ? (() => {
-        const maxCount = Math.max(...Object.values(rMultipleDistribution).map(Number), 1)
-        return Object.entries(rMultipleDistribution).map(([bucket, rawCount], i) => {
+    // Pre-computed R-Multiple data for Recharts
+    const rMultipleChartData = useMemo(() => {
+        if (!rMultipleDistribution) return []
+        return Object.entries(rMultipleDistribution).map(([bucket, rawCount]) => {
             const count = Number(rawCount)
-            const height = maxCount > 0 ? (count / maxCount * 100) : 0
             const isNegative = bucket.includes('<') || bucket.includes('-')
+            return {
+                name: bucket,
+                count,
+                color: isNegative ? COLORS.bearish : COLORS.bullish
+            }
+        })
+    }, [rMultipleDistribution])
+
+    const RMultipleTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
             return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
-                    <div className="w-full relative flex flex-col justify-end" style={{ height: '180px' }}>
-                        {count > 0 && (
-                            <span className="text-[9px] font-bold text-center mb-1 text-muted-foreground">
-                                {count}
-                            </span>
-                        )}
-                        <motion.div
-                            initial={{ height: 0 }}
-                            animate={{ height: `${Math.max(height, count > 0 ? 2 : 0)}%` }}
-                            transition={{ duration: 0.6, ease: 'easeOut' }}
-                            className={cn(
-                                "w-full rounded-t-sm relative overflow-hidden",
-                            isNegative ? "bg-destructive/40 group-hover:bg-destructive/60" : "bg-long/40 group-hover:bg-long/60"
-                            )}
-                        >
-                            <div className={cn(
-                                "absolute top-0 left-0 w-full h-0.5",
-                                isNegative ? "bg-destructive" : "bg-long"
-                            )} />
-                        </motion.div>
+                <div className="bg-card border border-border p-2 rounded-lg shadow-md">
+                    <p className="text-[10px] uppercase font-black text-muted-foreground/70 mb-1">{label}</p>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold" style={{ color: payload[0].payload.color }}>
+                            {payload[0].value} Trades
+                        </span>
                     </div>
-                    <span className="text-[7px] font-bold text-muted-foreground/60 whitespace-nowrap text-center leading-tight">
-                        {bucket}
-                    </span>
                 </div>
             )
-        })
-    })() : null
+        }
+        return null
+    }
     const filteredTrades = reportData?.filteredTrades ?? []
     const filterOptions = reportData?.filterOptions ?? {
         symbols: [],

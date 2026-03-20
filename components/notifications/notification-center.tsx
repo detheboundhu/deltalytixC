@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator'
 import { NotificationItem } from './notification-item'
 import { FundedApprovalDialog } from '@/components/prop-firm/funded-approval-dialog'
 import { PhaseTransitionApprovalDialog } from '@/components/prop-firm/phase-transition-approval-dialog'
+import { AdjustDateDialog } from './adjust-date-dialog'
 import { toast } from 'sonner'
 import { Notification } from '@prisma/client'
 import { useDatabaseRealtime } from '@/lib/realtime/database-realtime'
@@ -29,6 +30,7 @@ export function NotificationCenter() {
   // Dialog states
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false)
   const [phaseTransitionDialogOpen, setPhaseTransitionDialogOpen] = useState(false)
+  const [adjustDateDialogOpen, setAdjustDateDialogOpen] = useState(false)
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
 
   // Use ref for isOpen to avoid stale closures in real-time callback
@@ -219,6 +221,12 @@ export function NotificationCenter() {
       setPhaseTransitionDialogOpen(true)
       setIsOpen(false)
     }
+    // Handle date adjustment actions
+    else if (notification.type === 'SYSTEM' && notification.actionRequired && notification.invalidationKey?.startsWith('adjust-date-')) {
+      setSelectedNotification(notification)
+      setAdjustDateDialogOpen(true)
+      setIsOpen(false)
+    }
     else {
       // Mark as read for non-actionable notifications
       if (!notification.isRead) {
@@ -243,6 +251,12 @@ export function NotificationCenter() {
     setTimeout(() => {
       refreshUnreadCount()
     }, 500)
+  }
+
+  const handleAdjustDateComplete = () => {
+    setAdjustDateDialogOpen(false)
+    setSelectedNotification(null)
+    fetchNotifications()
   }
 
   return (
@@ -369,6 +383,14 @@ export function NotificationCenter() {
         onOpenChange={setPhaseTransitionDialogOpen}
         notification={selectedNotification}
         onComplete={handlePhaseTransitionComplete}
+      />
+
+      {/* Adjust Date Dialog */}
+      <AdjustDateDialog
+        open={adjustDateDialogOpen}
+        onOpenChange={setAdjustDateDialogOpen}
+        notification={selectedNotification}
+        onComplete={handleAdjustDateComplete}
       />
     </>
   )

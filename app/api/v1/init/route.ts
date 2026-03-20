@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
         thorToken: true,
         timezone: true,
         theme: true,
+        accentPack: true,
         firstName: true,
         lastName: true,
         accountFilterSettings: true,
