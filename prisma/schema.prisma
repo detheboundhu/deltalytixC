@@ -346,6 +346,8 @@ model User {
   backtestInputMode      String                   @default("manual")
   accentPack             String                   @default("classic")
   autoAdjustAccountDate  Boolean                  @default(false)
+  calendarDisplayStats   String[]                 @default(["pnl", "trades"])
+  showWeeklySummary      Boolean                  @default(true)
   Account                Account[]
   BacktestTrade          BacktestTrade[]
   DailyNote              DailyNote[]

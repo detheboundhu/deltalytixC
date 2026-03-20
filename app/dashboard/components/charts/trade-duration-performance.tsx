@@ -18,11 +18,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { WidgetCard } from '../widget-card'
 import { useData } from "@/context/data-provider"
 import { cn, formatCurrency, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
-import { getWidgetStyles } from '@/app/dashboard/config/widget-dimensions'
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 
@@ -227,53 +226,13 @@ export default function TradeDurationPerformance({ size = 'small-long' }: TradeD
   // SIZE-RESPONSIVE VALUES
   // ---------------------------------------------------------------------------
   const isCompact = size === 'small' || size === 'small-long'
-  const widgetStyles = getWidgetStyles(size || 'small-long')
 
   // ---------------------------------------------------------------------------
   // RENDER
   // ---------------------------------------------------------------------------
   return (
-    <Card className="flex flex-col bg-card" style={{ height: widgetStyles.height }}>
-      {/* Header */}
-      <CardHeader className="flex flex-row items-center justify-between shrink-0 border-b border-border/50 h-12 px-5">
-        <div className="flex items-center gap-2">
-          <CardTitle className={cn(
-            "font-semibold tracking-tight",
-            isCompact ? "text-sm" : "text-base"
-          )}>
-            Duration Performance
-          </CardTitle>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Info weight="light" className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Performance based on trade duration length</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-
-        {/* Average Toggle */}
-        <div className="flex items-center gap-2">
-          <Label
-            htmlFor="duration-average"
-            className="text-xs text-muted-foreground cursor-pointer"
-          >
-            Avg
-          </Label>
-          <Switch
-            id="duration-average"
-            checked={showAverage}
-            onCheckedChange={setShowAverage}
-            className="scale-75"
-          />
-        </div>
-      </CardHeader>
-
-      {/* Chart Container */}
-      <CardContent className="flex-1 p-0 relative min-h-[100px]">
-        <div className="absolute inset-0">
-          <ResponsiveContainer width="100%" height="100%">
+    <WidgetCard title="Duration Performance">
+                  <ResponsiveContainer width="100%" height="100%">
             <AnyBarChart
               data={chartData}
               margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
@@ -339,8 +298,6 @@ export default function TradeDurationPerformance({ size = 'small-long' }: TradeD
               </Bar>
             </AnyBarChart>
           </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    </WidgetCard>
   )
 }

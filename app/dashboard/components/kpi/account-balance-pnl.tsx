@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { WidgetCard } from '../widget-card'
 import { useData } from '@/context/data-provider'
 import { useAccounts } from '@/hooks/use-accounts'
 import { useTradeStatistics } from '@/hooks/use-trade-statistics'
@@ -68,10 +68,10 @@ const AccountBalancePnl = React.memo(function AccountBalancePnl({ size }: Accoun
   }
 
   return (
-    <Card className="w-full h-24 overflow-hidden">
-      <CardContent className="p-5 h-full flex flex-col justify-center gap-1">
+    <WidgetCard isKpi>
+      <div className="h-full flex flex-col justify-center gap-1">
         <div className="flex items-center gap-1.5">
-          <span className="text-[11px] uppercase tracking-wide font-bold text-muted-foreground/80 whitespace-nowrap">
+          <span className="text-[8px] uppercase font-black tracking-widest text-muted-foreground/60">
             Account Balance & P&L
           </span>
           <TooltipProvider delayDuration={100}>
@@ -92,40 +92,40 @@ const AccountBalancePnl = React.memo(function AccountBalancePnl({ size }: Accoun
           </TooltipProvider>
         </div>
 
-        <div className="text-2xl font-bold text-foreground tracking-tight">
+        <div className="text-xl font-black font-mono text-foreground tracking-tighter">
           {formatCompactCurrency(totalBalance)}
         </div>
 
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-3 text-[10px]">
             <div className="flex items-center gap-1">
-              <span className="text-muted-foreground">P&L:</span>
+              <span className="text-muted-foreground/50">P&L:</span>
               <span className={cn(
-                "font-semibold",
+                "font-bold font-mono",
                 grossPnl >= 0 ? "text-long" : "text-short"
               )}>
                 {formatCompactCurrency(grossPnl)}
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-muted-foreground">Fees:</span>
-              <span className="font-semibold text-warning">
+              <span className="text-muted-foreground/50">Fees:</span>
+              <span className="font-bold font-mono text-warning">
                 -{formatCompactCurrency(totalCommissions)}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-1 text-[10px]">
-            <span className="text-muted-foreground">Net:</span>
+            <span className="text-muted-foreground/50">Net:</span>
             <span className={cn(
-              "font-semibold",
+              "font-bold font-mono",
               netPnl >= 0 ? "text-long" : "text-short"
             )}>
               {formatCompactCurrency(netPnl)}
             </span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </WidgetCard>
   )
 })
 

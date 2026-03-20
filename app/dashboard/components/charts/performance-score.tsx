@@ -12,11 +12,10 @@ import {
 } from "recharts"
 
 const AnyRadarChart = RadarChart as any
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { WidgetCard } from '../widget-card'
 import { useData } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
-import { getWidgetStyles, getWidgetHeightClass } from '@/app/dashboard/config/widget-dimensions'
 import { TrendUp as TrendUp, TrendDown as TrendDown, Trophy, Info } from "@phosphor-icons/react"
 import { calculateZellaScore, calculateMetricsFromTrades } from "@/lib/zella-score"
 import {
@@ -250,38 +249,12 @@ export default function PerformanceScore({ size = 'small-long' }: PerformanceSco
   // SIZE-RESPONSIVE VALUES
   // ---------------------------------------------------------------------------
   const isCompact = size === 'small' || size === 'small-long'
-  const widgetStyles = getWidgetStyles(size || 'small-long')
 
   // ---------------------------------------------------------------------------
   // RENDER
   // ---------------------------------------------------------------------------
   return (
-    <Card className={cn("flex flex-col bg-card", getWidgetHeightClass(size))}>
-      {/* Header */}
-      <CardHeader className="flex flex-row items-center justify-between shrink-0 border-b border-border/50 h-12 px-5">
-        <div className="flex items-center gap-2">
-          <Trophy weight="light" className={cn("text-amber-500", isCompact ? "h-4 w-4" : "h-5 w-5")} />
-          <CardTitle className={cn(
-            "font-semibold tracking-tight",
-            isCompact ? "text-sm" : "text-base"
-          )}>
-            Performance Score
-          </CardTitle>
-          <UiTooltip>
-            <UiTooltipTrigger asChild>
-              <Info weight="light" className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
-            </UiTooltipTrigger>
-            <UiTooltipContent>
-              <p>Overall trading performance score based on 6 key metrics</p>
-            </UiTooltipContent>
-          </UiTooltip>
-        </div>
-
-        <ScoreBadge score={overallScore} hasData={hasData} />
-      </CardHeader>
-
-      {/* Chart Container */}
-      <CardContent className="flex-1 p-0 flex flex-col">
+    <WidgetCard title="Performance Score">
         {hasData ? (
           <>
             {/* Radar Chart */}
@@ -355,7 +328,7 @@ export default function PerformanceScore({ size = 'small-long' }: PerformanceSco
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      
+    </WidgetCard>
   )
 }

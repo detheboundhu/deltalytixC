@@ -176,3 +176,56 @@ export function getDashboardGridConfig() {
   }
 }
 
+/**
+ * react-grid-layout default and minimum sizes per widget type
+ * 
+ * w/h = grid units (columns out of 12, rows where 1 row = ROW_HEIGHT px)
+ * minW/minH = minimum resize constraints
+ */
+export interface WidgetGridDefault {
+  defaultW: number
+  defaultH: number
+  minW: number
+  minH: number
+}
+
+export const WIDGET_GRID_DEFAULTS: Record<string, WidgetGridDefault> = {
+  // KPIs — handled separately, but included for completeness
+  accountBalancePnl: { defaultW: 1, defaultH: 1, minW: 1, minH: 1 },
+  tradeWinRate:      { defaultW: 1, defaultH: 1, minW: 1, minH: 1 },
+  dayWinRate:        { defaultW: 1, defaultH: 1, minW: 1, minH: 1 },
+  profitFactor:      { defaultW: 1, defaultH: 1, minW: 1, minH: 1 },
+  avgWinLoss:        { defaultW: 1, defaultH: 1, minW: 1, minH: 1 },
+  currentStreak:     { defaultW: 1, defaultH: 1, minW: 1, minH: 1 },
+
+  // Charts — 4 cols wide, 4 rows tall (320px)
+  netDailyPnL:              { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  dailyCumulativePnL:       { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  accountBalanceChart:      { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  weekdayPnL:               { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  tradeDurationPerformance: { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  performanceScore:         { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  pnlByInstrument:          { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  pnlByStrategy:            { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  winRateByStrategy:        { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+
+  // Command center / session
+  goalsRiskCommandCenter: { defaultW: 6, defaultH: 4, minW: 4, minH: 3 },
+  sessionAnalysis:        { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+
+  // Tables
+  recentTrades: { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+
+  // Calendars — wider, taller
+  calendarAdvanced: { defaultW: 12, defaultH: 7, minW: 6, minH: 5 },
+  calendarMini:     { defaultW: 8, defaultH: 4, minW: 5, minH: 3 },
+
+  // New charts
+  equityCurve:            { defaultW: 8, defaultH: 4, minW: 4, minH: 3 },
+  outcomeDistribution:    { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  dayOfWeekPerformance:   { defaultW: 6, defaultH: 4, minW: 3, minH: 3 },
+
+  // Fallback default
+  default: { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+}
+

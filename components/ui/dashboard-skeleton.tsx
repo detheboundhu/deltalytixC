@@ -216,105 +216,91 @@ export function MainDashboardSkeleton() {
     <div className="px-4 sm:px-6 py-8">
       <div className="max-w-7xl mx-auto flex flex-col gap-6">
         {/* KPI Row */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
           {[0, 1, 2, 3, 4].map((i) => (
-            <Card key={`kpi-${i}`} className="h-widget-kpi">
-              <CardContent className="p-4 h-full flex flex-col justify-between">
-                <div className="flex items-start justify-between">
-                  <SkeletonBlock className="h-3 w-24" />
-                  <SkeletonBlock className="h-8 w-8 rounded-lg" />
-                </div>
-                <div className="space-y-2">
-                  <SkeletonBlock className="h-7 w-32" />
-                  <SkeletonBlock className="h-3 w-20" />
-                </div>
-              </CardContent>
-            </Card>
+            <div key={`kpi-${i}`} className="bg-muted/10 border border-border/40 rounded-2xl p-4 h-[100px]">
+              <div className="flex items-start justify-between">
+                <SkeletonBlock className="h-2 w-24" />
+                <SkeletonBlock className="h-7 w-7 rounded-lg" />
+              </div>
+              <div className="space-y-2 mt-3">
+                <SkeletonBlock className="h-6 w-32" />
+                <SkeletonBlock className="h-2 w-20" />
+              </div>
+            </div>
           ))}
         </section>
 
         {/* Table / Calendar Row */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card className="lg:col-span-2 min-h-[280px] flex flex-col">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <SkeletonBlock className="h-5 w-36" />
-                <SkeletonBlock className="h-6 w-16 rounded-md" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0 flex-1">
+          <div className="lg:col-span-2 min-h-[280px] bg-muted/10 border border-border/40 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <SkeletonBlock className="h-2 w-36" />
+              <SkeletonBlock className="h-5 w-16 rounded-md" />
+            </div>
+            <div className="space-y-3">
               {[0, 1, 2, 3, 4].map((r) => (
-                <div key={`table-row-${r}`} className="flex items-center gap-4 py-3 border-b border-muted/50">
-                  <SkeletonBlock className="h-4 w-20" />
-                  <SkeletonBlock className="h-4 w-24" />
-                  <SkeletonBlock className="h-4 w-16 ml-auto" />
+                <div key={`table-row-${r}`} className="flex items-center gap-4 py-2 border-b border-border/20">
+                  <SkeletonBlock className="h-3 w-20" />
+                  <SkeletonBlock className="h-3 w-24" />
+                  <SkeletonBlock className="h-3 w-16 ml-auto" />
                 </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="min-h-[280px] flex flex-col">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <SkeletonBlock className="h-5 w-28" />
-                <div className="flex gap-1">
-                  <SkeletonBlock className="h-7 w-7 rounded-md" />
-                  <SkeletonBlock className="h-7 w-7 rounded-md" />
+          <div className="min-h-[280px] bg-muted/10 border border-border/40 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <SkeletonBlock className="h-2 w-28" />
+              <div className="flex gap-1">
+                <SkeletonBlock className="h-5 w-5 rounded-md" />
+                <SkeletonBlock className="h-5 w-5 rounded-md" />
+              </div>
+            </div>
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {[...Array(7)].map((_, d) => (
+                <SkeletonBlock key={`weekday-${d}`} className="h-3 w-3 mx-auto" />
+              ))}
+            </div>
+            <div className="space-y-1">
+              {[...Array(5)].map((_, week) => (
+                <div key={`calendar-week-${week}`} className="grid grid-cols-7 gap-1">
+                  {[...Array(7)].map((_, day) => (
+                    <SkeletonBlock key={`calendar-cell-${week}-${day}`} className="aspect-square rounded-lg" />
+                  ))}
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0 flex-1">
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {[...Array(7)].map((_, d) => (
-                  <SkeletonBlock key={`weekday-${d}`} className="h-4 w-4 mx-auto" />
-                ))}
-              </div>
-              <div className="space-y-1">
-                {[...Array(5)].map((_, week) => (
-                  <div key={`calendar-week-${week}`} className="grid grid-cols-7 gap-1">
-                    {[...Array(7)].map((_, day) => (
-                      <SkeletonBlock key={`calendar-cell-${week}-${day}`} className="aspect-square rounded-md" />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* Performance Row */}
         <section className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <Card className="xl:col-span-2 min-h-[320px] flex flex-col">
-            <CardHeader className="pb-2">
-              <SkeletonBlock className="h-5 w-32" />
-            </CardHeader>
-            <CardContent className="pt-0 flex-1">
-              <div className="h-full flex items-end gap-3 bg-muted/20 rounded-lg p-4">
-                {[...Array(8)].map((_, j) => (
-                  <div key={`perf-bar-${j}`} className="flex-1 flex flex-col justify-end">
-                    <SkeletonBlock
-                      className="w-full rounded-t"
-                      style={{ height: `${[30, 55, 45, 70, 50, 65, 40, 60][j]}%` }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="xl:col-span-2 min-h-[320px] bg-muted/10 border border-border/40 rounded-2xl p-5">
+            <SkeletonBlock className="h-2 w-32 mb-4" />
+            <div className="h-[260px] flex items-end gap-3 bg-muted/20 rounded-lg p-4">
+              {[...Array(8)].map((_, j) => (
+                <div key={`perf-bar-${j}`} className="flex-1 flex flex-col justify-end h-full">
+                  <SkeletonBlock
+                    className="w-full rounded-t"
+                    style={{ height: `${[30, 55, 45, 70, 50, 65, 40, 60][j]}%` }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 gap-4">
             {[0, 1].map((i) => (
-              <Card key={`stat-card-${i}`} className="min-h-[150px] flex flex-col">
-                <CardContent className="p-4 space-y-3 flex-1">
-                  <SkeletonBlock className="h-4 w-1/2" />
-                  {[0, 1, 2].map((row) => (
-                    <div key={`stat-line-${i}-${row}`} className="flex items-center justify-between">
-                      <SkeletonBlock className="h-3 w-20" />
-                      <SkeletonBlock className="h-4 w-16" />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+              <div key={`stat-card-${i}`} className="min-h-[150px] bg-muted/10 border border-border/40 rounded-2xl p-4 space-y-3">
+                <SkeletonBlock className="h-2 w-1/2" />
+                {[0, 1, 2].map((row) => (
+                  <div key={`stat-line-${i}-${row}`} className="flex items-center justify-between">
+                    <SkeletonBlock className="h-2 w-20" />
+                    <SkeletonBlock className="h-3 w-16" />
+                  </div>
+                ))}
+              </div>
             ))}
           </div>
         </section>
@@ -322,23 +308,19 @@ export function MainDashboardSkeleton() {
         {/* Secondary Widgets Row */}
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {[0, 1, 2].map((i) => (
-            <Card key={`secondary-${i}`} className="min-h-[260px] flex flex-col">
-              <CardHeader className="pb-2">
-                <SkeletonBlock className="h-5 w-28" />
-              </CardHeader>
-              <CardContent className="pt-0 flex-1">
-                <div className="h-full flex items-end gap-2 bg-muted/20 rounded-lg p-4">
-                  {[0, 1, 2, 3, 4].map((j) => (
-                    <div key={`secondary-${i}-${j}`} className="flex-1 flex flex-col justify-end">
-                      <SkeletonBlock
-                        className="w-full rounded-t"
-                        style={{ height: `${[55, 35, 65, 45, 60][j]}%` }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div key={`secondary-${i}`} className="min-h-[260px] bg-muted/10 border border-border/40 rounded-2xl p-5">
+              <SkeletonBlock className="h-2 w-28 mb-4" />
+              <div className="h-[200px] flex items-end gap-2 bg-muted/20 rounded-lg p-4">
+                {[0, 1, 2, 3, 4].map((j) => (
+                  <div key={`secondary-${i}-${j}`} className="flex-1 flex flex-col justify-end h-full">
+                    <SkeletonBlock
+                      className="w-full rounded-t"
+                      style={{ height: `${[55, 35, 65, 45, 60][j]}%` }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           ))}
         </section>
       </div>

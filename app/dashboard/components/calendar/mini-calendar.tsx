@@ -4,8 +4,8 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, getDay, endOfWeek, addDays, getWeek } from "date-fns"
 import { formatInTimeZone } from 'date-fns-tz'
 import { enUS } from 'date-fns/locale'
-import { CaretLeft, CaretRight, TrendUp, TrendDown, Camera } from "@phosphor-icons/react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CaretLeft, CaretRight, Camera } from "@phosphor-icons/react"
+import { WidgetCard } from '../widget-card'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import html2canvas from 'html2canvas'
@@ -151,53 +151,56 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
   }, [calendarData, currentDate])
 
   return (
-    <div ref={calendarRef} data-screenshot-wrap className="w-full">
-      <Card className="lg:h-[580px] min-h-[400px] flex flex-col w-full rounded-xl border shadow-sm overflow-hidden bg-card">
-        {/* Header */}
-        {/* Header */}
-        <CardHeader className="flex flex-row items-center justify-between border-b shrink-0 px-3 sm:px-4 py-2 sm:py-3 bg-muted/50">
-          <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
-            <div className="flex items-center gap-0.5 sm:gap-1 bg-muted/30 rounded-lg p-0.5 border border-border/40 font-bold shrink-0">
-              <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-6 w-6 sm:h-7 sm:w-7 hover:bg-background" aria-label="Previous month">
-                <CaretLeft className="h-4 w-4" weight="light" />
+    <div ref={calendarRef} data-screenshot-wrap className="w-full h-full">
+      <WidgetCard
+        title="Mini Calendar"
+        noPadding
+        className="overflow-hidden"
+        headerRight={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleScreenshot}
+            className="h-6 px-1.5 text-[10px] font-bold gap-1.5 hover:bg-primary/5 hover:text-primary transition-all"
+            title="Snapshot"
+          >
+            <Camera className="h-3 w-3" weight="light" />
+            <span className="hidden sm:inline">Snapshot</span>
+          </Button>
+        }
+      >
+        {/* Sub-header: Nav + Stats */}
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border/20 bg-muted/5">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30 font-bold shrink-0">
+              <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-5 w-5 hover:bg-background" aria-label="Previous month">
+                <CaretLeft className="h-3 w-3" weight="light" />
               </Button>
-              <div className="px-1 sm:px-2 min-w-[70px] sm:min-w-[100px] text-center">
-                <span className="text-[11px] sm:text-sm font-bold capitalize tracking-tight whitespace-nowrap">
+              <div className="px-1 min-w-[70px] text-center">
+                <span className="text-[10px] font-black capitalize tracking-tight">
                   {format(currentDate, 'MMM yyyy')}
                 </span>
               </div>
-              <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-6 w-6 sm:h-7 sm:w-7 hover:bg-background" aria-label="Next month">
-                <CaretRight className="h-4 w-4" weight="light" />
+              <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-5 w-5 hover:bg-background" aria-label="Next month">
+                <CaretRight className="h-3 w-3" weight="light" />
               </Button>
             </div>
 
-            <div data-stats-group className="flex items-center gap-1.5 sm:gap-2 text-[10px] font-bold uppercase tracking-tighter sm:tracking-wider shrink-0">
+            <div data-stats-group className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider shrink-0">
               <div className={cn(
-                "px-1 sm:px-1.5 py-0.5 rounded border shadow-sm flex items-center gap-0.5 sm:gap-1",
+                "px-1 py-0.5 rounded border shadow-sm flex items-center",
                 isProfitTotal ? "bg-long/10 border-long/20 text-long" : isLossTotal ? "bg-short/10 border-short/20 text-short" : "bg-muted/10 border-border/20 text-muted-foreground"
               )}>
                 {formatCompact(monthlyTotal)}
               </div>
-              <div className="px-1 sm:px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary border-dashed shadow-sm">
+              <div className="px-1 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary border-dashed shadow-sm">
                 {tradedDaysCount}d
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleScreenshot}
-              className="h-7 w-7 sm:w-auto sm:px-2 text-[10px] font-bold uppercase tracking-wider gap-1.5 border-dashed hover:bg-primary/10 hover:text-primary transition-all p-0 sm:p-auto"
-              title="Snapshot"
-            >
-              <Camera className="h-3.5 w-3.5" weight="light" />
-              <span className="hidden sm:inline">Snapshot</span>
-            </Button>
-          </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="flex-1 min-h-0 p-3" data-screenshot-container>
+        <div className="flex-1 min-h-0 p-3" data-screenshot-container>
           {/* Weekday Headers */}
           <div className="grid grid-cols-5 sm:grid-cols-6 gap-1 md:gap-2 mb-2">
             {WEEKDAYS_MINI.map((day, i) => (
@@ -325,8 +328,8 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
               )
             })}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </WidgetCard>
     </div>
   )
 }

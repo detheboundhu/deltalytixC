@@ -26,6 +26,8 @@ export async function GET() {
         lastName: true,
         accentPack: true,
         theme: true,
+        calendarDisplayStats: true,
+        showWeeklySummary: true,
       }
     })
 
@@ -65,7 +67,7 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json()
 
-    const { firstName, lastName, accentPack, theme, autoAdjustAccountDate } = body
+    const { firstName, lastName, accentPack, theme, autoAdjustAccountDate, calendarDisplayStats, showWeeklySummary } = body
 
     // Validate input — only check fields that are actually provided
     if (firstName !== undefined && typeof firstName !== 'string' && firstName !== null) {
@@ -89,6 +91,11 @@ export async function PATCH(request: NextRequest) {
     if (accentPack && typeof accentPack === 'string') updateData.accentPack = accentPack
     if (theme && typeof theme === 'string') updateData.theme = theme
     if (autoAdjustAccountDate !== undefined) updateData.autoAdjustAccountDate = !!autoAdjustAccountDate
+    if (calendarDisplayStats !== undefined && Array.isArray(calendarDisplayStats)) {
+      const allowed = ['pnl', 'trades', 'winRate', 'rMultiple']
+      updateData.calendarDisplayStats = calendarDisplayStats.filter((s: string) => allowed.includes(s))
+    }
+    if (showWeeklySummary !== undefined) updateData.showWeeklySummary = !!showWeeklySummary
 
     // Update user profile in database
     const updatedUser = await prisma.user.update({
@@ -101,6 +108,8 @@ export async function PATCH(request: NextRequest) {
         lastName: true,
         accentPack: true,
         theme: true,
+        calendarDisplayStats: true,
+        showWeeklySummary: true,
       }
     })
 

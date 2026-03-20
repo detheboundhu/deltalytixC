@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { WidgetCard } from '../widget-card'
 import { useData } from '@/context/data-provider'
 import { Fire, Snowflake, TrendUp, TrendDown } from "@phosphor-icons/react"
 import { cn } from '@/lib/utils'
@@ -99,17 +99,17 @@ export default function CurrentStreak({ size }: CurrentStreakProps) {
   const { currentStreak, isWinning, longestWinStreak, longestLoseStreak } = streakData
 
   return (
-    <Card className="h-24">
-      <CardContent className="px-6 py-4 h-full flex flex-col justify-between">
+    <WidgetCard isKpi>
+      <div className="h-full flex flex-col justify-between">
         <div className="flex justify-between items-start">
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-wide font-bold text-muted-foreground/80">
+              <span className="text-[8px] uppercase font-black tracking-widest text-muted-foreground/60">
                 Current Streak
               </span>
             </div>
             <div className={cn(
-              "text-2xl font-bold tracking-tight",
+              "text-xl font-black font-mono tracking-tighter",
               isWinning ? "text-long" : "text-short"
             )}>
               {currentStreak}
@@ -122,7 +122,7 @@ export default function CurrentStreak({ size }: CurrentStreakProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-4 text-[10px] font-medium text-muted-foreground">
+        <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/50">
           <div className="flex items-center gap-1.5">
             <TrendUp weight="light" className="h-3 w-3 text-long" />
             <span>Best: {longestWinStreak}</span>
@@ -132,7 +132,7 @@ export default function CurrentStreak({ size }: CurrentStreakProps) {
             <span>Worst: {longestLoseStreak}</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </WidgetCard>
   )
 }

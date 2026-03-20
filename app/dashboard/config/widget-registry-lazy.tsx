@@ -29,6 +29,9 @@ const PerformanceScore = lazy(() => import('../components/charts/performance-sco
 const PnLByInstrument = lazy(() => import('../components/charts/pnl-by-instrument'))
 const PnLByStrategy = lazy(() => import('../components/charts/pnl-by-strategy'))
 const WinRateByStrategy = lazy(() => import('../components/charts/win-rate-by-strategy'))
+const EquityCurveWidget = lazy(() => import('../components/charts/equity-curve-widget'))
+const OutcomeDistributionWidget = lazy(() => import('../components/charts/outcome-distribution-widget'))
+const DayOfWeekPerformanceWidget = lazy(() => import('../components/charts/day-of-week-performance-widget'))
 
 
 
@@ -381,6 +384,36 @@ export const WIDGET_REGISTRY_LAZY: Record<WidgetType, WidgetConfig> = {
     previewHeight: 200,
     getComponent: ({ size }) => <LazyWidget Component={SessionAnalysis} size={size} type="sessionAnalysis" Preview={CreateKpiPreview('Session Analysis')} />,
     getPreview: () => CreateKpiPreview('Session Analysis')
+  },
+  equityCurve: {
+    type: 'equityCurve',
+    defaultSize: 'large',
+    allowedSizes: ['medium', 'large', 'extra-large'],
+    category: 'charts',
+    description: 'Cumulative equity curve over time',
+    previewHeight: 250,
+    getComponent: ({ size }) => <LazyWidget Component={EquityCurveWidget} size={size} type="equityCurve" Preview={CreateChartPreview('Equity Curve')} />,
+    getPreview: () => CreateChartPreview('Equity Curve')
+  },
+  outcomeDistribution: {
+    type: 'outcomeDistribution',
+    defaultSize: 'medium',
+    allowedSizes: ['small', 'medium', 'large'],
+    category: 'charts',
+    description: 'Win/Loss/Breakeven trade distribution',
+    previewHeight: 250,
+    getComponent: ({ size }) => <LazyWidget Component={OutcomeDistributionWidget} size={size} type="outcomeDistribution" Preview={CreateChartPreview('Outcome Distribution')} />,
+    getPreview: () => CreateChartPreview('Outcome Distribution')
+  },
+  dayOfWeekPerformance: {
+    type: 'dayOfWeekPerformance',
+    defaultSize: 'medium',
+    allowedSizes: ['medium', 'large'],
+    category: 'charts',
+    description: 'P&L performance by day of week',
+    previewHeight: 250,
+    getComponent: ({ size }) => <LazyWidget Component={DayOfWeekPerformanceWidget} size={size} type="dayOfWeekPerformance" Preview={CreateChartPreview('Day of Week Performance')} />,
+    getPreview: () => CreateChartPreview('Day of Week Performance')
   }
 }
 

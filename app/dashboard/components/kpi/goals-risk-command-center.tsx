@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useState, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { WidgetCard } from '../widget-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -369,75 +369,61 @@ export default function GoalsRiskCommandCenter({ size = 'large' }: GoalsRiskComm
     // ---------------------------------------------------------------------------
     const hasData = formattedTrades && formattedTrades.length > 0
 
-    return (
-        <Card className="h-full flex flex-col bg-card">
-            {/* Header */}
-            <CardHeader className="flex flex-row items-center justify-between shrink-0 border-b border-border/50 px-6 py-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-warning/10 rounded-lg">
-                        <Trophy weight="light" className="h-5 w-5 text-warning" />
+    const settingsButton = (
+        <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                    <SettingsIcon weight="light" className="h-3.5 w-3.5" />
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Set Your Goals</DialogTitle>
+                    <DialogDescription>
+                        Customize your trading targets
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="monthlyTrades">Monthly Trades Target</Label>
+                        <Input
+                            id="monthlyTrades"
+                            type="number"
+                            value={tempTargets.monthlyTrades}
+                            onChange={(e) => setTempTargets(prev => ({ ...prev, monthlyTrades: parseInt(e.target.value) || 0 }))}
+                        />
                     </div>
-                    <div>
-                        <CardTitle className="text-lg font-bold tracking-tight">Command Center</CardTitle>
-                        <p className="text-xs text-muted-foreground">Goals & Risk Overview</p>
+                    <div className="space-y-2">
+                        <Label htmlFor="winRate">Win Rate Target (%)</Label>
+                        <Input
+                            id="winRate"
+                            type="number"
+                            value={tempTargets.winRate}
+                            onChange={(e) => setTempTargets(prev => ({ ...prev, winRate: parseInt(e.target.value) || 0 }))}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="weeklyPnl">Weekly P&L Target ($)</Label>
+                        <Input
+                            id="weeklyPnl"
+                            type="number"
+                            value={tempTargets.weeklyPnl}
+                            onChange={(e) => setTempTargets(prev => ({ ...prev, weeklyPnl: parseInt(e.target.value) || 0 }))}
+                        />
                     </div>
                 </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>Cancel</Button>
+                    <Button onClick={saveGoals} disabled={isLoading}>
+                        {isLoading ? 'Saving...' : 'Save Goals'}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
 
-                {/* Settings Dialog */}
-                <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-                    <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <SettingsIcon weight="light" className="h-4 w-4" />
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>Set Your Goals</DialogTitle>
-                            <DialogDescription>
-                                Customize your trading targets
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="monthlyTrades">Monthly Trades Target</Label>
-                                <Input
-                                    id="monthlyTrades"
-                                    type="number"
-                                    value={tempTargets.monthlyTrades}
-                                    onChange={(e) => setTempTargets(prev => ({ ...prev, monthlyTrades: parseInt(e.target.value) || 0 }))}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="winRate">Win Rate Target (%)</Label>
-                                <Input
-                                    id="winRate"
-                                    type="number"
-                                    value={tempTargets.winRate}
-                                    onChange={(e) => setTempTargets(prev => ({ ...prev, winRate: parseInt(e.target.value) || 0 }))}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="weeklyPnl">Weekly P&L Target ($)</Label>
-                                <Input
-                                    id="weeklyPnl"
-                                    type="number"
-                                    value={tempTargets.weeklyPnl}
-                                    onChange={(e) => setTempTargets(prev => ({ ...prev, weeklyPnl: parseInt(e.target.value) || 0 }))}
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>Cancel</Button>
-                            <Button onClick={saveGoals} disabled={isLoading}>
-                                {isLoading ? 'Saving...' : 'Save Goals'}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </CardHeader>
-
-            {/* Content */}
-            <CardContent className="flex-1 p-6">
+    return (
+        <WidgetCard title="Command Center" headerRight={settingsButton}>
                 {hasData ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
                         {/* Goals Section */}
@@ -513,7 +499,6 @@ export default function GoalsRiskCommandCenter({ size = 'large' }: GoalsRiskComm
                         </div>
                     </div>
                 )}
-            </CardContent>
-        </Card>
+    </WidgetCard>
     )
 }

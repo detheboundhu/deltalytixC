@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { WidgetCard } from '../widget-card'
 import { useData } from '@/context/data-provider'
 import { getTradingSession, MarketSession } from '@/lib/time-utils'
 import { classifyTrade, cn } from '@/lib/utils'
@@ -64,19 +64,13 @@ export default function SessionAnalysis({ size }: SessionAnalysisProps) {
 
     if (!sessionStats) {
         return (
-            <Card className="h-full">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <Globe weight="light" className="h-4 w-4 text-blue-500" />
-                        Session Analysis
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground text-center py-4">
+            <WidgetCard title="Session Analysis">
+                <div className="flex items-center justify-center h-full">
+                    <p className="text-sm text-muted-foreground">
                         No trade data available
                     </p>
-                </CardContent>
-            </Card>
+                </div>
+            </WidgetCard>
         )
     }
 
@@ -92,14 +86,8 @@ export default function SessionAnalysis({ size }: SessionAnalysisProps) {
         , sessions[0])
 
     return (
-        <Card className="h-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Globe weight="light" className="h-4 w-4 text-blue-500" />
-                    Session Analysis
-                </CardTitle>
-            </CardHeader>
-            <CardContent className={cn("space-y-3", size === 'small' && "space-y-2 p-3")}>
+        <WidgetCard title="Session Analysis">
+            <div className="space-y-3 h-full">
                 {sessions.map(session => {
                     const Icon = session.icon
                     const winRate = session.trades > 0 ? (session.wins / session.trades * 100).toFixed(0) : 0
@@ -110,21 +98,21 @@ export default function SessionAnalysis({ size }: SessionAnalysisProps) {
                         <div
                             key={session.key}
                             className={cn(
-                                "flex items-center justify-between p-3 rounded-lg border",
-                                isBest ? "bg-long/10 border-long/30" : "bg-muted/30 border-border/50"
+                                "flex items-center justify-between p-3 rounded-xl border",
+                                isBest ? "bg-long/10 border-long/30" : "bg-muted/20 border-border/30"
                             )}
                         >
                             <div className="flex items-center gap-3">
                                 <Icon weight="light" className={cn("h-5 w-5", session.color)} />
                                 <div>
-                                    <p className="font-medium text-sm">{session.name}</p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="font-bold text-sm">{session.name}</p>
+                                    <p className="text-[10px] text-muted-foreground/50 font-medium">
                                         {session.trades} trades · {winRate}% win
                                     </p>
                                 </div>
                             </div>
                             <div className={cn(
-                                "text-right font-semibold",
+                                "text-right font-black font-mono text-sm tracking-tighter",
                                 isPositive ? "text-long" : "text-short"
                             )}>
                                 {isPositive ? '+' : ''}${session.pnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -134,11 +122,11 @@ export default function SessionAnalysis({ size }: SessionAnalysisProps) {
                 })}
 
                 {bestSession.pnl > 0 && (
-                    <p className="text-xs text-muted-foreground text-center pt-1">
+                    <p className="text-[10px] text-muted-foreground/50 text-center pt-1 font-medium">
                         Best performance: {bestSession.name} session
                     </p>
                 )}
-            </CardContent>
-        </Card>
+            </div>
+        </WidgetCard>
     )
 }

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { DashboardErrorBoundary, ErrorBoundaryWrapper } from '@/components/error-boundary'
 
 // Dynamically import heavy components for better performance
-const WidgetCanvas = NextDynamic(() => import('./components/widget-canvas-with-drag'), {
+const WidgetCanvas = NextDynamic(() => import('./components/widget-grid'), {
   ssr: false
 })
 

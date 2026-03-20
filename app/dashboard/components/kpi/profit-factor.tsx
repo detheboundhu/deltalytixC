@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { WidgetCard } from '../widget-card'
 import { CircularProgress } from '@/components/ui/circular-progress'
 import { useTradeStatistics } from '@/hooks/use-trade-statistics'
 import { Info } from '@phosphor-icons/react'
@@ -33,11 +33,11 @@ const ProfitFactor = React.memo(function ProfitFactor({ size }: ProfitFactorProp
 
 
   return (
-    <Card className="w-full h-24">
-      <CardContent className="px-6 py-4 h-full flex items-center justify-between">
+    <WidgetCard isKpi>
+      <div className="h-full flex items-center justify-between">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] uppercase tracking-wide font-bold text-muted-foreground/80">
+            <span className="text-[8px] uppercase font-black tracking-widest text-muted-foreground/60">
               Profit factor
             </span>
             <TooltipProvider delayDuration={100}>
@@ -53,7 +53,7 @@ const ProfitFactor = React.memo(function ProfitFactor({ size }: ProfitFactorProp
               </Tooltip>
             </TooltipProvider>
           </div>
-          <span className="text-2xl font-bold text-foreground tracking-tight">
+          <span className="text-xl font-black font-mono text-foreground tracking-tighter">
             {profitFactor.toFixed(2)}
           </span>
         </div>
@@ -68,8 +68,8 @@ const ProfitFactor = React.memo(function ProfitFactor({ size }: ProfitFactorProp
             type="circle"
           />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </WidgetCard>
   )
 })
 

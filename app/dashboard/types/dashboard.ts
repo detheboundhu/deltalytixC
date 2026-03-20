@@ -19,6 +19,9 @@ export type WidgetType =
   | 'pnlByInstrument'
   | 'pnlByStrategy'
   | 'winRateByStrategy'
+  | 'equityCurve'
+  | 'outcomeDistribution'
+  | 'dayOfWeekPerformance'
 export type WidgetSize = 'tiny' | 'small' | 'small-long' | 'medium' | 'large' | 'extra-large' | 'kpi'
 
 

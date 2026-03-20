@@ -29,6 +29,9 @@ import PerformanceScore from '../components/charts/performance-score'
 import PnLByInstrument from '../components/charts/pnl-by-instrument'
 import PnLByStrategy from '../components/charts/pnl-by-strategy'
 import WinRateByStrategy from '../components/charts/win-rate-by-strategy'
+import EquityCurveWidget from '../components/charts/equity-curve-widget'
+import OutcomeDistributionWidget from '../components/charts/outcome-distribution-widget'
+import DayOfWeekPerformanceWidget from '../components/charts/day-of-week-performance-widget'
 
 export interface WidgetConfig {
   type: WidgetType
@@ -549,6 +552,51 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetConfig> = {
             <div className="p-2 bg-warning/10 rounded"><span>New York</span></div>
           </div>
         </CardContent>
+      </Card>
+    )
+  },
+  equityCurve: {
+    type: 'equityCurve',
+    defaultSize: 'large',
+    allowedSizes: ['medium', 'large', 'extra-large'],
+    category: 'charts',
+    description: 'Cumulative equity curve over time',
+    previewHeight: 250,
+    getComponent: () => <EquityCurveWidget />,
+    getPreview: () => (
+      <Card className="w-full h-full">
+        <CardHeader className="pb-2"><CardTitle className="text-sm">Equity Curve</CardTitle></CardHeader>
+        <CardContent className="p-2"><div className="h-20 bg-chart-1/10 rounded" /></CardContent>
+      </Card>
+    )
+  },
+  outcomeDistribution: {
+    type: 'outcomeDistribution',
+    defaultSize: 'medium',
+    allowedSizes: ['small', 'medium', 'large'],
+    category: 'charts',
+    description: 'Win/Loss/Breakeven trade distribution',
+    previewHeight: 250,
+    getComponent: () => <OutcomeDistributionWidget />,
+    getPreview: () => (
+      <Card className="w-full h-full">
+        <CardHeader className="pb-2"><CardTitle className="text-sm">Outcome Distribution</CardTitle></CardHeader>
+        <CardContent className="p-2"><div className="h-20 bg-chart-2/10 rounded-full mx-auto w-20" /></CardContent>
+      </Card>
+    )
+  },
+  dayOfWeekPerformance: {
+    type: 'dayOfWeekPerformance',
+    defaultSize: 'medium',
+    allowedSizes: ['medium', 'large'],
+    category: 'charts',
+    description: 'P&L performance by day of week',
+    previewHeight: 250,
+    getComponent: () => <DayOfWeekPerformanceWidget />,
+    getPreview: () => (
+      <Card className="w-full h-full">
+        <CardHeader className="pb-2"><CardTitle className="text-sm">Day of Week</CardTitle></CardHeader>
+        <CardContent className="p-2"><div className="flex gap-1 items-end h-16">{[40,60,30,80,50].map((h,i)=><div key={i} className="flex-1 bg-chart-1/20 rounded-t" style={{height:`${h}%`}} />)}</div></CardContent>
       </Card>
     )
   },

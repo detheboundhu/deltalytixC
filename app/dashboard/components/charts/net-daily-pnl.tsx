@@ -2,11 +2,10 @@
 
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { WidgetCard } from '../widget-card'
 import { useData } from "@/context/data-provider"
 import { cn, formatCurrency, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
-import { getWidgetStyles, getWidgetHeightClass } from '@/app/dashboard/config/widget-dimensions'
 import {
   Bar,
   XAxis,
@@ -219,115 +218,72 @@ export default function NetDailyPnL({ size = 'small-long' }: NetDailyPnLProps) {
     return { yDomain: domain, yTicks: ticks }
   }, [chartData])
 
-  // ---------------------------------------------------------------------------
-  // SIZE-RESPONSIVE VALUES
-  // ---------------------------------------------------------------------------
   const isCompact = size === 'small' || size === 'small-long'
-  const widgetStyles = getWidgetStyles(size || 'small-long')
 
-  // ---------------------------------------------------------------------------
-  // RENDER
-  // ---------------------------------------------------------------------------
   return (
-    <Card className={cn("flex flex-col bg-card", getWidgetHeightClass(size))}>
-      {/* Header */}
-      <CardHeader className="flex flex-row items-center justify-between shrink-0 border-b border-border/50 h-12 px-5">
-        <div className="flex items-center gap-2">
-          <CardTitle className={cn(
-            "font-semibold tracking-tight",
-            isCompact ? "text-sm" : "text-base"
-          )}>
-            Net Daily P/L
-          </CardTitle>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Info weight="light" className="h-4 w-4 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Daily net profit/loss including commissions</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </CardHeader>
-
-      {/* Chart Container */}
-      <CardContent className="flex-1 p-0 relative min-h-[100px]">
-        <div className="absolute inset-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <AnyBarChart
-              data={chartData}
-              margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
-              barCategoryGap="25%"
-            >
-              {/* Subtle Grid - Horizontal Only */}
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={COLORS.grid}
-                strokeOpacity={CHART_CONFIG.gridOpacity}
-                vertical={false}
+    <WidgetCard title="Net Daily P/L">
+      <ResponsiveContainer width="100%" height="100%">
+        <AnyBarChart
+          data={chartData}
+          margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+          barCategoryGap="25%"
+        >
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke={COLORS.grid}
+            strokeOpacity={CHART_CONFIG.gridOpacity}
+            vertical={false}
+          />
+          <XAxis
+            dataKey="date"
+            tickFormatter={(value) => {
+              const date = new Date(value + 'T00:00:00Z')
+              return date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                timeZone: 'UTC'
+              })
+            }}
+            stroke={COLORS.axis}
+            fontSize={10}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+          />
+          <YAxis
+            tickFormatter={formatAxisValue}
+            stroke={COLORS.axis}
+            fontSize={10}
+            tickLine={false}
+            axisLine={false}
+            domain={yDomain}
+            ticks={yTicks}
+            width={50}
+          />
+          <RechartsTooltip
+            content={<ChartTooltip />}
+            cursor={{ fill: 'hsl(var(--muted)/0.3)' }}
+          />
+          <ReferenceLine
+            y={0}
+            stroke={COLORS.reference}
+            strokeDasharray="3 3"
+            strokeOpacity={CHART_CONFIG.referenceLineOpacity}
+          />
+          <Bar
+            dataKey="pnl"
+            radius={CHART_CONFIG.barRadius}
+            maxBarSize={60}
+          >
+            {chartData.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={entry.pnl > BREAK_EVEN_THRESHOLD ? COLORS.profit : entry.pnl < -BREAK_EVEN_THRESHOLD ? COLORS.loss : 'hsl(var(--muted-foreground)/0.4)'}
               />
-
-              {/* X Axis - Dates */}
-              <XAxis
-                dataKey="date"
-                tickFormatter={(value) => {
-                  const date = new Date(value + 'T00:00:00Z')
-                  return date.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    timeZone: 'UTC'
-                  })
-                }}
-                stroke={COLORS.axis}
-                fontSize={isCompact ? 10 : 11}
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-              />
-
-              {/* Y Axis - Currency */}
-              <YAxis
-                tickFormatter={formatAxisValue}
-                stroke={COLORS.axis}
-                fontSize={isCompact ? 10 : 11}
-                tickLine={false}
-                axisLine={false}
-                domain={yDomain}
-                ticks={yTicks}
-                width={50}
-              />
-
-              {/* Tooltip */}
-              <RechartsTooltip
-                content={<ChartTooltip />}
-                cursor={{ fill: 'hsl(var(--muted)/0.3)' }}
-              />
-
-              {/* Zero Reference Line */}
-              <ReferenceLine
-                y={0}
-                stroke={COLORS.reference}
-                strokeDasharray="3 3"
-                strokeOpacity={CHART_CONFIG.referenceLineOpacity}
-              />
-
-              {/* Bars with Rounded Tops */}
-              <Bar
-                dataKey="pnl"
-                radius={CHART_CONFIG.barRadius}
-                maxBarSize={60}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.pnl > BREAK_EVEN_THRESHOLD ? COLORS.profit : entry.pnl < -BREAK_EVEN_THRESHOLD ? COLORS.loss : 'hsl(var(--muted-foreground)/0.4)'}
-                  />
-                ))}
-              </Bar>
-            </AnyBarChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </Bar>
+        </AnyBarChart>
+      </ResponsiveContainer>
+    </WidgetCard>
   )
 }

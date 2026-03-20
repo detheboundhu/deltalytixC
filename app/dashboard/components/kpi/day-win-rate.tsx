@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { WidgetCard } from '../widget-card'
 import { CircularProgress } from '@/components/ui/circular-progress'
 import { useData } from '@/context/data-provider'
 import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
@@ -41,11 +41,11 @@ const DayWinRate = React.memo(function DayWinRate({ size }: DayWinRateProps) {
   }
 
   return (
-    <Card className="w-full h-24">
-      <CardContent className="px-6 py-4 h-full flex items-center justify-between">
+    <WidgetCard isKpi>
+      <div className="h-full flex items-center justify-between">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] uppercase tracking-wide font-bold text-muted-foreground/80">
+            <span className="text-[8px] uppercase font-black tracking-widest text-muted-foreground/60">
               Day Win %
             </span>
             <TooltipProvider delayDuration={100}>
@@ -61,7 +61,7 @@ const DayWinRate = React.memo(function DayWinRate({ size }: DayWinRateProps) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <span className="text-2xl font-bold text-foreground tracking-tight">
+          <span className="text-xl font-black font-mono text-foreground tracking-tighter">
             {dayWinRate.toFixed(1)}%
           </span>
         </div>
@@ -75,8 +75,8 @@ const DayWinRate = React.memo(function DayWinRate({ size }: DayWinRateProps) {
             showPercentage={false}
           />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </WidgetCard>
   )
 })
 

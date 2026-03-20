@@ -3,19 +3,20 @@
 import { useState, useEffect, useRef, memo, useCallback, useMemo } from "react"
 import { format, addMonths, subMonths, getYear } from "date-fns"
 import { enUS } from 'date-fns/locale'
-import { CaretLeft, CaretRight, Camera, Image as ImageIcon } from "@phosphor-icons/react"
+import { CaretLeft, CaretRight, Camera, Image as ImageIcon, Gear } from "@phosphor-icons/react"
 import html2canvas from 'html2canvas'
 import { toast } from "sonner"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { CalendarModal } from "./daily-modal"
 import { WeeklyModal } from "./weekly-modal"
+import { CalendarSettings } from "./calendar-settings"
 import { useCalendarViewStore } from "@/store/calendar-view"
 import { useCalendarNotes } from "@/app/dashboard/hooks/use-calendar-notes"
 import { useUserStore } from "@/store/user-store"
 import { useData } from "@/context/data-provider"
 import { CalendarData } from "@/app/dashboard/types/calendar"
+import { WidgetCard } from "../widget-card"
 
 // New Components
 import MonthlyView from "./monthly-view"
@@ -57,11 +58,8 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
     if (!formattedTrades) return data
 
     formattedTrades.forEach(trade => {
-      // formattedTrades.entryDate is expected to be a Date object or string parsable as one
       if (!trade.entryDate) return
 
-      // Use format(..., 'yyyy-MM-dd') to get the NOMINAL date string
-      // This will match format(date, 'yyyy-MM-dd') exactly in MonthlyView's grid
       const key = format(new Date(trade.entryDate), 'yyyy-MM-dd')
 
       if (!data[key]) {
@@ -113,14 +111,14 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
               wrapper.style.width = '1320px'
               wrapper.style.height = 'fit-content'
 
-              const card = wrapper.querySelector('.rounded-xl') as HTMLElement
+              const card = wrapper.querySelector('.rounded-2xl') as HTMLElement
               if (card) {
                 card.style.width = '1200px'
                 card.style.boxShadow = '0 30px 60px -12px hsl(var(--background)/0.7)'
                 card.style.border = '1px solid hsl(var(--border)/0.5)'
                 card.style.background = 'hsl(var(--background))'
-                card.style.height = 'auto' // Dynamic height based on content
-                card.style.minHeight = '700px' // Maintain a minimum professional look
+                card.style.height = 'auto'
+                card.style.minHeight = '700px'
               }
             }
           }
@@ -194,35 +192,73 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
     return count;
   }, [localCalendarData, currentDate, viewMode])
 
+  // Header right content — settings gear + snapshot
+  const headerControls = (
+    <div className="flex items-center gap-1.5">
+      {/* Snapshot controls */}
+      <div className="flex items-center gap-0.5 bg-muted/20 rounded-lg p-0.5 border border-border/30">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleScreenshot}
+          className="h-6 px-1.5 text-[10px] font-bold gap-1 hover:bg-primary/5 hover:text-primary transition-all"
+        >
+          <Camera className="h-3 w-3" weight="light" />
+          <span className="hidden lg:inline">Snapshot</span>
+        </Button>
+        <div className="w-px h-3 bg-border/30" />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setScreenshotWithGradient(!screenshotWithGradient)}
+          className={cn(
+            "h-6 w-6 transition-all",
+            screenshotWithGradient ? "text-primary bg-primary/10" : "text-muted-foreground/40"
+          )}
+          title={screenshotWithGradient ? "Gradient: ON" : "Gradient: OFF"}
+        >
+          <ImageIcon className="h-3 w-3" weight="light" />
+        </Button>
+      </div>
+
+      {/* Settings gear */}
+      <CalendarSettings />
+    </div>
+  )
+
   return (
     <div id="advanced-calendar-capture" ref={calendarRef} data-screenshot-wrap className={cn("h-full w-full", className)}>
-      <Card className="h-full flex flex-col overflow-hidden bg-background border shadow-sm rounded-xl">
-        {/* Header - Aligned with MiniCalendar */}
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0 py-3 md:py-2.5 px-4 border-b bg-card/50">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+      <WidgetCard
+        title={viewMode === 'daily' ? 'Calendar' : 'Yearly Calendar'}
+        headerRight={headerControls}
+        noPadding
+        className="overflow-hidden"
+      >
+        {/* Sub-header: Navigation + Stats + View Switcher */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 px-5 py-3 border-b border-border/20 bg-muted/5">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             {/* Navigation Group */}
-            <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5 border border-border/40 font-bold w-full sm:w-auto justify-between sm:justify-start">
-              <Button variant="ghost" size="icon" onClick={handlePrev} className="h-7 w-7 hover:bg-background" aria-label="Previous">
-                <CaretLeft className="h-4 w-4" weight="light" />
+            <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30 font-bold shrink-0">
+              <Button variant="ghost" size="icon" onClick={handlePrev} className="h-6 w-6 hover:bg-background" aria-label="Previous">
+                <CaretLeft className="h-3.5 w-3.5" weight="light" />
               </Button>
-              <div className="px-2 min-w-[100px] text-center">
-                <span className="text-sm font-bold capitalize tracking-tight">
+              <div className="px-2 min-w-[90px] text-center">
+                <span className="text-[11px] font-black capitalize tracking-tight">
                   {viewMode === 'daily'
                     ? format(currentDate, 'MMM yyyy')
                     : format(currentDate, 'yyyy')
                   }
                 </span>
               </div>
-              <Button variant="ghost" size="icon" onClick={handleNext} className="h-7 w-7 hover:bg-background" aria-label="Next">
-                <CaretRight className="h-4 w-4" weight="light" />
+              <Button variant="ghost" size="icon" onClick={handleNext} className="h-6 w-6 hover:bg-background" aria-label="Next">
+                <CaretRight className="h-3.5 w-3.5" weight="light" />
               </Button>
             </div>
 
-            {/* Stats Group */}
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
-              <span className="text-muted-foreground/40 hidden sm:inline">{viewMode === 'daily' ? 'Monthly' : 'Yearly'} stats:</span>
+            {/* Stats Badges */}
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider">
               <div className={cn(
-                "px-1.5 py-0.5 rounded border shadow-sm flex items-center gap-1",
+                "px-1.5 py-0.5 rounded border shadow-sm flex items-center",
                 isPositive ? "bg-long/10 border-long/20 text-long" : "bg-short/10 border-short/20 text-short"
               )}>
                 {formatCompact(displayTotal)}
@@ -234,78 +270,47 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            {/* Snapshot Controls */}
-            <div className="flex items-center gap-1 bg-muted/20 rounded-lg p-0.5 border border-border/40">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleScreenshot}
-                className="h-7 px-2 text-[11px] font-bold gap-1.5 hover:bg-primary/5 hover:text-primary transition-all"
-              >
-                <Camera className="h-3.5 w-3.5" weight="light" />
-                <span className="hidden sm:inline">Snapshot</span>
-              </Button>
-              <div className="w-px h-3 bg-border/40" />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setScreenshotWithGradient(!screenshotWithGradient)}
-                className={cn(
-                  "h-7 w-7 transition-all",
-                  screenshotWithGradient ? "text-primary bg-primary/10" : "text-muted-foreground/60"
-                )}
-                title={screenshotWithGradient ? "Gradient background: ON" : "Gradient background: OFF"}
-              >
-                <ImageIcon className="h-3.5 w-3.5" weight="light" />
-              </Button>
-            </div>
-
-            <div className="w-px h-4 bg-border/40 mx-1" />
-
             {/* View Switcher */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center p-1 bg-muted/40 border border-border/40 rounded-lg">
-                <button
-                  onClick={() => setViewMode('daily')}
-                  className={cn(
-                    "px-3 py-1 text-[11px] font-bold rounded-md transition-all",
-                    viewMode === 'daily'
-                      ? "bg-background shadow-sm text-foreground border border-border/50"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  Daily
-                </button>
-                <button
-                  onClick={() => setViewMode('weekly')}
-                  className={cn(
-                    "px-3 py-1 text-[11px] font-bold rounded-md transition-all",
-                    viewMode === 'weekly'
-                      ? "bg-background shadow-sm text-foreground border border-border/50"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  Yearly
-                </button>
-              </div>
-
-              <Button
-                onClick={() => setCurrentDate(new Date())}
-                variant="outline"
-                size="sm"
-                className="h-8 px-2.5 text-[11px] font-bold bg-muted/20 hover:bg-muted border-border/60 transition-colors"
-                title="Go to Today"
+            <div className="flex items-center p-0.5 bg-muted/30 border border-border/30 rounded-lg">
+              <button
+                onClick={() => setViewMode('daily')}
+                className={cn(
+                  "px-2.5 py-1 text-[10px] font-black rounded-md transition-all",
+                  viewMode === 'daily'
+                    ? "bg-background shadow-sm text-foreground border border-border/40"
+                    : "text-muted-foreground/50 hover:text-foreground"
+                )}
               >
-                <span className="sm:hidden text-xs">T</span>
-                <span className="hidden sm:inline">Today</span>
-              </Button>
+                Daily
+              </button>
+              <button
+                onClick={() => setViewMode('weekly')}
+                className={cn(
+                  "px-2.5 py-1 text-[10px] font-black rounded-md transition-all",
+                  viewMode === 'weekly'
+                    ? "bg-background shadow-sm text-foreground border border-border/40"
+                    : "text-muted-foreground/50 hover:text-foreground"
+                )}
+              >
+                Yearly
+              </button>
             </div>
 
-            {/* Settings Menu (Stats + Review) - Removed as per user request */}
+            <Button
+              onClick={() => setCurrentDate(new Date())}
+              variant="outline"
+              size="sm"
+              className="h-7 px-2 text-[10px] font-black bg-muted/20 hover:bg-muted border-border/40 transition-colors"
+              title="Go to Today"
+            >
+              <span className="sm:hidden text-xs">T</span>
+              <span className="hidden sm:inline">Today</span>
+            </Button>
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="flex-1 min-h-0 p-0 overflow-hidden relative">
+        {/* Calendar Content */}
+        <div className="flex-1 min-h-0 overflow-hidden relative">
           {viewMode === 'daily' ? (
             <MonthlyView
               currentDate={currentDate}
@@ -322,7 +327,7 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
               calendarData={localCalendarData}
             />
           )}
-        </CardContent>
+        </div>
 
         <CalendarModal
           isOpen={selectedDate !== null}
@@ -331,7 +336,7 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
           dayData={selectedDate ? localCalendarData[format(selectedDate, 'yyyy-MM-dd')] : undefined}
           isLoading={isLoading}
         />
-      </Card>
+      </WidgetCard>
 
       <WeeklyModal
         isOpen={showWeeklyModal}
