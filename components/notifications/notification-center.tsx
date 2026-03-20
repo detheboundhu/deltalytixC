@@ -75,14 +75,10 @@ export function NotificationCenter() {
     }
   }, [])
 
-  // Fetch unread count on mount to show badge immediately
-  // This ensures the badge shows correct count even before user opens the popover
-  useEffect(() => {
-    refreshUnreadCount()
-  }, [refreshUnreadCount])
+  // Fetch unread count on mount is handled by fetchNotifications below,
+  // which already returns unreadCount in its response. No separate call needed.
 
-  // Auto-fetch full notifications on initial mount
-  // This pre-loads notifications so they're ready when user opens the popover
+  // Auto-fetch full notifications on mount (includes unreadCount)
   useEffect(() => {
     fetchNotifications()
     // eslint-disable-next-line react-hooks/exhaustive-deps

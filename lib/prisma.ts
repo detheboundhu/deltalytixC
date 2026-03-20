@@ -17,14 +17,16 @@ function buildDatabaseUrl(): string {
   try {
     const url = new URL(baseUrl)
 
-    // Fail-fast timeouts — must stay well under Vercel's 30 s function limit
-    url.searchParams.set('connection_limit', '5')
+    // Serverless best practice: connection_limit=1
+    // Each Vercel function invocation creates its own Prisma client.
+    // With limit=5 and 10+ parallel invocations → 50 connections → pool exhaustion.
+    // With limit=1, each function gets 1 connection; pgbouncer handles multiplexing.
+    url.searchParams.set('connection_limit', '1')
     url.searchParams.set('pool_timeout', '10')
     url.searchParams.set('connect_timeout', '5')
-    url.searchParams.set('socket_timeout', '15')
+    url.searchParams.set('socket_timeout', '10')
 
-    // Enable prepared statements for better performance with pgbouncer
-    // Required for Supabase Transaction mode (port 6543)
+    // Required for Supabase Transaction mode (port 6543) pgbouncer
     url.searchParams.set('pgbouncer', 'true')
 
     return url.toString()

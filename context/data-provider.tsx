@@ -641,8 +641,8 @@ export const DataProvider: React.FC<{
       }
     }
 
-    // Initial ping on mount
-    ping()
+    // Defer initial ping by 10s — avoids adding to the connection burst on dashboard load
+    const initialPingTimeout = setTimeout(ping, 10_000)
 
     const intervalId = setInterval(ping, FOUR_HOURS)
 
@@ -655,6 +655,7 @@ export const DataProvider: React.FC<{
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
+      clearTimeout(initialPingTimeout)
       clearInterval(intervalId)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
