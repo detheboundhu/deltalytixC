@@ -126,9 +126,17 @@ export default function RootPage() {
             )}
             {theme === 'dark' ? 'Light' : 'Dark'}
           </Button>
-          <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.2em] font-medium">
-            &copy; {new Date().getFullYear()} Deltalytix
-          </p>
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => router.push('/privacy')}
+              className="text-[10px] text-muted-foreground/40 hover:text-muted-foreground/80 uppercase tracking-[0.2em] font-medium transition-colors"
+            >
+              Privacy
+            </button>
+            <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.2em] font-medium">
+              &copy; {new Date().getFullYear()} Deltalytix
+            </p>
+          </div>
         </motion.div>
       </motion.div>
     </div>
