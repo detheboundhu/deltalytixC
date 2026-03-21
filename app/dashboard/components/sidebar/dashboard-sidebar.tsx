@@ -14,6 +14,7 @@ import {
   Database,
   FileText,
   RefreshCw,
+  PanelLeftClose,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -27,6 +28,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
 import { Logo } from '@/components/logo'
@@ -154,7 +156,14 @@ export function DashboardSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* No footer toggle — SidebarTrigger in navbar handles collapse */}
+      {/* Footer — Sidebar toggle at bottom */}
+      <SidebarFooter className="border-t border-border p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarTrigger className="w-full justify-start" />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }

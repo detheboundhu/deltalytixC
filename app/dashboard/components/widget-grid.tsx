@@ -41,7 +41,7 @@ function useGridContainerWidth() {
       }
       setMounted(true)
       window.dispatchEvent(new Event('resize'))
-    }, 200)
+    }, 500)
 
     return () => {
       resizeObserver.disconnect()
@@ -346,11 +346,11 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
 
       {/* Main Grid — react-grid-layout */}
       <div className="px-2" ref={gridContainerRef}>
-        {gridMounted && <Responsive
-          width={containerWidth}
+        <Responsive
+          width={containerWidth || 1200}
           layouts={gridLayouts}
           breakpoints={{ xl: 1280, lg: 1024, md: 768, sm: 480 }}
-          cols={{ xl: GRID_COLS, lg: GRID_COLS, md: 1, sm: 1 }}
+          cols={{ xl: GRID_COLS, lg: GRID_COLS, md: 6, sm: 1 }}
           rowHeight={ROW_HEIGHT}
           margin={GRID_MARGIN}
           containerPadding={[8, 8]}
@@ -391,7 +391,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
               </div>
             )
           })}
-        </Responsive>}
+        </Responsive>
       </div>
 
       {/* Add new widget button at bottom in edit mode */}

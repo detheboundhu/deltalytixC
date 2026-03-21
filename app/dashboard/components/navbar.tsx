@@ -13,7 +13,6 @@ import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts'
 import { CombinedFilters } from './navbar-filters/combined-filters'
 import { AccountSelector } from './navbar-filters/account-selector'
 import { useUserStore } from '@/store/user-store'
-import { SidebarTrigger } from '@/components/ui/sidebar'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { Separator } from '@/components/ui/separator'
 import { TemplateSelector } from './template-selector'
@@ -63,10 +62,8 @@ export default function Navbar() {
       transition={{ duration: 0.25, ease: "easeOut" }}
     >
       <div className="flex items-center justify-between w-full px-4 h-12">
-        {/* Left: Sidebar trigger only (logo lives in sidebar) */}
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-        </div>
+        {/* Left: empty — sidebar has its own trigger at bottom */}
+        <div className="flex items-center" />
 
         {/* Right: Account Selector + Filters + Template + Import + Notifications + Theme + Profile */}
         <div className="flex items-center gap-1.5">
