@@ -15,7 +15,7 @@ const TradeWinRate = lazy(() => import('../components/kpi/trade-win-rate'))
 const DayWinRate = lazy(() => import('../components/kpi/day-win-rate'))
 const ProfitFactor = lazy(() => import('../components/kpi/profit-factor'))
 const AvgWinLoss = lazy(() => import('../components/kpi/avg-win-loss'))
-const CurrentStreak = lazy(() => import('../components/kpi/current-streak'))
+const CurrentStreak = lazy(() => import('../components/kpi/trading-overview'))
 const TradingOverview = lazy(() => import('../components/kpi/trading-overview'))
 const WeeklyTracker = lazy(() => import('../components/kpi/weekly-tracker'))
 const GoalsRiskCommandCenter = lazy(() => import('../components/kpi/trading-overview')) // redirects to new widget

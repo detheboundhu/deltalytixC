@@ -2,11 +2,20 @@
 
 import React from 'react'
 import { cn } from '@/lib/utils'
+import { Info } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface WidgetCardProps {
   children: React.ReactNode
   /** Widget title shown in the header */
   title?: string
+  /** Tooltip description shown on hover next to title */
+  tooltip?: string
   /** Optional right-side header content (icons, badges, etc.) */
   headerRight?: React.ReactNode
   /** Whether this is a KPI card (compact, no border-radius padding) */
@@ -17,23 +26,49 @@ interface WidgetCardProps {
   noPadding?: boolean
 }
 
+/** Widget tooltip descriptions — centralized for consistency */
+export const WIDGET_TOOLTIPS: Record<string, string> = {
+  'Account Balance & P&L': 'Total account balance and cumulative profit/loss across selected accounts.',
+  'Trade Win Rate': 'Percentage of winning trades out of total trades taken.',
+  'Day Win Rate': 'Percentage of profitable trading days out of total trading days.',
+  'Profit Factor': 'Ratio of gross profit to gross loss. Above 1.0 means profitable overall.',
+  'Avg Win/Loss': 'Average profit on winning trades vs average loss on losing trades.',
+  'Current Streak': 'Current consecutive winning or losing trade streak.',
+  'Trading Overview': 'Goals progress, risk metrics, and streak data in one view.',
+  'Weekly Tracker': "This week's P&L, trade count, win rate, and daily performance heat bar.",
+  'Net Daily P&L': 'Daily profit/loss bars showing each day\'s trading result.',
+  'Cumulative P&L': 'Running total P&L over time showing overall growth trajectory.',
+  'Account Balance Chart': 'Account balance progression over time.',
+  'Weekday P&L': 'P&L breakdown by day of week to identify best/worst trading days.',
+  'Day of Week Performance': 'Performance metrics broken down by each weekday.',
+  'Trade Duration': 'Performance analysis based on how long trades are held.',
+  'P&L by Strategy': 'Profit/loss breakdown by your trading strategies.',
+  'P&L by Instrument': 'Profit/loss breakdown by traded instruments/symbols.',
+  'Win Rate by Strategy': 'Win rate comparison across different strategies.',
+  'Performance Score': 'Composite score evaluating multiple aspects of trading performance.',
+  'Session Analysis': 'Performance breakdown by market session (Asia, London, New York).',
+  'Equity Curve': 'Cumulative equity progression over time.',
+  'Outcome Distribution': 'Pie chart showing win/loss/breakeven trade distribution.',
+  'Recent Trades': 'Most recent trades with key details.',
+  'Calendar': 'Monthly calendar view with daily P&L color coding.',
+}
+
 /**
  * Shared widget wrapper — applies the reports page design language
  * to all dashboard widgets for visual consistency.
- * 
- * Design tokens:
- * - Container: bg-muted/10 border border-border/40 rounded-2xl
- * - Header: text-[10px] uppercase font-black tracking-widest text-muted-foreground
- * - Values: font-mono font-black tracking-tighter (applied by children)
  */
 export function WidgetCard({
   children,
   title,
+  tooltip,
   headerRight,
   isKpi = false,
   className,
   noPadding = false,
 }: WidgetCardProps) {
+  // Auto-resolve tooltip from title if not explicitly passed
+  const resolvedTooltip = tooltip || (title ? WIDGET_TOOLTIPS[title] : undefined)
+
   if (isKpi) {
     return (
       <div
@@ -60,9 +95,23 @@ export function WidgetCard({
     >
       {title && (
         <div className="flex items-center justify-between mb-4 flex-shrink-0">
-          <h3 className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">
-            {title}
-          </h3>
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">
+              {title}
+            </h3>
+            {resolvedTooltip && (
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3 w-3 text-muted-foreground/40 hover:text-muted-foreground cursor-help transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[220px] text-xs">
+                    {resolvedTooltip}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
           {headerRight}
         </div>
       )}
