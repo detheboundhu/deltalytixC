@@ -1,133 +1,166 @@
 'use client'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { ChevronRight, ArrowRight, BarChart3, Building, BookOpen, Zap, Shield, TrendingUp, Database, Lock, FileCode, Filter, GitBranch, Rocket, CheckCircle2, Sparkles, Code, Globe, Upload } from 'lucide-react'
+import { ChevronRight, ArrowRight, BarChart3, Building, BookOpen, Zap, Shield, TrendingUp, Database, Lock, FileCode, Filter, GitBranch, Rocket, CheckCircle2, Sparkles, Code, Globe, Upload, Activity, History, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
 export default function DocsHome() {
   return (
-    <div className="space-y-16 pb-20">
+    <div className="space-y-12 pb-20">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-8">
-        <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
-        <div className="relative space-y-6">
-          <div className="flex items-center gap-3">
-            <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-              <Sparkles className="h-3 w-3 mr-1" />
-              v2.0 Release
-            </Badge>
+      <section className="relative pt-4 pb-8">
+        <div className="space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider animate-pulse">
+            <Sparkles className="h-3 w-3" />
+            Platform Update v2.0
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-            Deltalytix
-            <span className="text-primary"> Documentation</span>
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">
+            The Professional <br />
+            <span className="text-primary">Trading Edge.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl leading-relaxed">
-            A comprehensive trading analytics platform designed for professional traders.
-            Track performance, analyze patterns, and optimize your strategy with advanced metrics
-            and real-time insights.
+          <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed font-medium">
+            Deltalytix is a high-performance analytics engine built for disciplined traders. 
+            Bridge the gap between raw data and actionable intelligence with institutional-grade 
+            metrics and behavioral analysis.
           </p>
 
-          <div className="flex flex-wrap gap-4 pt-4">
-            <Button asChild size="lg" className="h-12 px-8 font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
+          <div className="flex flex-wrap gap-4 pt-6">
+            <Button asChild size="lg" className="h-12 px-8 font-bold text-white bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] transition-all">
               <Link href="/docs/getting-started">
                 Get Started
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="h-12 px-6">
+            <Button asChild variant="outline" size="lg" className="h-12 px-8 font-bold border-2 hover:bg-accent/50 transition-all">
               <Link href="/docs/features/importing">
                 Explore Features
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="lg" className="h-12 px-6">
-              <Link href="/docs/for-developers/architecture">
-                <Code className="mr-2 h-4 w-4" />
-                Developer Docs
-              </Link>
-            </Button>
           </div>
         </div>
       </section>
 
-      {/* Product Vision (from PRD) */}
-      <section className="space-y-8 bg-accent/30 rounded-2xl p-8 border">
-        <div className="space-y-4 text-center">
-          <Badge variant="outline" className="mb-2">The Mission</Badge>
-          <h2 className="text-3xl font-bold">Product Vision</h2>
-          <p className="text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            Deltalytix is a comprehensive Trading Journal & Analytics platform designed for professional traders.
-            Our mission is to improve trading psychology and performance through data-driven insights and AI-assisted analysis.
+      {/* v2.0 Release Highlights */}
+      <section className="relative overflow-hidden rounded-3xl border-2 border-primary/20 bg-primary/5 p-8 md:p-12">
+        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+          <Rocket className="h-32 w-32 text-primary" />
+        </div>
+        
+        <div className="relative space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black uppercase tracking-tighter italic">v2.0 Release Notes</h2>
+            <div className="h-1 w-20 bg-primary rounded-full" />
+          </div>
+          
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-1 p-1.5 rounded-lg bg-primary/20">
+                  <Activity className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground italic uppercase text-sm">Lexical Engine Integration</h3>
+                  <p className="text-sm text-muted-foreground leading-snug mt-1">
+                    New rich-text journaling engine with support for screenshots, emotional tagging, and deep market context.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="mt-1 p-1.5 rounded-lg bg-primary/20">
+                  <Layers className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground italic uppercase text-sm">Dynamic Widget Architecture</h3>
+                  <p className="text-sm text-muted-foreground leading-snug mt-1">
+                    Re-engineered dashboard grid with 20+ performance-optimized widgets and persistent custom layouts.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-1 p-1.5 rounded-lg bg-primary/20">
+                  <History className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground italic uppercase text-sm">Prop Firm Protocol v2</h3>
+                  <p className="text-sm text-muted-foreground leading-snug mt-1">
+                    Enhanced breach detection, automated profit target tracking, and multi-phase evaluation history.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="mt-1 p-1.5 rounded-lg bg-primary/20">
+                  <Zap className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground italic uppercase text-sm">Sub-Second Execution</h3>
+                  <p className="text-sm text-muted-foreground leading-snug mt-1">
+                    Infrastructure migration to Next.js 15 for faster data hydration and real-time P&L updates.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Product Vision */}
+      <section className="space-y-10 py-8">
+        <div className="text-center space-y-3">
+          <h2 className="text-3xl font-black uppercase tracking-tighter">The Vision</h2>
+          <p className="text-muted-foreground font-medium max-w-2xl mx-auto uppercase text-xs tracking-[0.2em]">
+            Institutional analysis for the retail environment.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="p-6 rounded-xl border bg-card/50 space-y-3">
-            <h3 className="font-semibold text-primary flex items-center gap-2">
-              <Globe className="h-4 w-4" />
-              Multi-Asset Journaling
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Capture every detail of your trades across Forex, Crypto, Stocks, and Options with our Lexical-powered rich text editor.
-            </p>
-          </div>
-          <div className="p-6 rounded-xl border bg-card/50 space-y-3">
-            <h3 className="font-semibold text-primary flex items-center gap-2">
-              <Building className="h-4 w-4" />
-              Prop Firm Performance
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Advanced tracking for evaluation phases with real-time drawdown monitoring and breach detection.
-            </p>
-          </div>
-          <div className="p-6 rounded-xl border bg-card/50 space-y-3">
-            <h3 className="font-semibold text-primary flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
-              AI Psychology Analysis
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Identify emotional patterns and performance bottlenecks using our integrated GPT-4o analysis engine.
-            </p>
-          </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            { icon: Globe, title: 'Multi-Asset Sync', desc: 'Native support for Forex, Indices, and Crypto through automated CSV processing.' },
+            { icon: Building, title: 'Evaluation Guard', desc: 'Stay compliant with prop firm rules through real-time drawdown monitoring.' },
+            { icon: Sparkles, title: 'Behavioral Alpha', desc: 'Identify your edge by correlating emotional states with P&L performance.' }
+          ].map((item, i) => (
+            <div key={i} className="group p-8 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/40 transition-all duration-300">
+              <item.icon className="h-8 w-8 text-primary mb-4" />
+              <h3 className="font-black uppercase tracking-tight mb-2 italic">{item.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Main Feature Cards */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Core Features</h2>
-          <Link href="/docs/features/importing" className="text-sm text-primary hover:underline flex items-center gap-1">
-            View all <ChevronRight className="h-4 w-4" />
+      {/* Feature Navigation */}
+      <section className="space-y-8 pt-8 border-t border-border/50">
+        <div className="flex items-end justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-black uppercase tracking-tighter">Core Systems</h2>
+            <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest">Documentation Explorer</p>
+          </div>
+          <Link href="/docs/features/importing" className="text-[10px] font-black uppercase tracking-widest text-primary hover:opacity-80 flex items-center gap-1 group">
+            View all modules <ChevronRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Link href="/docs/features/importing" className="group">
-            <Card className="h-full border-2 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
-              <CardHeader className="space-y-4">
-                <div className="p-3 bg-primary/10 rounded-xl w-fit group-hover:scale-110 transition-transform duration-300">
+            <Card className="h-full border-2 border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card/50">
+              <CardHeader className="p-6">
+                <div className="p-3 bg-primary/10 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
                   <Upload className="h-6 w-6 text-primary" />
                 </div>
-                <div>
-                  <CardTitle className="text-xl group-hover:text-primary transition-colors">Trade Import</CardTitle>
-                  <CardDescription className="mt-2 leading-relaxed">
-                    Import trades from CSV files with intelligent AI-powered field mapping.
-                    Supports major brokers and custom formats.
-                  </CardDescription>
-                </div>
+                <CardTitle className="text-lg font-black uppercase italic group-hover:text-primary transition-colors">Trade Ingest</CardTitle>
+                <CardDescription className="text-xs font-medium uppercase tracking-tight mt-1">AI-Powered Data Normalization</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
-                <ul className="space-y-2.5">
-                  {[
-                    'Automatic column detection and mapping',
-                    'Batch import up to 10,000 trades',
-                    'Manual entry with validation'
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span>{item}</span>
+              <CardContent className="p-6 pt-0">
+                <ul className="space-y-3">
+                  {['Auto-column detection', '10k+ Trade processing', 'Manual verification'].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-xs font-bold text-muted-foreground/80">
+                      <div className="h-1 w-1 rounded-full bg-primary" />
+                      {item.toUpperCase()}
                     </li>
                   ))}
                 </ul>
@@ -136,29 +169,20 @@ export default function DocsHome() {
           </Link>
 
           <Link href="/docs/features/dashboard" className="group">
-            <Card className="h-full border-2 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
-              <CardHeader className="space-y-4">
-                <div className="p-3 bg-primary/10 rounded-xl w-fit group-hover:scale-110 transition-transform duration-300">
+            <Card className="h-full border-2 border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card/50">
+              <CardHeader className="p-6">
+                <div className="p-3 bg-primary/10 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
                   <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
-                <div>
-                  <CardTitle className="text-xl group-hover:text-primary transition-colors">Dashboard Analytics</CardTitle>
-                  <CardDescription className="mt-2 leading-relaxed">
-                    Fully customizable drag-and-drop dashboard with 20+ widgets.
-                    Track KPIs and visualize performance in real-time.
-                  </CardDescription>
-                </div>
+                <CardTitle className="text-lg font-black uppercase italic group-hover:text-primary transition-colors">Performance Grid</CardTitle>
+                <CardDescription className="text-xs font-medium uppercase tracking-tight mt-1">Real-Time Metric Hydration</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
-                <ul className="space-y-2.5">
-                  {[
-                    'Win rate, profit factor, drawdown tracking',
-                    'Advanced filtering by date, instrument, account',
-                    'Equity curve and P&L charts'
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span>{item}</span>
+              <CardContent className="p-6 pt-0">
+                <ul className="space-y-3">
+                  {['20+ Analytical widgets', 'Custom layout persistence', 'Dynamic filtering'].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-xs font-bold text-muted-foreground/80">
+                      <div className="h-1 w-1 rounded-full bg-primary" />
+                      {item.toUpperCase()}
                     </li>
                   ))}
                 </ul>
@@ -167,29 +191,20 @@ export default function DocsHome() {
           </Link>
 
           <Link href="/docs/features/prop-firm" className="group">
-            <Card className="h-full border-2 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
-              <CardHeader className="space-y-4">
-                <div className="p-3 bg-primary/10 rounded-xl w-fit group-hover:scale-110 transition-transform duration-300">
+            <Card className="h-full border-2 border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card/50">
+              <CardHeader className="p-6">
+                <div className="p-3 bg-primary/10 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
                   <Building className="h-6 w-6 text-primary" />
                 </div>
-                <div>
-                  <CardTitle className="text-xl group-hover:text-primary transition-colors">Prop Firm Tracking</CardTitle>
-                  <CardDescription className="mt-2 leading-relaxed">
-                    Comprehensive prop firm evaluation monitoring with automated breach
-                    detection and phase progression tracking.
-                  </CardDescription>
-                </div>
+                <CardTitle className="text-lg font-black uppercase italic group-hover:text-primary transition-colors">Capital Guard</CardTitle>
+                <CardDescription className="text-xs font-medium uppercase tracking-tight mt-1">Compliance & Risk Logic</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
-                <ul className="space-y-2.5">
-                  {[
-                    'Real-time daily/max drawdown monitoring',
-                    'Automated profit target & consistency checks',
-                    'Multi-phase evaluation support'
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span>{item}</span>
+              <CardContent className="p-6 pt-0">
+                <ul className="space-y-3">
+                  {['Drawdown breach detection', 'Phase progression logic', 'Consitency tracking'].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-xs font-bold text-muted-foreground/80">
+                      <div className="h-1 w-1 rounded-full bg-primary" />
+                      {item.toUpperCase()}
                     </li>
                   ))}
                 </ul>
@@ -199,121 +214,23 @@ export default function DocsHome() {
         </div>
       </section>
 
-      {/* Technical Features */}
-      <section className="space-y-8">
-        <div className="text-center space-y-4">
-          <Badge variant="outline" className="mb-2">Built for Performance</Badge>
-          <h2 className="text-3xl md:text-4xl font-bold">Core Capabilities</h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Modern architecture designed for speed, security, and scalability.
-          </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[
-            {
-              icon: Zap,
-              title: 'High Performance',
-              description: 'Built on Next.js 15 with React Server Components. Optimized queries handle 100,000+ trades with sub-second response times.'
-            },
-            {
-              icon: Shield,
-              title: 'Enterprise Security',
-              description: 'Supabase authentication with Row Level Security. Rate limiting on all sensitive endpoints. Zod validation on all inputs.'
-            },
-            {
-              icon: TrendingUp,
-              title: 'Precision Analytics',
-              description: 'Decimal(20,10) precision for accurate calculations. Win rate excludes break-even trades for realistic metrics.'
-            },
-            {
-              icon: BookOpen,
-              title: 'AI-Powered Journaling',
-              description: 'Document trades with screenshots and emotions. AI analysis identifies patterns and correlates with P&L.'
-            },
-            {
-              icon: Zap,
-              title: 'Real-Time Monitoring',
-              description: 'Live P&L tracking with instant updates. Automated breach alerts for prop firm accounts.'
-            },
-            {
-              icon: Filter,
-              title: 'Advanced Filtering',
-              description: 'Filter by date, instruments, accounts, P&L range, time in position, weekday, and hour. Save custom presets.'
-            }
-          ].map((feature, i) => (
-            <div key={i} className="group p-6 rounded-xl border bg-card hover:border-primary/50 hover:bg-accent/50 transition-all duration-300">
-              <div className="flex items-start gap-4">
-                <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <feature.icon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-lg">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {feature.description}
-                  </p>
-                </div>
+      {/* Tech Reference Links */}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pt-12">
+        {[
+          { href: '/docs/getting-started', icon: Rocket, title: 'Deployment Guide' },
+          { href: '/docs/for-developers/architecture', icon: GitBranch, title: 'Logic Architecture' },
+          { href: '/docs/for-developers/database', icon: Database, title: 'Schema Reference' }
+        ].map((link, i) => (
+          <Link key={i} href={link.href} className="group flex items-center justify-between p-4 rounded-xl border-2 border-border/50 bg-card hover:border-primary/50 transition-all">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <link.icon className="h-4 w-4 text-primary" />
               </div>
+              <span className="text-xs font-black uppercase tracking-tight group-hover:text-primary transition-colors italic">{link.title}</span>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Technology Stack */}
-      <section className="space-y-8">
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Technology Stack</h2>
-          <p className="text-muted-foreground">
-            Modern, production-ready technologies powering Deltalytix.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[
-            { icon: FileCode, title: 'Frontend', primary: 'Next.js 15, React 19', secondary: 'TypeScript 5.7, Tailwind CSS' },
-            { icon: Database, title: 'Database', primary: 'PostgreSQL 16', secondary: 'Prisma ORM 6.2' },
-            { icon: Lock, title: 'Authentication', primary: 'Supabase Auth', secondary: 'OAuth, OTP' },
-            { icon: BarChart3, title: 'Charts', primary: 'Recharts', secondary: 'Lightweight Charts' },
-            { icon: GitBranch, title: 'State', primary: 'Zustand', secondary: 'React Query (TanStack)' },
-            { icon: Sparkles, title: 'Monitoring', primary: 'Sentry', secondary: 'Error tracking' },
-            { icon: Code, title: 'Testing', primary: 'Vitest, Playwright', secondary: 'E2E, Unit, Integration' },
-            { icon: Globe, title: 'Deployment', primary: 'Vercel', secondary: 'Edge Functions, CDN' }
-          ].map((tech, i) => (
-            <div key={i} className="p-4 rounded-xl border bg-card hover:border-primary/50 transition-colors space-y-3">
-              <div className="flex items-center gap-2">
-                <tech.icon className="h-4 w-4 text-primary" />
-                <span className="font-semibold text-sm">{tech.title}</span>
-              </div>
-              <div>
-                <p className="text-sm text-foreground">{tech.primary}</p>
-                <p className="text-xs text-muted-foreground">{tech.secondary}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Quick Links */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-bold">Quick Links</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            { href: '/docs/getting-started', icon: Rocket, title: 'Quick Start Guide', description: 'Get up and running in 5 minutes' },
-            { href: '/docs/for-developers/architecture', icon: GitBranch, title: 'Architecture Overview', description: 'System design and data flow' },
-            { href: '/docs/for-developers/database', icon: Database, title: 'Database Schema', description: 'Complete data model reference' }
-          ].map((link, i) => (
-            <Link key={i} href={link.href} className="group flex items-center gap-4 p-5 rounded-xl border bg-card hover:border-primary/50 hover:bg-accent/50 transition-all">
-              <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                <link.icon className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold group-hover:text-primary transition-colors">{link.title}</p>
-                <p className="text-sm text-muted-foreground">{link.description}</p>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary ml-auto transition-colors" />
-            </Link>
-          ))}
-        </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+          </Link>
+        ))}
       </section>
     </div>
   )
