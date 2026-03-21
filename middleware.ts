@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 
 // Middleware for authentication and routing
 const protectedRoutes = ["/dashboard", "/profile", "/settings", "/api/trades", "/api/settings"]
-const publicRoutes = ["/", "/not-found", "/api/auth"]
+const publicRoutes = ["/", "/not-found", "/api/auth", "/docs", "/privacy"]
 
 export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
@@ -73,8 +73,13 @@ export default async function middleware(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     const isAuthenticated = !!user && !authError
 
-    // 1. Redirect authenticated users away from public routes and specifically the login page
-    if (isAuthenticated && !isProtectedRoute && !pathname.startsWith('/api/auth') && pathname !== '/not-found') {
+    // 1. Redirect authenticated users away from specific landing page, BUT allow public routes like /docs
+    if (isAuthenticated && !isProtectedRoute && !isPublicRoute && !pathname.startsWith('/api/auth') && pathname !== '/not-found') {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+    
+    // Specifically redirect "/" to "/dashboard" for authenticated users
+    if (isAuthenticated && pathname === "/") {
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 

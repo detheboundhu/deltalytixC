@@ -51,14 +51,14 @@ function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname()
 
   return (
-    <div className={cn("space-y-6 py-6", className)}>
+    <div className={cn("space-y-8", className)}>
       {navigation.map((section) => (
         <div key={section.title}>
-          <h4 className="mb-3 px-3 text-sm font-semibold flex items-center gap-2 text-foreground">
-            <section.icon className="h-4 w-4 text-primary" />
+          <h4 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50 flex items-center gap-2">
+            <section.icon className="h-3 w-3" />
             {section.title}
           </h4>
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {section.items.map((item) => {
               const isActive = pathname === item.href
               return (
@@ -66,14 +66,14 @@ function Sidebar({ className }: { className?: string }) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "group flex items-center rounded-md px-3 py-2 text-sm transition-all duration-200",
+                    "group flex items-center rounded-lg px-2 py-1.5 text-xs transition-colors",
                     isActive
-                      ? "bg-primary/10 text-primary font-medium"
-                      : "hover:bg-accent text-muted-foreground hover:text-foreground"
+                      ? "bg-primary/5 text-primary font-semibold"
+                      : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {item.title}
-                  {isActive && <ChevronRight className="ml-auto h-4 w-4" />}
+                  {isActive && <div className="ml-auto w-1 h-1 rounded-full bg-primary" />}
                 </Link>
               )
             })}
@@ -91,62 +91,64 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background">
-        <div className="container flex h-16 items-center gap-4 px-6">
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <List className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80 pr-0">
-              <div className="pr-6">
-                <Link href="/" className="flex items-center gap-2 mb-6">
-                  <Logo className="w-7 h-7 fill-foreground" />
-                  <span className="font-semibold text-lg">Deltalytix</span>
-                </Link>
-                <Sidebar />
-              </div>
-            </SheetContent>
-          </Sheet>
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
+        <div className="flex h-12 items-center gap-4 px-4 justify-between">
+          <div className="flex items-center gap-2">
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <List className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 pr-0">
+                <div className="pr-6 pt-4">
+                  <Link href="/" className="flex items-center gap-2 mb-6">
+                    <Logo className="w-7 h-7 fill-foreground" />
+                    <span className="font-semibold text-lg">Deltalytix</span>
+                  </Link>
+                  <Sidebar />
+                </div>
+              </SheetContent>
+            </Sheet>
 
-          <Link href="/" className="flex items-center gap-2">
-            <Logo className="w-7 h-7 fill-foreground" />
-            <span className="font-semibold text-lg hidden sm:inline">Deltalytix</span>
-            <Badge variant="outline" className="ml-2 hidden sm:inline-flex">Docs</Badge>
-          </Link>
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Logo className="w-6 h-6" />
+              <span className="text-sm font-bold tracking-tight hidden sm:inline">Deltalytix</span>
+              <Badge variant="outline" className="ml-2 h-5 px-1.5 text-[10px] hidden sm:inline-flex uppercase tracking-wider">Docs</Badge>
+            </Link>
+          </div>
 
-          <div className="flex-1 max-w-md ml-auto">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2">
+            <div className="relative hidden sm:block w-48 lg:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search documentation..."
-                className="pl-10 h-10"
+                placeholder="Search..."
+                className="pl-9 h-8 text-xs bg-muted/30 border-none focus-visible:ring-1 focus-visible:ring-primary/20"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-          </div>
 
-          <Button asChild variant="ghost" size="sm" className="h-9">
-            <Link href="/dashboard">
-              <Home className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Dashboard</span>
-            </Link>
-          </Button>
+            <Button asChild variant="ghost" size="sm" className="h-8 text-xs">
+              <Link href="/dashboard">
+                <Home className="h-3.5 w-3.5 mr-2" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
-      <div className="container px-6">
-        <div className="flex-1 items-start md:grid md:grid-cols-[260px_minmax(0,1fr)] md:gap-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-12 py-8">
+      <div className="mx-auto w-full max-w-[1440px]">
+        <div className="flex-1 items-start md:grid md:grid-cols-[240px_minmax(0,1fr)] lg:grid-cols-[260px_minmax(0,1fr)]">
           {/* Desktop Sidebar */}
-          <aside className="fixed top-16 z-30 hidden h-[calc(100vh-4rem)] w-[260px] lg:w-[280px] shrink-0 overflow-y-auto md:sticky md:block border-r pr-6">
+          <aside className="fixed top-12 z-30 hidden h-[calc(100vh-3rem)] w-[240px] lg:w-[260px] shrink-0 overflow-y-auto md:sticky md:block border-r px-4 py-4 scrollbar-none">
             <Sidebar />
           </aside>
 
           {/* Main Content */}
-          <main className="relative lg:gap-10">
-            <div className="mx-auto w-full min-w-0">
+          <main className="relative px-6 py-8 md:px-8 lg:px-12">
+            <div className="mx-auto w-full min-w-0 max-w-4xl">
               <div className="prose prose-invert max-w-none
                 prose-headings:scroll-mt-20
                 prose-headings:font-bold
