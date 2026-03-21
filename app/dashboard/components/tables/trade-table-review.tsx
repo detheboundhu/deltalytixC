@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { LexicalEditor } from '@/components/ui/editor/lexical-editor'
 import { useData } from '@/context/data-provider'
 import { useFilteredTrades } from '@/hooks/use-filtered-trades'
 import { useMediaQuery } from '@/hooks/use-media-query'
@@ -739,7 +740,22 @@ export function TradeTableReview() {
                                   <span className="font-mono">{formatQuantity(trade.quantity)}</span>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/30">
+                              <div className="mt-3 pt-3 border-t border-border/30">
+                                <p className="text-xs text-muted-foreground mb-1 font-semibold">Trade Notes</p>
+                                <div className="max-h-[150px] overflow-y-auto bg-background/50 rounded-md text-xs">
+                                  {trade.comment && trade.comment.trim() !== '' && trade.comment !== '<p></p>' && !trade.comment.includes('"children":[]') && !trade.comment.includes('"text":""') ? (
+                                    <div className="pointer-events-none scale-[0.95] origin-top-left w-[105%]">
+                                      <LexicalEditor
+                                        value={trade.comment}
+                                        minHeight="60px"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <p className="text-muted-foreground italic py-2">No notes attached.</p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2 pt-3 border-t border-border/30">
                                 <Button variant="outline" size="sm" className="h-7 text-[11px] flex-1" onClick={() => handleEditTrade(trade)}>
                                   Edit
                                 </Button>

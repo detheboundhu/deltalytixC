@@ -367,16 +367,6 @@ export const WIDGET_REGISTRY_LAZY: Record<WidgetType, WidgetConfig> = {
     getComponent: ({ size }) => <LazyWidget Component={WinRateByStrategy} size={size} type="winRateByStrategy" Preview={CreateChartPreview('Win Rate by Strategy')} />,
     getPreview: () => CreateChartPreview('Win Rate by Strategy')
   },
-  goalsRiskCommandCenter: {
-    type: 'goalsRiskCommandCenter',
-    defaultSize: 'large',
-    allowedSizes: ['medium', 'large', 'extra-large'],
-    category: 'statistics',
-    description: 'Trading overview with goals, risk metrics, and streak data',
-    previewHeight: 200,
-    getComponent: ({ size }) => <LazyWidget Component={TradingOverview} size={size} type="goalsRiskCommandCenter" Preview={CreateKpiPreview('Trading Overview')} />,
-    getPreview: () => CreateKpiPreview('Trading Overview')
-  },
   tradingOverview: {
     type: 'tradingOverview',
     defaultSize: 'large',

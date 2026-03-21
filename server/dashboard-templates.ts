@@ -55,8 +55,7 @@ const DEFAULT_LAYOUT: WidgetLayout[] = [
   { i: 'performance-score', type: 'performanceScore', size: 'small-long', x: 0, y: 21, w: 4, h: 4 },
   { i: 'win-rate-by-strategy', type: 'winRateByStrategy', size: 'small-long', x: 4, y: 21, w: 4, h: 4 },
   { i: 'session-analysis', type: 'sessionAnalysis', size: 'medium', x: 8, y: 21, w: 4, h: 4 },
-  // Row 7: Goals + Full Calendar
-  { i: 'goals-risk', type: 'goalsRiskCommandCenter', size: 'large', x: 0, y: 25, w: 6, h: 4 },
+  // Row 7: Full Calendar
   { i: 'current-streak', type: 'currentStreak', size: 'kpi', x: 6, y: 25, w: 6, h: 4 },
   // Row 8: Full Calendar at the bottom (full width)
   { i: 'calendar-advanced', type: 'calendarAdvanced', size: 'extra-large', x: 0, y: 29, w: 12, h: 7 },

@@ -215,11 +215,13 @@ export default function MonthlyView({
   calendarData,
   onSelectDate,
   onReviewWeek,
+  hideWeekends = false,
 }: {
   currentDate: Date
   calendarData: CalendarData
   onSelectDate: (date: Date) => void
   onReviewWeek?: (weekDate: Date) => void
+  hideWeekends?: boolean
 }) {
   const timezone = useUserStore((state) => state.timezone)
   const { notes } = useCalendarNotes()
@@ -232,18 +234,34 @@ export default function MonthlyView({
 
     const weeksArray = []
     for (let i = 0; i < days.length; i += 7) {
-      weeksArray.push(days.slice(i, i + 7))
+      let weekDays = days.slice(i, i + 7)
+      
+      // Filter out weekends if requested
+      if (hideWeekends) {
+        weekDays = weekDays.filter(day => {
+          const dayIndex = day.getDay()
+          return dayIndex !== 0 && dayIndex !== 6
+        })
+      }
+      
+      if (weekDays.length > 0) {
+        weeksArray.push(weekDays)
+      }
     }
     return weeksArray
-  }, [currentDate])
+  }, [currentDate, hideWeekends])
+
+  const displayWeekdays = hideWeekends 
+    ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] 
+    : WEEKDAYS
 
   return (
     <div className="flex h-full">
       {/* Main Calendar Grid */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 gap-1 md:gap-1.5 px-2 md:px-3 pt-3 pb-1">
-          {WEEKDAYS.map((day) => (
+        <div className={cn("grid gap-1 md:gap-1.5 px-2 md:px-3 pt-3 pb-1", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
+          {displayWeekdays.map((day) => (
             <div
               key={day}
               className="text-center text-[9px] md:text-[10px] font-bold text-muted-foreground/50 tracking-widest uppercase"
@@ -254,7 +272,7 @@ export default function MonthlyView({
         </div>
 
         {/* Day Grid */}
-        <div className="flex-1 grid grid-cols-7 gap-1 md:gap-1.5 p-2 md:p-3 pt-0 auto-rows-fr min-h-0 overflow-y-auto">
+        <div className={cn("flex-1 grid gap-1 md:gap-1.5 p-2 md:p-3 pt-0 auto-rows-fr min-h-0 overflow-y-auto", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
           {weeks.map((week, weekIndex) => (
             <React.Fragment key={weekIndex}>
               {week.map((date) => {

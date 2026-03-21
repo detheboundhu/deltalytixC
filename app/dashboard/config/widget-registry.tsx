@@ -508,33 +508,7 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetConfig> = {
       </Card>
     )
   },
-  goalsRiskCommandCenter: {
-    type: 'goalsRiskCommandCenter',
-    defaultSize: 'large',
-    allowedSizes: ['medium', 'large', 'extra-large'],
-    category: 'statistics',
-    description: 'Combined goals tracker and risk metrics command center',
-    previewHeight: 200,
-    getComponent: ({ size }) => <GoalsRiskCommandCenter size={size} />,
-    getPreview: () => (
-      <Card className="w-full h-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Command Center</CardTitle>
-        </CardHeader>
-        <CardContent className="p-2">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex items-center justify-center">
-              <div className="w-10 h-10 rounded-full border-4 border-long border-t-transparent"></div>
-            </div>
-            <div className="space-y-1">
-              <div className="p-1.5 bg-short/10 rounded text-xs">Max DD</div>
-              <div className="p-1.5 bg-long/10 rounded text-xs">Streak</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  },
+
   tradingOverview: {
     type: 'tradingOverview',
     defaultSize: 'large',

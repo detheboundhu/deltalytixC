@@ -8,7 +8,6 @@ export type WidgetType =
   | 'profitFactor'
   | 'avgWinLoss'
   | 'currentStreak'
-  | 'goalsRiskCommandCenter'
   | 'tradingOverview'
   | 'weeklyTracker'
   | 'sessionAnalysis'

@@ -1,47 +1,16 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, getDay, endOfWeek, addDays, getWeek } from "date-fns"
-import { formatInTimeZone } from 'date-fns-tz'
-import { enUS } from 'date-fns/locale'
-import { ChevronLeft as CaretLeft, ChevronRight as CaretRight, Camera } from "lucide-react"
+import React, { useState, useMemo, useCallback } from "react"
+import { format, addMonths, subMonths, isSameMonth } from "date-fns"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { WidgetCard } from '../widget-card'
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import html2canvas from 'html2canvas'
-import { toast } from "sonner"
+import { CalendarModal } from "./daily-modal"
+import { WeeklyModal } from "./weekly-modal"
 import { CalendarData } from "@/app/dashboard/types/calendar"
-import { useUserStore } from "@/store/user-store"
+import { useData } from "@/context/data-provider"
+import MonthlyView from "./monthly-view"
 import { BREAK_EVEN_THRESHOLD } from "@/lib/utils"
-import { TODAY_STYLES, WEEKDAYS_WEEKDAYS_ONLY, PNL_TEXT_STYLES, METRIC_PILL_STYLES } from "@/app/dashboard/constants/calendar-styles"
-
-const WEEKDAYS_MINI = WEEKDAYS_WEEKDAYS_ONLY
-
-function getCalendarDays(monthStart: Date, monthEnd: Date) {
-  const startDate = startOfWeek(monthStart)
-  const endDate = endOfWeek(monthEnd)
-  const days = eachDayOfInterval({ start: startDate, end: endDate })
-
-  if (days.length === 42) return days
-
-  const lastDay = days[days.length - 1]
-  const additionalDays = eachDayOfInterval({
-    start: addDays(lastDay, 1),
-    end: addDays(startDate, 41)
-  })
-
-  return [...days, ...additionalDays].slice(0, 42)
-}
-
-const formatCurrency = (value: number) => {
-  const formatted = value.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  })
-  return formatted
-}
 
 const formatCompact = (value: number) => {
   if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}k`
@@ -53,123 +22,59 @@ interface MiniCalendarProps {
 }
 
 function MiniCalendar({ calendarData }: MiniCalendarProps) {
-  const timezone = useUserStore(state => state.timezone)
-  const dateLocale = enUS
+  const { isLoading } = useData()
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [calendarDays, setCalendarDays] = useState<Date[]>([])
 
-  const { monthStart, monthEnd } = useMemo(() => ({
-    monthStart: startOfMonth(currentDate),
-    monthEnd: endOfMonth(currentDate)
-  }), [currentDate])
+  // Modals state
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [showWeeklyModal, setShowWeeklyModal] = useState(false)
+  const [selectedWeekDate, setSelectedWeekDate] = useState<Date | null>(null)
 
-  useEffect(() => {
-    setCalendarDays(getCalendarDays(monthStart, monthEnd))
-  }, [currentDate, monthStart, monthEnd])
+  // Navigation
+  const handlePrev = useCallback(() => setCurrentDate(prev => subMonths(prev, 1)), [])
+  const handleNext = useCallback(() => setCurrentDate(prev => addMonths(prev, 1)), [])
 
-  const handlePrevMonth = useCallback(() => setCurrentDate(subMonths(currentDate, 1)), [currentDate])
-  const handleNextMonth = useCallback(() => setCurrentDate(addMonths(currentDate, 1)), [currentDate])
-
-  const calendarRef = useRef<HTMLDivElement>(null)
-
-  const handleScreenshot = useCallback(async () => {
-    if (!calendarRef.current) return
-
-    try {
-      toast.info("Capturing screenshot...")
-      const canvas = await html2canvas(calendarRef.current, {
-        backgroundColor: 'hsl(var(--background))',
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        windowWidth: 1200, // Force desktop width for capture
-        onclone: (clonedDoc) => {
-          const wrapper = clonedDoc.querySelector('[data-screenshot-wrap]') as HTMLElement
-          if (wrapper) {
-            wrapper.style.width = '870px'
-            wrapper.style.padding = '60px'
-            wrapper.style.background = 'hsl(var(--background))'
-            wrapper.style.borderRadius = '0px'
-            wrapper.style.display = 'flex'
-            wrapper.style.justifyContent = 'center'
-
-            const card = wrapper.querySelector('.rounded-xl') as HTMLElement
-            if (card) {
-              card.style.width = '750px'
-              card.style.boxShadow = '0 30px 60px -12px hsl(var(--background)/0.7)'
-              card.style.border = '1px solid hsl(var(--border)/0.5)'
-              card.style.background = 'hsl(var(--background))'
-
-              // Ensure stats are visible in screenshot
-              const statsGroup = card.querySelector('[data-stats-group]') as HTMLElement
-              if (statsGroup) statsGroup.style.display = 'flex'
-            }
-          }
-        }
-      })
-
-      const image = canvas.toDataURL("image/png")
-      const link = document.createElement("a")
-      link.href = image
-      link.download = `calendar-summary-${format(currentDate, 'MMM-yyyy')}.png`
-      link.click()
-      toast.success("Screenshot saved!")
-    } catch (err) {
-      console.error("Screenshot failed:", err)
-      toast.error("Failed to capture screenshot")
-    }
-  }, [currentDate])
-
-  const monthlyTotal = useMemo(() => {
-    return Object.entries(calendarData).reduce((total, [dateString, dayData]) => {
-      const date = new Date(dateString)
-      if (isSameMonth(date, currentDate)) return total + dayData.pnl
-      return total
-    }, 0)
+  // Stats
+  const displayTotal = useMemo(() => {
+    let total = 0
+    const currentMonthPrefix = format(currentDate, 'yyyy-MM')
+    Object.entries(calendarData).forEach(([key, data]) => {
+      if (key.startsWith(currentMonthPrefix)) {
+        total += data.pnl
+      }
+    })
+    return total
   }, [calendarData, currentDate])
 
-  const calculateWeeklyTotal = useCallback((index: number, calendarDays: Date[], calendarData: CalendarData) => {
-    const startOfWeekIndex = index - 4
-    const weekDays = calendarDays.slice(startOfWeekIndex, index + 1)
-
-    return weekDays.reduce((total, day) => {
-      const dayOfWeek = getDay(day)
-      if (dayOfWeek === 0 || dayOfWeek === 6) return total
-      const dayData = calendarData[format(day, 'yyyy-MM-dd')]
-      return total + (dayData ? dayData.pnl : 0)
-    }, 0)
-  }, [])
-
-  const isProfitTotal = monthlyTotal > BREAK_EVEN_THRESHOLD
-  const isLossTotal = monthlyTotal < -BREAK_EVEN_THRESHOLD
+  const isPositive = displayTotal >= 0
 
   const tradedDaysCount = useMemo(() => {
-    return Object.entries(calendarData).filter(([dateString, dayData]) => {
-      const date = new Date(dateString)
-      return isSameMonth(date, currentDate) && dayData.tradeNumber > 0
-    }).length
+    let count = 0;
+    const currentMonthPrefix = format(currentDate, 'yyyy-MM')
+    Object.entries(calendarData).forEach(([key, data]) => {
+      if (key.startsWith(currentMonthPrefix) && data.tradeNumber > 0) count++
+    })
+    return count;
   }, [calendarData, currentDate])
 
   return (
-    <div ref={calendarRef} data-screenshot-wrap className="w-full h-full">
-      <WidgetCard
-        noPadding
-        className="overflow-hidden flex flex-col h-full"
-      >
-        {/* Unified Header: Nav + Stats + Snapshot */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border/20 bg-muted/5 flex-shrink-0">
-          <div className="flex items-center gap-2">
+    <div className="w-full h-full">
+      <WidgetCard noPadding className="overflow-hidden flex flex-col h-full">
+        {/* Unified Header: Navigation + Stats */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 px-4 py-3 border-b border-border/20 bg-muted/5 flex-shrink-0">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* Navigation Group */}
             <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30 font-bold shrink-0">
-              <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-6 w-6 hover:bg-background" aria-label="Previous month">
-                <CaretLeft className="h-3.5 w-3.5" />
+              <Button variant="ghost" size="icon" onClick={handlePrev} className="h-6 w-6 hover:bg-background" aria-label="Previous month">
+                <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
-              <div className="px-2 min-w-[80px] text-center">
+              <div className="px-2 min-w-[90px] text-center">
                 <span className="text-[11px] font-black capitalize tracking-tight">
                   {format(currentDate, 'MMM yyyy')}
                 </span>
               </div>
-              <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-6 w-6 hover:bg-background" aria-label="Next month">
-                <CaretRight className="h-3.5 w-3.5" />
+              <Button variant="ghost" size="icon" onClick={handleNext} className="h-6 w-6 hover:bg-background" aria-label="Next month">
+                <ChevronRight className="h-3.5 w-3.5" />
               </Button>
             </div>
 
@@ -177,173 +82,62 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
               onClick={() => setCurrentDate(new Date())}
               variant="outline"
               size="sm"
-              className="h-7 px-2.5 text-[10px] font-black bg-muted/20 hover:bg-muted border-border/40 transition-colors hidden sm:flex"
+              className="h-7 px-2.5 text-[10px] font-black bg-muted/20 hover:bg-muted border-border/40 transition-colors hidden sm:inline-flex"
             >
               This month
             </Button>
           </div>
 
-          <div className="flex items-center gap-3">
-             <div className="hidden sm:flex items-center gap-1.5">
-               <span className="text-[10px] font-bold text-muted-foreground">Monthly stats:</span>
-               <div data-stats-group className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider shrink-0">
-                 <div className={cn(
-                   "px-1.5 py-0.5 rounded border shadow-sm flex items-center",
-                   isProfitTotal ? "bg-long/10 border-long/20 text-long" : isLossTotal ? "bg-short/10 border-short/20 text-short" : "bg-muted/10 border-border/20 text-muted-foreground"
-                 )}>
-                   {formatCompact(monthlyTotal)}
-                 </div>
-                 <div className="px-1.5 py-0.5 rounded bg-chart-4/10 border border-chart-4/20 text-chart-4 border-solid shadow-sm">
-                   {tradedDaysCount} d
-                 </div>
-               </div>
-             </div>
+          <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
+            <span className="text-[10px] font-bold text-muted-foreground mr-1">
+              Monthly stats:
+            </span>
 
-             <div className="w-px h-4 bg-border/40 hidden sm:block" />
-
-             <Button
-               variant="ghost"
-               size="sm"
-               onClick={handleScreenshot}
-               className="h-7 px-2 text-[10px] font-bold gap-1.5 hover:bg-primary/5 hover:text-primary transition-all bg-muted/20 border border-border/30 rounded-lg"
-               title="Snapshot"
-             >
-               <Camera className="h-3.5 w-3.5" />
-               <span className="hidden sm:inline">Snapshot</span>
-             </Button>
-          </div>
-        </div>
-
-        <div className="flex-1 min-h-0 p-3" data-screenshot-container>
-          {/* Weekday Headers */}
-          <div className="grid grid-cols-5 sm:grid-cols-6 gap-1 md:gap-2 mb-2">
-            {WEEKDAYS_MINI.map((day, i) => (
-              <div key={day} className="text-center font-bold text-[10px] text-muted-foreground/60 py-1 uppercase tracking-tighter sm:tracking-normal">
-                <span className="hidden sm:inline">{day}</span>
-                <span className="sm:hidden">{['M', 'T', 'W', 'T', 'F'][i]}</span>
+            {/* Stats Badges */}
+            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider">
+              <div className={
+                "px-1.5 py-0.5 rounded border shadow-sm flex items-center " +
+                (isPositive ? "bg-long/10 border-long/20 text-long" : "bg-short/10 border-short/20 text-short")
+              }>
+                {formatCompact(displayTotal)}
               </div>
-            ))}
-            <div className="hidden sm:block text-center font-bold text-[11px] text-muted-foreground/80 py-1 uppercase tracking-[0.15em]">
-              Week
+              <div className="px-1.5 py-0.5 rounded bg-chart-4/10 border border-chart-4/20 text-chart-4 border-solid shadow-sm">
+                {tradedDaysCount} d
+              </div>
             </div>
           </div>
-
-          {/* Calendar Grid - removed fixed column for wk on mobile */}
-          <div className="grid grid-cols-5 sm:grid-cols-6 gap-1 md:gap-2 flex-1 auto-rows-fr">
-            {(() => {
-              const rows = [];
-              for (let i = 0; i < calendarDays.length; i += 7) {
-                const weekDays = calendarDays.slice(i, i + 7);
-                // Only show the week if at least one Mon-Fri day belongs to the current month
-                const hasVisibleDayInMonth = weekDays.slice(1, 6).some(d => isSameMonth(d, currentDate));
-                if (hasVisibleDayInMonth) {
-                  rows.push(...weekDays);
-                }
-              }
-              return rows;
-            })().map((date, index) => {
-              const dayOfWeek = getDay(date)
-
-              // Skip weekends
-              if (dayOfWeek === 0 || dayOfWeek === 6) return null
-
-              let gridColumn = undefined
-              if (dayOfWeek === 1) gridColumn = 1
-              else if (dayOfWeek === 2) gridColumn = 2
-              else if (dayOfWeek === 3) gridColumn = 3
-              else if (dayOfWeek === 4) gridColumn = 4
-              else if (dayOfWeek === 5) gridColumn = 5
-
-              const dateString = format(date, 'yyyy-MM-dd')
-              const dayData = calendarData[dateString]
-              const isLastDayOfWeek = dayOfWeek === 5
-              const isCurrentMonth = isSameMonth(date, currentDate)
-              const isTodayDate = isToday(date)
-              const hasTrades = dayData && dayData.tradeNumber > 0
-              const isProfit = dayData && dayData.pnl > BREAK_EVEN_THRESHOLD
-              const isLoss = dayData && dayData.pnl < -BREAK_EVEN_THRESHOLD
-              const isBreakEven = dayData && !isProfit && !isLoss && dayData.tradeNumber > 0
-
-              return (
-                <React.Fragment key={dateString}>
-                  <div
-                    style={gridColumn ? { gridColumn } : undefined}
-                    className={cn(
-                      "flex flex-col rounded-md p-1 sm:p-1.5 border transition-all duration-200 min-h-[40px] cursor-default group",
-                      hasTrades
-                        ? isProfit
-                          ? "bg-long/10 border-long/30 hover:bg-long/20 hover:border-long/50"
-                          : isLoss
-                            ? "bg-short/10 border-short/30 hover:bg-short/20 hover:border-short/50"
-                            : "bg-card/40 border-border/30"
-                        : "bg-card/40 border-border/30",
-                      !isCurrentMonth && "opacity-20 grayscale",
-                      isTodayDate && "border-primary/30",
-                    )}
-                  >
-                    {/* Header: Date + Compact PnL */}
-                    <div className="flex justify-between items-start mb-1">
-                      <span className={cn(
-                        "text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md transition-colors",
-                        isTodayDate ? "border border-primary/50 text-primary" : "bg-muted/80 text-muted-foreground",
-                      )}>
-                        {format(date, 'd')}
-                      </span>
-
-                      {hasTrades && (
-                        <div className={cn(
-                          "text-[9px] sm:text-[11px] font-black tracking-tighter",
-                          isProfit ? "text-long" : isLoss ? "text-short" : "text-muted-foreground"
-                        )}>
-                          {formatCompact(dayData.pnl)}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Body: Compact Metrics (Clean White/Gray) */}
-                    <div className="mt-auto hidden sm:block">
-                      {hasTrades && (
-                        <div className="flex flex-col gap-0">
-                          <div className="text-[9px] font-semibold text-muted-foreground/80 flex items-center gap-0.5">
-                            <span>{dayData.tradeNumber}</span>
-                            <span className="opacity-50 font-medium scale-[0.9] origin-left">trades</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {isLastDayOfWeek && (() => {
-                    const weeklyTotal = calculateWeeklyTotal(index, calendarDays, calendarData)
-                    const state = weeklyTotal > BREAK_EVEN_THRESHOLD ? 'profit' : weeklyTotal < -BREAK_EVEN_THRESHOLD ? 'loss' : 'flat'
-                    const weekOfYear = getWeek(date, { weekStartsOn: 1 })
-                    return (
-                      <div className={cn(
-                        "hidden sm:flex flex-col items-center justify-center rounded-lg border min-h-[45px] sm:min-h-[60px] lg:min-h-[82px] p-1 transition-all shadow-sm",
-                        state === 'profit' && "bg-long/10 border-long/40",
-                        state === 'loss' && "bg-short/10 border-short/40",
-                        state === 'flat' && "bg-muted/10 border-dashed border-border/40",
-                      )}>
-                        <span className={cn(
-                          "text-[10px] sm:text-[13px] font-black tracking-tighter",
-                          state === 'profit' && "text-long",
-                          state === 'loss' && "text-short",
-                          state === 'flat' && "text-muted-foreground",
-                        )}>
-                          {formatCompact(weeklyTotal)}
-                        </span>
-                        <span className="text-[9px] sm:text-[10px] font-bold uppercase text-muted-foreground/50 mt-1 hidden sm:block">
-                          Week {weekOfYear}
-                        </span>
-                      </div>
-                    )
-                  })()}
-                </React.Fragment>
-              )
-            })}
-          </div>
         </div>
+
+        {/* Calendar Grid - uses MonthlyView with hideWeekends */}
+        <div className="flex-1 min-h-0 overflow-hidden relative">
+          <MonthlyView
+            hideWeekends
+            currentDate={currentDate}
+            calendarData={calendarData}
+            onSelectDate={setSelectedDate}
+            onReviewWeek={(date) => {
+              setSelectedWeekDate(date)
+              setShowWeeklyModal(true)
+            }}
+          />
+        </div>
+
+        <CalendarModal
+          isOpen={selectedDate !== null}
+          onOpenChange={(open) => !open && setSelectedDate(null)}
+          selectedDate={selectedDate}
+          dayData={selectedDate ? calendarData[format(selectedDate, 'yyyy-MM-dd')] : undefined}
+          isLoading={isLoading}
+        />
       </WidgetCard>
+
+      <WeeklyModal
+        isOpen={showWeeklyModal}
+        onOpenChange={setShowWeeklyModal}
+        selectedDate={selectedWeekDate || new Date()}
+        calendarData={calendarData}
+        isLoading={isLoading}
+      />
     </div>
   )
 }

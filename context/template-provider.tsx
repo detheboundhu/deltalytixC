@@ -60,7 +60,7 @@ const DEFAULT_LAYOUT: WidgetLayout[] = [
   { i: 'trading-overview', type: 'tradingOverview', size: 'large', x: 0, y: 25, w: 6, h: 4 },
   { i: 'weekly-tracker', type: 'weeklyTracker', size: 'medium', x: 6, y: 25, w: 6, h: 3 },
   // Row 8: Full Calendar
-  { i: 'calendar-advanced', type: 'calendarAdvanced', size: 'extra-large', x: 0, y: 29, w: 12, h: 7 },
+  { i: 'calendar-advanced', type: 'calendarAdvanced', size: 'extra-large', x: 0, y: 28, w: 12, h: 7 },
 ]
 
 export function TemplateProvider({ children }: { children: React.ReactNode }) {

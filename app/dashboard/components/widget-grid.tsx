@@ -300,9 +300,9 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
             isEditMode && 'border-2 border-dashed border-border/50 rounded-xl p-2'
           )}
         >
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="flex overflow-x-auto lg:grid lg:grid-cols-5 gap-3 pb-2 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {kpiLayout.map((widget, index) => (
-              <div key={`kpi-slot-${index}`} className="relative">
+              <div key={`kpi-slot-${index}`} className="relative w-[85vw] sm:w-[320px] lg:w-auto shrink-0 snap-center lg:snap-align-none">
                 {widget ? (
                   <div className="relative group h-full">
                     {/* Edit mode controls */}

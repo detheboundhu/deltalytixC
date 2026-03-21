@@ -54,7 +54,7 @@ const toolItems = [
 export function DashboardSidebar() {
   const pathname = usePathname()
   const { refreshTrades } = useData()
-  const { state } = useSidebar()
+  const { state, toggleSidebar } = useSidebar()
   const isCollapsed = state === 'collapsed'
 
   const getActiveId = () => {
@@ -160,7 +160,10 @@ export function DashboardSidebar() {
       <SidebarFooter className="border-t border-border p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarTrigger className="w-full justify-start" />
+            <SidebarMenuButton onClick={toggleSidebar} tooltip="Collapse" className="w-full justify-start text-muted-foreground hover:text-foreground">
+              <PanelLeftClose />
+              <span>Collapse</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

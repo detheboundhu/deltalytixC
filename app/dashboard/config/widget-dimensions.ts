@@ -210,7 +210,7 @@ export const WIDGET_GRID_DEFAULTS: Record<string, WidgetGridDefault> = {
   winRateByStrategy:        { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
 
   // Command center / session / overview
-  goalsRiskCommandCenter: { defaultW: 6, defaultH: 4, minW: 4, minH: 3 },
+
   tradingOverview:        { defaultW: 6, defaultH: 4, minW: 4, minH: 3 },
   weeklyTracker:          { defaultW: 4, defaultH: 3, minW: 3, minH: 2 },
   sessionAnalysis:        { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
