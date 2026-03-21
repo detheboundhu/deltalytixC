@@ -20,7 +20,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { WidgetCard } from '../widget-card'
+import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
 import { useWidgetData } from '@/hooks/use-widget-data'
 import { cn, formatCurrency, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
@@ -57,63 +57,7 @@ const CHART_CONFIG = {
   strokeWidth: 2.5
 } as const
 
-// ============================================================================
-// TOOLTIP COMPONENT - Glassmorphism Style
-// ============================================================================
 
-function ChartTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null
-
-  const data = payload[0].payload as ChartDataPoint
-  const date = new Date(data.date + 'T00:00:00Z')
-  const isCumulativeProfit = data.cumulativePnL > BREAK_EVEN_THRESHOLD
-  const isCumulativeLoss = data.cumulativePnL < -BREAK_EVEN_THRESHOLD
-  const isDailyProfit = data.dailyPnL > BREAK_EVEN_THRESHOLD
-  const isDailyLoss = data.dailyPnL < -BREAK_EVEN_THRESHOLD
-
-  return (
-    <div className="bg-card border border-border/50 rounded-xl p-4 shadow-md">
-      {/* Date Header */}
-      <p className="text-xs font-medium text-muted-foreground mb-1">
-        {date.toLocaleDateString("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          timeZone: 'UTC'
-        })}
-      </p>
-
-      {/* Cumulative P/L - Large & Bold */}
-      <div className="mb-2">
-        <span className="text-xs text-muted-foreground">Cumulative</span>
-        <p className={cn(
-          "text-2xl font-bold tracking-tight",
-          isCumulativeProfit ? "text-long" : isCumulativeLoss ? "text-short" : "text-muted-foreground"
-        )}>
-          {formatCurrency(data.cumulativePnL)}
-        </p>
-      </div>
-
-      {/* Daily P/L */}
-      <div className="pt-2 border-t border-border/30">
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-muted-foreground">Today's P/L</span>
-          <span className={cn(
-            "text-sm font-semibold",
-            isDailyProfit ? "text-long" : isDailyLoss ? "text-short" : "text-muted-foreground"
-          )}>
-            {isDailyProfit ? "+" : ""}{formatCurrency(data.dailyPnL)}
-          </span>
-        </div>
-        <div className="flex justify-between items-center mt-1">
-          <span className="text-xs text-muted-foreground">Trades</span>
-          <span className="text-sm font-semibold">{data.trades}</span>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -249,7 +193,7 @@ export default function DailyCumulativePnL({ size = 'small-long' }: DailyCumulat
 
               {/* Tooltip */}
               <RechartsTooltip
-                content={<ChartTooltip />}
+                content={<SharedChartTooltip />}
                 cursor={{ stroke: 'hsl(var(--muted-foreground))', strokeDasharray: '3 3' }}
               />
 

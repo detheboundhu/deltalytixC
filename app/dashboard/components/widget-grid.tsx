@@ -7,47 +7,50 @@ function useGridContainerWidth() {
   const [width, setWidth] = useState(0)
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const lastWidthRef = useRef(0)
 
   useEffect(() => {
     if (!containerRef.current) return
 
-    const observeTarget = containerRef.current
+    const el = containerRef.current
 
-    // Measure immediately before observer — prevents stale 0/1200 on first render
-    const initialWidth = observeTarget.offsetWidth
-    if (initialWidth > 0) {
-      setWidth(initialWidth)
-      setMounted(true)
+    // Measure using rAF for accurate post-layout width
+    const measure = () => {
+      const w = el.offsetWidth
+      if (w > 0 && w !== lastWidthRef.current) {
+        lastWidthRef.current = w
+        setWidth(w)
+      }
+      if (w > 0) setMounted(true)
     }
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const newWidth = observeTarget.offsetWidth || entry.contentRect.width
-        if (newWidth > 0) {
-          setWidth(newWidth)
-          if (!mounted) setMounted(true)
-        }
-      }
+    // Immediate measurement
+    requestAnimationFrame(measure)
+
+    // ResizeObserver for continuous width tracking
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(measure)
     })
+    resizeObserver.observe(el)
 
-    resizeObserver.observe(observeTarget)
-
-    // Force a layout recalculation after a short delay for edge cases
-    // (e.g., sidebar animation completing, dynamic imports resolving)
-    const timer = setTimeout(() => {
-      const freshWidth = observeTarget.offsetWidth
-      if (freshWidth > 0 && freshWidth !== width) {
-        setWidth(freshWidth)
-      }
-      setMounted(true)
-      window.dispatchEvent(new Event('resize'))
-    }, 500)
+    // Multiple recalculation passes to handle CSS transitions:
+    // - Sidebar collapses over 200ms
+    // - Layout reflow can take additional time
+    // - Dynamic imports may shift container width
+    const timers = [300, 600, 1200].map((delay) =>
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          measure()
+          window.dispatchEvent(new Event('resize'))
+        })
+      }, delay)
+    )
 
     return () => {
       resizeObserver.disconnect()
-      clearTimeout(timer)
+      timers.forEach(clearTimeout)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   return { width, containerRef, mounted }
 }

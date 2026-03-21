@@ -84,9 +84,14 @@ export function DashboardSidebar() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               asChild
             >
-              <Link href="/dashboard" className="flex items-center justify-center gap-2">
+              <Link href="/dashboard" className={cn(
+                "flex items-center",
+                isCollapsed ? "justify-center" : "gap-2"
+              )}>
                 <Logo className="h-6 w-6 shrink-0" />
-                <span className="text-sm font-bold tracking-tight truncate">Deltalytix</span>
+                {!isCollapsed && (
+                  <span className="text-sm font-bold tracking-tight">Deltalytix</span>
+                )}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

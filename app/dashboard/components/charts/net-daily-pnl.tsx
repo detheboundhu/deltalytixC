@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
-import { WidgetCard } from '../widget-card'
+import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
 import { useWidgetData } from '@/hooks/use-widget-data'
 import { cn, formatCurrency, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
@@ -60,61 +60,7 @@ const CHART_CONFIG = {
   referenceLineOpacity: 0.4
 } as const
 
-// ============================================================================
-// TOOLTIP COMPONENT - Glassmorphism Style
-// ============================================================================
 
-function ChartTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null
-
-  const data = payload[0].payload as ChartDataPoint
-  const date = new Date(data.date + 'T00:00:00Z')
-  const isProfit = data.pnl > BREAK_EVEN_THRESHOLD
-  const isLoss = data.pnl < -BREAK_EVEN_THRESHOLD
-
-  return (
-    <div className="bg-card border border-border/50 rounded-xl p-4 shadow-md">
-      {/* Date Header */}
-      <p className="text-xs font-medium text-muted-foreground mb-1">
-        {date.toLocaleDateString("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          timeZone: 'UTC'
-        })}
-      </p>
-
-      {/* P/L Value - Large & Bold */}
-      <p className={cn(
-        "text-2xl font-bold tracking-tight",
-        isProfit ? "text-long" : isLoss ? "text-short" : "text-muted-foreground"
-      )}>
-        {formatCurrency(data.pnl)}
-      </p>
-
-      {/* Stats Grid */}
-      <div className="mt-3 pt-3 border-t border-border/30 grid grid-cols-2 gap-x-6 gap-y-1">
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Trades</span>
-          <span className="font-semibold">{data.longNumber + data.shortNumber}</span>
-        </div>
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Long/Short</span>
-          <span className="font-semibold">{data.longNumber}/{data.shortNumber}</span>
-        </div>
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Wins</span>
-          <span className="font-semibold text-long">{data.wins}</span>
-        </div>
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Losses</span>
-          <span className="font-semibold text-short">{data.losses}</span>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -246,7 +192,7 @@ export default function NetDailyPnL({ size = 'small-long' }: NetDailyPnLProps) {
             width={50}
           />
           <RechartsTooltip
-            content={<ChartTooltip />}
+            content={<SharedChartTooltip />}
             cursor={{ fill: 'hsl(var(--muted)/0.3)' }}
           />
           <ReferenceLine

@@ -12,7 +12,7 @@ import {
 } from "recharts"
 
 const AnyRadarChart = RadarChart as any
-import { WidgetCard } from '../widget-card'
+import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
 import { useData } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
@@ -53,54 +53,7 @@ const COLORS = {
   red: 'hsl(var(--chart-loss))'
 } as const
 
-// ============================================================================
-// TOOLTIP COMPONENT - Glassmorphism Style
-// ============================================================================
 
-function ChartTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null
-
-  const data = payload[0].payload as MetricData
-
-  const formatRawValue = (metric: string, value: number) => {
-    if (metric === 'Win %') return `${value.toFixed(1)}%`
-    if (metric === 'Drawdown') return `${value.toFixed(1)}%`
-    if (metric === 'Consistency') return `${value.toFixed(0)}/100`
-    return value.toFixed(2)
-  }
-
-  return (
-    <div className="bg-card border border-border/50 rounded-xl p-4 shadow-md min-w-[180px]">
-      {/* Metric Header */}
-      <p className="text-sm font-bold mb-2 border-b border-border/30 pb-2">{data.metric}</p>
-
-      {/* Stats */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Value</span>
-          <span className="font-bold">{formatRawValue(data.metric, data.rawValue || 0)}</span>
-        </div>
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Score</span>
-          <span className="font-bold">{Math.round(data.value)}/100</span>
-        </div>
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Weight</span>
-          <span className="font-semibold">{data.weight}%</span>
-        </div>
-      </div>
-
-      {/* Target */}
-      <div className="mt-2 pt-2 border-t border-border/30">
-        <p className="text-[10px] text-muted-foreground">{data.description}</p>
-        <p className="text-xs mt-1">
-          <span className="text-muted-foreground">Target: </span>
-          <span className="text-long font-semibold">{data.target}</span>
-        </p>
-      </div>
-    </div>
-  )
-}
 
 // ============================================================================
 // SCORE BADGE COMPONENT
@@ -284,7 +237,7 @@ export default function PerformanceScore({ size = 'small-long' }: PerformanceSco
                       tick={false}
                       axisLine={false}
                     />
-                    <Tooltip content={<ChartTooltip />} />
+                    <Tooltip content={<SharedChartTooltip />} />
                     <Radar
                       name="Score"
                       dataKey="value"

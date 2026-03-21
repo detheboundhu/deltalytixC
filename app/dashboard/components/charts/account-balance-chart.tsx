@@ -20,7 +20,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { WidgetCard } from '../widget-card'
+import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
 import { useWidgetData } from '@/hooks/use-widget-data'
 import { useUserStore } from "@/store/user-store"
 import { cn, formatCurrency, formatNumber, formatPercent, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
@@ -64,73 +64,7 @@ const CHART_CONFIG = {
   dotRadius: 4
 } as const
 
-// ============================================================================
-// TOOLTIP COMPONENT - Glassmorphism Style
-// ============================================================================
 
-function ChartTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null
-
-  const data = payload[0].payload as ChartDataPoint
-  const date = new Date(data.date + 'T00:00:00Z')
-  const isProfit = data.change > BREAK_EVEN_THRESHOLD
-  const isLoss = data.change < -BREAK_EVEN_THRESHOLD
-
-  return (
-    <div className="bg-card border border-border/50 rounded-xl p-4 shadow-md min-w-[220px]">
-      {/* Date Header */}
-      <p className="text-xs font-medium text-muted-foreground mb-2">
-        {date.toLocaleDateString("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          timeZone: 'UTC'
-        })}
-      </p>
-
-      {/* Balance - Large & Bold */}
-      <div className="mb-3">
-        <span className="text-xs text-muted-foreground">Balance</span>
-        <p className="text-2xl font-bold tracking-tight">
-          {formatCurrency(data.balance)}
-        </p>
-      </div>
-
-      {/* Change */}
-      <div className={cn(
-        "flex items-center justify-between py-2 px-3 rounded-lg",
-        isProfit ? "bg-long/10" : isLoss ? "bg-short/10" : "bg-muted/10"
-      )}>
-        <span className="text-xs text-muted-foreground">Change</span>
-        <span className={cn(
-          "text-sm font-bold",
-          isProfit ? "text-long" : isLoss ? "text-short" : "text-muted-foreground"
-        )}>
-          {isProfit || isLoss ? (isProfit ? "+" : "") + formatCurrency(data.change) : "$0.00"} ({isProfit || isLoss ? (isProfit ? "+" : "") + formatPercent(data.changePercent) : "0%"})
-        </span>
-      </div>
-
-      {/* Trade Stats */}
-      {data.trades > 0 && (
-        <div className="mt-3 pt-3 border-t border-border/30 grid grid-cols-3 gap-2 text-center">
-          <div>
-            <p className="text-lg font-bold">{data.trades}</p>
-            <p className="text-[10px] text-muted-foreground">Trades</p>
-          </div>
-          <div>
-            <p className="text-lg font-bold text-long">{data.wins}</p>
-            <p className="text-[10px] text-muted-foreground">Wins</p>
-          </div>
-          <div>
-            <p className="text-lg font-bold text-short">{data.losses}</p>
-            <p className="text-[10px] text-muted-foreground">Losses</p>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 // ============================================================================
 // CUSTOM DOT COMPONENT
@@ -256,7 +190,7 @@ function AccountBalanceChart({ size = 'small-long' }: AccountBalanceChartProps) 
 
               {/* Tooltip */}
               <RechartsTooltip
-                content={<ChartTooltip />}
+                content={<SharedChartTooltip />}
                 cursor={{ stroke: 'hsl(var(--muted-foreground))', strokeDasharray: '3 3' }}
               />
 

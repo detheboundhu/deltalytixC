@@ -94,7 +94,7 @@ const DayCell = memo(function DayCell({
 
       {/* Journal icon — top left */}
       {hasNotes && (
-        <NotebookPen className="absolute top-1 left-1.5 h-3 w-3 md:h-3.5 md:w-3.5 text-muted-foreground/50" />
+        <NotebookPen className="absolute top-1 left-1.5 h-4 w-4 md:h-5 md:w-5 text-muted-foreground/70" />
       )}
 
       {/* P&L — centered, prominent */}

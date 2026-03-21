@@ -3,14 +3,15 @@
 import React from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useWidgetData } from '@/hooks/use-widget-data'
-import { WidgetCard, ChartTooltip, RECHARTS_COLORS } from '../widget-card'
-import { useTheme } from '@/context/theme-provider'
-import { format } from 'date-fns'
+import { WidgetCard, ChartTooltip } from '../widget-card'
+
+const COLORS = {
+  bullish: 'hsl(var(--chart-bullish))',
+  bearish: 'hsl(var(--chart-bearish))',
+} as const
 
 export default function EquityCurveWidget() {
   const { data: chartData, isLoading } = useWidgetData('equityCurve')
-  const { theme } = useTheme()
-  const colors = theme === 'dark' ? RECHARTS_COLORS.dark : RECHARTS_COLORS.light
 
   if (isLoading) {
     return (
@@ -40,8 +41,8 @@ export default function EquityCurveWidget() {
         <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={isPositive ? colors.bullish : colors.bearish} stopOpacity={0.3} />
-              <stop offset="95%" stopColor={isPositive ? colors.bullish : colors.bearish} stopOpacity={0} />
+              <stop offset="5%" stopColor={isPositive ? COLORS.bullish : COLORS.bearish} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={isPositive ? COLORS.bullish : COLORS.bearish} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.15)" vertical={false} />
@@ -63,7 +64,7 @@ export default function EquityCurveWidget() {
           <Area
             type="monotone"
             dataKey="equity"
-            stroke={isPositive ? colors.bullish : colors.bearish}
+            stroke={isPositive ? COLORS.bullish : COLORS.bearish}
             strokeWidth={2}
             fill="url(#equityGradient)"
             name="Equity"

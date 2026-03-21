@@ -1,15 +1,17 @@
 'use client'
 
 import React from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useWidgetData } from '@/hooks/use-widget-data'
-import { WidgetCard, ChartTooltip, RECHARTS_COLORS } from '../widget-card'
-import { useTheme } from '@/context/theme-provider'
+import { WidgetCard, ChartTooltip } from '../widget-card'
+
+const COLORS = {
+  bullish: 'hsl(var(--chart-bullish))',
+  bearish: 'hsl(var(--chart-bearish))',
+} as const
 
 export default function DayOfWeekPerformanceWidget() {
   const { data: chartData, isLoading } = useWidgetData('dayOfWeekPerformance')
-  const { theme } = useTheme()
-  const colors = theme === 'dark' ? RECHARTS_COLORS.dark : RECHARTS_COLORS.light
 
   if (isLoading) {
     return (
@@ -43,46 +45,16 @@ export default function DayOfWeekPerformanceWidget() {
             tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))', fontWeight: 700 }}
           />
           <YAxis
+            hide
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
-            tickFormatter={(v) => `$${v >= 1000 ? `${(v/1000).toFixed(1)}k` : v}`}
-            width={50}
           />
           <Tooltip
-            content={({ active, payload, label }) => {
-              if (!active || !payload?.length) return null
-              const data = payload[0].payload
-              return (
-                <div className="bg-card border border-border p-3 rounded-lg shadow-md">
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground/70 mb-2">{label}</p>
-                  <div className="flex items-center justify-between gap-4 mb-1">
-                    <span className="text-xs font-medium">Net P&L:</span>
-                    <span className={`text-xs font-mono font-bold ${data.pnl >= 0 ? 'text-long' : 'text-short'}`}>
-                      ${data.pnl.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-4 mb-1">
-                    <span className="text-xs font-medium text-muted-foreground">Trades:</span>
-                    <span className="text-xs font-mono font-bold">{data.total}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-xs font-medium text-muted-foreground">W/L:</span>
-                    <span className="text-xs font-mono font-bold">{data.wins}/{data.losses}</span>
-                  </div>
-                </div>
-              )
-            }}
+            content={<ChartTooltip />}
+            cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
           />
-          <Bar dataKey="pnl" radius={[4, 4, 0, 0]} name="Net P&L">
-            {chartData.map((entry: any, index: number) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={entry.pnl >= 0 ? colors.bullish : colors.bearish}
-                fillOpacity={0.85}
-              />
-            ))}
-          </Bar>
+          <Bar dataKey="Win" name="Win" fill={COLORS.bullish} radius={[4, 4, 0, 0]} maxBarSize={40} />
+          <Bar dataKey="Loss" name="Loss" fill={COLORS.bearish} radius={[4, 4, 0, 0]} maxBarSize={40} />
         </BarChart>
       </ResponsiveContainer>
     </WidgetCard>

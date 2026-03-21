@@ -160,7 +160,10 @@ export function SafeToaster() {
     <SonnerToaster
       position="bottom-right"
       theme={theme as 'light' | 'dark' | 'system'}
-      toastOptions={{ unstyled: true, className: 'flex justify-end' }}
+      toastOptions={{
+        className: 'bg-card text-foreground border border-border rounded-xl shadow-md p-3 text-xs',
+        descriptionClassName: 'text-muted-foreground text-xs',
+      }}
     />
   )
 }

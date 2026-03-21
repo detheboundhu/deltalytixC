@@ -31,10 +31,10 @@ function getDailyAggregations(trades: Partial<Trade>[]) {
 }
 
 export function calculateDayOfWeekPerformance(trades: Partial<Trade>[]) {
-  const dayMap: Record<number, { totalPnl: number; wins: number; losses: number; total: number }> = {}
+  const dayMap: Record<number, { totalPnl: number; winPnl: number; lossPnl: number; wins: number; losses: number; total: number }> = {}
 
   for (let i = 0; i < 7; i++) {
-    dayMap[i] = { totalPnl: 0, wins: 0, losses: 0, total: 0 }
+    dayMap[i] = { totalPnl: 0, winPnl: 0, lossPnl: 0, wins: 0, losses: 0, total: 0 }
   }
 
   trades.forEach((trade) => {
@@ -44,14 +44,21 @@ export function calculateDayOfWeekPerformance(trades: Partial<Trade>[]) {
     
     dayMap[dayOfWeek].totalPnl += netPnl
     dayMap[dayOfWeek].total++
-    if (netPnl > BREAK_EVEN_THRESHOLD) dayMap[dayOfWeek].wins++
-    else if (netPnl < -BREAK_EVEN_THRESHOLD) dayMap[dayOfWeek].losses++
+    if (netPnl > BREAK_EVEN_THRESHOLD) {
+      dayMap[dayOfWeek].wins++
+      dayMap[dayOfWeek].winPnl += netPnl
+    } else if (netPnl < -BREAK_EVEN_THRESHOLD) {
+      dayMap[dayOfWeek].losses++
+      dayMap[dayOfWeek].lossPnl += Math.abs(netPnl)
+    }
   })
 
   return [1, 2, 3, 4, 5, 0, 6]
     .map((day) => ({
       day: DAY_NAMES[day],
       pnl: parseFloat(dayMap[day].totalPnl.toFixed(2)),
+      Win: parseFloat(dayMap[day].winPnl.toFixed(2)),
+      Loss: parseFloat(dayMap[day].lossPnl.toFixed(2)),
       wins: dayMap[day].wins,
       losses: dayMap[day].losses,
       total: dayMap[day].total,

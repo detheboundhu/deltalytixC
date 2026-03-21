@@ -3,24 +3,16 @@
 import React from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { useWidgetData } from '@/hooks/use-widget-data'
-import { WidgetCard, RECHARTS_COLORS } from '../widget-card'
-import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
-import { useTheme } from '@/context/theme-provider'
+import { WidgetCard } from '../widget-card'
 
-/** Client-side color mapping for Recharts SVG fill — CSS vars don't work in SVG attributes */
-function useOutcomeColors() {
-  const { theme } = useTheme()
-  const palette = theme === 'dark' ? RECHARTS_COLORS.dark : RECHARTS_COLORS.light
-  return {
-    Wins: palette.bullish,
-    Losses: palette.bearish,
-    Breakeven: palette.muted,
-  } as Record<string, string>
-}
+const COLORS = {
+  Wins: 'hsl(var(--chart-bullish))',
+  Losses: 'hsl(var(--chart-bearish))',
+  Breakeven: 'hsl(220, 15%, 55%)',
+} as Record<string, string>
 
 export default function OutcomeDistributionWidget() {
   const { data: widgetData, isLoading } = useWidgetData('outcomeDistribution')
-  const colorMap = useOutcomeColors()
 
   if (isLoading) {
     return (
@@ -63,7 +55,7 @@ export default function OutcomeDistributionWidget() {
                 {data.map((entry: any, index: number) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={colorMap[entry.name] || '#7b8494'}
+                    fill={COLORS[entry.name] || 'hsl(220, 15%, 55%)'}
                   />
                 ))}
               </Pie>
@@ -97,7 +89,7 @@ export default function OutcomeDistributionWidget() {
             <div key={entry.name} className="flex items-center gap-1.5">
               <div
                 className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: colorMap[entry.name] || '#7b8494' }}
+                style={{ backgroundColor: COLORS[entry.name] || 'hsl(220, 15%, 55%)' }}
               />
               <span className="text-[10px] font-bold text-muted-foreground">
                 {entry.name} ({entry.value})

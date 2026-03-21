@@ -18,7 +18,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { WidgetCard } from '../widget-card'
+import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
 import { useData } from "@/context/data-provider"
 import { cn, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
@@ -61,57 +61,7 @@ const CHART_CONFIG = {
   referenceLineOpacity: 0.6
 } as const
 
-// ============================================================================
-// TOOLTIP COMPONENT - Glassmorphism Style
-// ============================================================================
 
-function ChartTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null
-
-  const data = payload[0].payload as StrategyWinRate
-  const isWinning = data.winRate >= 50
-
-  return (
-    <div className="bg-card border border-border/50 rounded-xl p-4 shadow-md min-w-[200px]">
-      {/* Strategy Header */}
-      <p className="text-sm font-bold mb-2 truncate max-w-[180px]">{data.strategy}</p>
-
-      {/* Win Rate - Large & Bold */}
-      <p className={cn(
-        "text-2xl font-bold tracking-tight",
-        isWinning ? "text-long" : "text-short"
-      )}>
-        {data.winRate.toFixed(1)}%
-      </p>
-
-      {/* Stats Grid */}
-      <div className="mt-3 pt-3 border-t border-border/30 space-y-2">
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Total Trades</span>
-          <span className="font-semibold">{data.totalTrades}</span>
-        </div>
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Profit Factor</span>
-          <span className="font-semibold">{data.profitFactor.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">Consistency</span>
-          <span className="font-semibold">{data.consistency.toFixed(0)}%</span>
-        </div>
-        <div className="grid grid-cols-2 gap-2 pt-2">
-          <div className="text-center p-2 bg-long/10 rounded-lg">
-            <p className="text-sm font-bold text-long">{data.wins}</p>
-            <p className="text-[10px] text-muted-foreground">Wins</p>
-          </div>
-          <div className="text-center p-2 bg-short/10 rounded-lg">
-            <p className="text-sm font-bold text-short">{data.losses}</p>
-            <p className="text-[10px] text-muted-foreground">Losses</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ============================================================================
 // MAIN COMPONENT
@@ -248,7 +198,7 @@ export default function WinRateByStrategy({ size = 'small-long' }: WinRateByStra
 
               {/* Tooltip */}
               <RechartsTooltip
-                content={<ChartTooltip />}
+                content={<SharedChartTooltip />}
                 cursor={{ fill: 'hsl(var(--muted)/0.3)' }}
               />
 
