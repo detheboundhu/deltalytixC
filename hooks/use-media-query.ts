@@ -17,10 +17,19 @@ export function useMediaQuery(query: string): boolean {
     }
 
     // Modern browsers
-    media.addEventListener('change', listener)
+    if (media.addEventListener) {
+      media.addEventListener('change', listener)
+    } else {
+      // Deprecated 'addListener' for older Safari/iOS
+      media.addListener(listener)
+    }
 
     return () => {
-      media.removeEventListener('change', listener)
+      if (media.removeEventListener) {
+        media.removeEventListener('change', listener)
+      } else {
+        media.removeListener(listener)
+      }
     }
   }, [query])
 

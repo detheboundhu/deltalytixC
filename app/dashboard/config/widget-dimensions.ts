@@ -216,11 +216,11 @@ export const WIDGET_GRID_DEFAULTS: Record<string, WidgetGridDefault> = {
   sessionAnalysis:        { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
 
   // Tables
-  recentTrades: { defaultW: 4, defaultH: 4, minW: 3, minH: 3 },
+  recentTrades: { defaultW: 4, defaultH: 5, minW: 3, minH: 3 },
 
   // Calendars — wider, taller
-  calendarAdvanced: { defaultW: 12, defaultH: 7, minW: 6, minH: 5 },
-  calendarMini:     { defaultW: 8, defaultH: 4, minW: 5, minH: 3 },
+  calendarAdvanced: { defaultW: 12, defaultH: 8, minW: 6, minH: 5 },
+  calendarMini:     { defaultW: 8, defaultH: 5, minW: 5, minH: 3 },
 
   // New charts
   equityCurve:            { defaultW: 8, defaultH: 4, minW: 4, minH: 3 },

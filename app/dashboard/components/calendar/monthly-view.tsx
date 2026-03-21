@@ -35,12 +35,14 @@ const DayCell = memo(function DayCell({
   dayData,
   hasNotes,
   isCurrentMonth,
+  hideWeekends,
   onClick,
 }: {
   date: Date
   dayData: CalendarData[string] | undefined
   hasNotes: boolean
   isCurrentMonth: boolean
+  hideWeekends?: boolean
   onClick: () => void
 }) {
   const { visibleStats } = useCalendarViewStore()
@@ -108,7 +110,7 @@ const DayCell = memo(function DayCell({
       )}
 
       {/* Secondary metrics — trade count + winrate */}
-      {hasTrades && (
+      {hasTrades && !hideWeekends && (
         <div className="hidden md:flex flex-col items-center gap-0 mt-0.5">
           {visibleStats.trades && (
             <span className="text-[9px] font-semibold text-muted-foreground/60">
@@ -288,7 +290,8 @@ export default function MonthlyView({
                     dayData={dayData}
                     hasNotes={hasNotes}
                     isCurrentMonth={isCurrentMonth}
-                    onClick={() => onSelectDate(date)}
+                    hideWeekends={hideWeekends}
+                    onClick={() => onSelectDate?.(date)}
                   />
                 )
               })}
