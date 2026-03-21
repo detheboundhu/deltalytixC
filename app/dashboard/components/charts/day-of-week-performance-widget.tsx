@@ -3,10 +3,13 @@
 import React from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useWidgetData } from '@/hooks/use-widget-data'
-import { WidgetCard, ChartTooltip, CHART_COLORS } from '../widget-card'
+import { WidgetCard, ChartTooltip, RECHARTS_COLORS } from '../widget-card'
+import { useTheme } from '@/context/theme-provider'
 
 export default function DayOfWeekPerformanceWidget() {
   const { data: chartData, isLoading } = useWidgetData('dayOfWeekPerformance')
+  const { theme } = useTheme()
+  const colors = theme === 'dark' ? RECHARTS_COLORS.dark : RECHARTS_COLORS.light
 
   if (isLoading) {
     return (
@@ -75,7 +78,7 @@ export default function DayOfWeekPerformanceWidget() {
             {chartData.map((entry: any, index: number) => (
               <Cell
                 key={`cell-${index}`}
-                fill={entry.pnl >= 0 ? CHART_COLORS.bullish : CHART_COLORS.bearish}
+                fill={entry.pnl >= 0 ? colors.bullish : colors.bearish}
                 fillOpacity={0.85}
               />
             ))}

@@ -3,11 +3,24 @@
 import React from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { useWidgetData } from '@/hooks/use-widget-data'
-import { WidgetCard, CHART_COLORS } from '../widget-card'
+import { WidgetCard, RECHARTS_COLORS } from '../widget-card'
 import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
+import { useTheme } from '@/context/theme-provider'
+
+/** Client-side color mapping for Recharts SVG fill — CSS vars don't work in SVG attributes */
+function useOutcomeColors() {
+  const { theme } = useTheme()
+  const palette = theme === 'dark' ? RECHARTS_COLORS.dark : RECHARTS_COLORS.light
+  return {
+    Wins: palette.bullish,
+    Losses: palette.bearish,
+    Breakeven: palette.muted,
+  } as Record<string, string>
+}
 
 export default function OutcomeDistributionWidget() {
   const { data: widgetData, isLoading } = useWidgetData('outcomeDistribution')
+  const colorMap = useOutcomeColors()
 
   if (isLoading) {
     return (
@@ -48,7 +61,10 @@ export default function OutcomeDistributionWidget() {
                 stroke="none"
               >
                 {data.map((entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={colorMap[entry.name] || '#7b8494'}
+                  />
                 ))}
               </Pie>
               <Tooltip
@@ -79,7 +95,10 @@ export default function OutcomeDistributionWidget() {
         <div className="flex items-center gap-4">
           {data.map((entry: any) => (
             <div key={entry.name} className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: colorMap[entry.name] || '#7b8494' }}
+              />
               <span className="text-[10px] font-bold text-muted-foreground">
                 {entry.name} ({entry.value})
               </span>

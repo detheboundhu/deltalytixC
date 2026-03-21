@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   LayoutDashboard,
@@ -15,8 +14,7 @@ import {
   Database,
   FileText,
   RefreshCw,
-  LogOut,
-  ChevronDown,
+  PanelLeftClose,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -30,20 +28,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { Logo } from '@/components/logo'
 import { cn } from '@/lib/utils'
 import { useData } from '@/context/data-provider'
-import { useAuth } from '@/context/auth-provider'
-import { signOut } from '@/server/auth'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useUserStore } from '@/store/user-store'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 
 const navItems = [
   { id: 'widgets', label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
@@ -63,10 +52,9 @@ const toolItems = [
 
 export function DashboardSidebar() {
   const pathname = usePathname()
-  const router = useRouter()
   const { refreshTrades } = useData()
-  const { forceClearAuth } = useAuth()
-  const user = useUserStore(state => state.supabaseUser)
+  const { toggleSidebar, state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
 
   const getActiveId = () => {
     if (pathname === '/dashboard') return 'widgets'
@@ -84,17 +72,10 @@ export function DashboardSidebar() {
 
   const activeId = getActiveId()
 
-  const handleLogout = async () => {
-    localStorage.clear()
-    sessionStorage.clear()
-    forceClearAuth()
-    await signOut()
-  }
-
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
-      {/* Header — Logo */}
-      <SidebarHeader className="h-14 flex items-center justify-center border-b border-border">
+      {/* Header — Logo: show only icon when collapsed */}
+      <SidebarHeader className="h-12 flex items-center justify-center border-b border-border">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -104,7 +85,9 @@ export function DashboardSidebar() {
             >
               <Link href="/dashboard" className="flex items-center gap-2">
                 <Logo className="h-6 w-6 shrink-0" />
-                <span className="text-sm font-bold tracking-tight truncate">Deltalytix</span>
+                {!isCollapsed && (
+                  <span className="text-sm font-bold tracking-tight">Deltalytix</span>
+                )}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -172,54 +155,20 @@ export function DashboardSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer — User + Logout */}
+      {/* Footer — Sidebar toggle (moved here from top, replacing profile) */}
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user?.user_metadata?.avatar_url} />
-                    <AvatarFallback className="rounded-lg uppercase text-xs">
-                      {user?.email?.[0] || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
-                    </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {user?.email || ''}
-                    </span>
-                  </div>
-                  <ChevronDown className="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/settings">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SidebarMenuButton
+              tooltip={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              onClick={toggleSidebar}
+            >
+              <PanelLeftClose className={cn(
+                'transition-transform',
+                isCollapsed && 'rotate-180'
+              )} />
+              <span>Collapse</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

@@ -9,6 +9,8 @@ export type WidgetType =
   | 'avgWinLoss'
   | 'currentStreak'
   | 'goalsRiskCommandCenter'
+  | 'tradingOverview'
+  | 'weeklyTracker'
   | 'sessionAnalysis'
   | 'netDailyPnL'
   | 'dailyCumulativePnL'

@@ -16,7 +16,9 @@ const DayWinRate = lazy(() => import('../components/kpi/day-win-rate'))
 const ProfitFactor = lazy(() => import('../components/kpi/profit-factor'))
 const AvgWinLoss = lazy(() => import('../components/kpi/avg-win-loss'))
 const CurrentStreak = lazy(() => import('../components/kpi/current-streak'))
-const GoalsRiskCommandCenter = lazy(() => import('../components/kpi/goals-risk-command-center'))
+const TradingOverview = lazy(() => import('../components/kpi/trading-overview'))
+const WeeklyTracker = lazy(() => import('../components/kpi/weekly-tracker'))
+const GoalsRiskCommandCenter = lazy(() => import('../components/kpi/trading-overview')) // redirects to new widget
 const SessionAnalysis = lazy(() => import('../components/kpi/session-analysis'))
 
 // Chart components (lazy loaded)
@@ -370,10 +372,30 @@ export const WIDGET_REGISTRY_LAZY: Record<WidgetType, WidgetConfig> = {
     defaultSize: 'large',
     allowedSizes: ['medium', 'large', 'extra-large'],
     category: 'statistics',
-    description: 'Combined goals tracker and risk metrics command center',
+    description: 'Trading overview with goals, risk metrics, and streak data',
     previewHeight: 200,
-    getComponent: ({ size }) => <LazyWidget Component={GoalsRiskCommandCenter} size={size} type="goalsRiskCommandCenter" Preview={CreateKpiPreview('Command Center')} />,
-    getPreview: () => CreateKpiPreview('Command Center')
+    getComponent: ({ size }) => <LazyWidget Component={TradingOverview} size={size} type="goalsRiskCommandCenter" Preview={CreateKpiPreview('Trading Overview')} />,
+    getPreview: () => CreateKpiPreview('Trading Overview')
+  },
+  tradingOverview: {
+    type: 'tradingOverview',
+    defaultSize: 'large',
+    allowedSizes: ['medium', 'large', 'extra-large'],
+    category: 'statistics',
+    description: 'Trading overview with goals, risk metrics, and streak data',
+    previewHeight: 200,
+    getComponent: ({ size }) => <LazyWidget Component={TradingOverview} size={size} type="tradingOverview" Preview={CreateKpiPreview('Trading Overview')} />,
+    getPreview: () => CreateKpiPreview('Trading Overview')
+  },
+  weeklyTracker: {
+    type: 'weeklyTracker',
+    defaultSize: 'medium',
+    allowedSizes: ['small', 'medium'],
+    category: 'statistics',
+    description: 'Current week P&L, trade count, win rate, and day-by-day heat bar',
+    previewHeight: 150,
+    getComponent: ({ size }) => <LazyWidget Component={WeeklyTracker} size={size} type="weeklyTracker" Preview={CreateKpiPreview('Weekly Tracker')} />,
+    getPreview: () => CreateKpiPreview('Weekly Tracker')
   },
   sessionAnalysis: {
     type: 'sessionAnalysis',

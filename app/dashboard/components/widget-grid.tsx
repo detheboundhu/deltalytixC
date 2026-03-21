@@ -4,26 +4,50 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { Responsive, verticalCompactor } from 'react-grid-layout'
 
 function useGridContainerWidth() {
-  const [width, setWidth] = useState(1200)
+  const [width, setWidth] = useState(0)
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setMounted(true)
     if (!containerRef.current) return
 
     const observeTarget = containerRef.current
+
+    // Measure immediately before observer — prevents stale 0/1200 on first render
+    const initialWidth = observeTarget.offsetWidth
+    if (initialWidth > 0) {
+      setWidth(initialWidth)
+      setMounted(true)
+    }
+
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        setWidth(observeTarget.offsetWidth || entry.contentRect.width)
+        const newWidth = observeTarget.offsetWidth || entry.contentRect.width
+        if (newWidth > 0) {
+          setWidth(newWidth)
+          if (!mounted) setMounted(true)
+        }
       }
     })
 
     resizeObserver.observe(observeTarget)
-    setWidth(observeTarget.offsetWidth)
 
-    return () => resizeObserver.disconnect()
-  }, [])
+    // Force a layout recalculation after a short delay for edge cases
+    // (e.g., sidebar animation completing, dynamic imports resolving)
+    const timer = setTimeout(() => {
+      const freshWidth = observeTarget.offsetWidth
+      if (freshWidth > 0 && freshWidth !== width) {
+        setWidth(freshWidth)
+      }
+      setMounted(true)
+      window.dispatchEvent(new Event('resize'))
+    }, 200)
+
+    return () => {
+      resizeObserver.disconnect()
+      clearTimeout(timer)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { width, containerRef, mounted }
 }
@@ -130,7 +154,12 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
     return {
       xl: desktopLayout,
       lg: desktopLayout,
-      md: desktopLayout.map(l => ({ ...l, w: 1, x: 0 })), // Stack on tablet
+      md: desktopLayout.map(l => ({
+        ...l,
+        // On tablets: 2-column layout instead of single column
+        w: Math.min(l.w, 6),
+        x: l.x >= 6 ? 0 : l.x,
+      })),
       sm: desktopLayout.map(l => ({ ...l, w: 1, x: 0 })), // Stack on mobile
     }
   }, [gridWidgets, isEditMode])
@@ -271,9 +300,9 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
             isEditMode && 'border-2 border-dashed border-border/50 rounded-xl p-2'
           )}
         >
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {kpiLayout.map((widget, index) => (
-              <div key={`kpi-slot-${index}`} className="relative flex-1 min-w-[160px]">
+              <div key={`kpi-slot-${index}`} className="relative">
                 {widget ? (
                   <div className="relative group h-full">
                     {/* Edit mode controls */}

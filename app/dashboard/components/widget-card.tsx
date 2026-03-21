@@ -107,10 +107,29 @@ export function ChartTooltip({ active, payload, label }: any) {
 }
 
 /**
- * Standard chart color constants matching reports page
+ * Standard chart color constants matching reports page.
+ * CSS var strings for stylesheet usage.
  */
 export const CHART_COLORS = {
   bullish: 'hsl(var(--chart-bullish))',
   bearish: 'hsl(var(--chart-bearish))',
   muted: 'hsl(220, 15%, 55%)',
+} as const
+
+/**
+ * Resolved color values for Recharts SVG contexts where CSS variables
+ * don't reliably work in fill/stroke attributes.
+ * These match the CSS vars in globals.css.
+ */
+export const RECHARTS_COLORS = {
+  light: {
+    bullish: '#83b885',   // --chart-bullish: 123 27% 62%
+    bearish: '#c4572a',   // --chart-bearish: 25 70% 45%
+    muted: '#7b8494',     // neutral muted
+  },
+  dark: {
+    bullish: '#83b885',   // same in dark
+    bearish: '#c4572a',   // same in dark
+    muted: '#7b8494',
+  },
 } as const
