@@ -24,7 +24,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   }, [pathname, setIsLoading])
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <DashboardSidebar />
       <SidebarInset>
         <Navbar />
