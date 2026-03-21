@@ -6,38 +6,41 @@ import { Responsive, verticalCompactor } from 'react-grid-layout'
 function useGridContainerWidth() {
   const [width, setWidth] = useState(0)
   const [mounted, setMounted] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
   const lastWidthRef = useRef(0)
+  const observerRef = useRef<ResizeObserver | null>(null)
+  const timersRef = useRef<NodeJS.Timeout[]>([])
 
-  useEffect(() => {
-    if (!containerRef.current) return
+  const containerRef = useCallback((node: HTMLDivElement | null) => {
+    // Cleanup previous observer and timers
+    if (observerRef.current) {
+      observerRef.current.disconnect()
+      observerRef.current = null
+    }
+    timersRef.current.forEach(clearTimeout)
+    timersRef.current = []
 
-    const el = containerRef.current
+    if (!node) return
 
-    // Measure using rAF for accurate post-layout width
     const measure = () => {
-      const w = el.offsetWidth
+      const w = node.offsetWidth
       if (w > 0 && w !== lastWidthRef.current) {
         lastWidthRef.current = w
         setWidth(w)
       }
-      if (w > 0) setMounted(true)
+      if (w > 0 && !mounted) setMounted(true)
     }
 
     // Immediate measurement
     requestAnimationFrame(measure)
 
-    // ResizeObserver for continuous width tracking
-    const resizeObserver = new ResizeObserver(() => {
+    // Setup new observer
+    observerRef.current = new ResizeObserver(() => {
       requestAnimationFrame(measure)
     })
-    resizeObserver.observe(el)
+    observerRef.current.observe(node)
 
-    // Multiple recalculation passes to handle CSS transitions:
-    // - Sidebar collapses over 200ms
-    // - Layout reflow can take additional time
-    // - Dynamic imports may shift container width
-    const timers = [300, 600, 1200].map((delay) =>
+    // Setup delayed passes for transitions
+    timersRef.current = [300, 600, 1200].map((delay) =>
       setTimeout(() => {
         requestAnimationFrame(() => {
           measure()
@@ -45,10 +48,13 @@ function useGridContainerWidth() {
         })
       }, delay)
     )
+  }, [mounted])
 
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      resizeObserver.disconnect()
-      timers.forEach(clearTimeout)
+      if (observerRef.current) observerRef.current.disconnect()
+      timersRef.current.forEach(clearTimeout)
     }
   }, [])
 
