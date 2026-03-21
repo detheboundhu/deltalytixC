@@ -6,8 +6,8 @@ import { useWidgetData } from '@/hooks/use-widget-data'
 import { WidgetCard, ChartTooltip } from '../widget-card'
 
 const COLORS = {
-  bullish: 'hsl(var(--chart-bullish))',
-  bearish: 'hsl(var(--chart-bearish))',
+  bullish: 'hsl(var(--chart-profit))',
+  bearish: 'hsl(var(--chart-loss))',
 } as const
 
 export default function EquityCurveWidget() {

@@ -293,6 +293,9 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
     return <EmptyAccountState />
   }
 
+  // Whether the grid has finished its initial width measurement
+  const gridReady = gridMounted && containerWidth > 0
+
   return (
     <div className={cn('space-y-3', className)}>
       {/* KPI Row — Flex container, separate from grid */}
@@ -348,9 +351,11 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
       </div>
 
       {/* Main Grid — react-grid-layout */}
+      {/* The ref div MUST always be in the DOM so ResizeObserver can measure width */}
       <div className="px-2" ref={gridContainerRef}>
+        {gridReady ? (
         <Responsive
-          width={containerWidth || 1200}
+          width={containerWidth}
           layouts={gridLayouts}
           breakpoints={{ xl: 1280, lg: 1024, md: 768, sm: 480 }}
           cols={{ xl: GRID_COLS, lg: GRID_COLS, md: 6, sm: 1 }}
@@ -395,6 +400,9 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
             )
           })}
         </Responsive>
+        ) : (
+          <MainDashboardSkeleton />
+        )}
       </div>
 
       {/* Add new widget button at bottom in edit mode */}

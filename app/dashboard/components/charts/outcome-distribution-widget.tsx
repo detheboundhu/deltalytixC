@@ -6,8 +6,8 @@ import { useWidgetData } from '@/hooks/use-widget-data'
 import { WidgetCard } from '../widget-card'
 
 const COLORS = {
-  Wins: 'hsl(var(--chart-bullish))',
-  Losses: 'hsl(var(--chart-bearish))',
+  Wins: 'hsl(var(--chart-profit))',
+  Losses: 'hsl(var(--chart-loss))',
   Breakeven: 'hsl(220, 15%, 55%)',
 } as Record<string, string>
 

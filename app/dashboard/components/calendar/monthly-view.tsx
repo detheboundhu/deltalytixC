@@ -13,7 +13,7 @@ import {
   getISOWeek,
 } from "date-fns"
 import { cn, formatCurrency, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
-import { NotebookPen } from "lucide-react"
+
 import { CalendarData } from "@/app/dashboard/types/calendar"
 import { useCalendarViewStore } from "@/store/calendar-view"
 import { useUserStore } from "@/store/user-store"
@@ -58,7 +58,7 @@ const DayCell = memo(function DayCell({
   return (
     <div
       className={cn(
-        "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-md border cursor-pointer transition-all duration-150 select-none group min-h-[48px] md:min-h-[100px]",
+        "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-md border cursor-pointer transition-all duration-150 select-none group min-h-[44px] md:min-h-[64px]",
 
         // No trades — dark neutral
         !hasTrades && isCurrentMonth && "bg-card/50 border-border/30 hover:border-border/60",
@@ -92,10 +92,7 @@ const DayCell = memo(function DayCell({
         {format(date, 'd')}
       </span>
 
-      {/* Journal icon — top left */}
-      {hasNotes && (
-        <NotebookPen className="absolute top-1 left-1.5 h-4 w-4 md:h-5 md:w-5 text-muted-foreground/70" />
-      )}
+
 
       {/* P&L — centered, prominent */}
       {hasTrades && visibleStats.pnl && (
