@@ -39,28 +39,28 @@ const DEFAULT_LAYOUT: WidgetLayout[] = [
   { i: 'equity-curve', type: 'equityCurve', size: 'large', x: 0, y: 1, w: 8, h: 4 },
   { i: 'outcome-dist', type: 'outcomeDistribution', size: 'medium', x: 8, y: 1, w: 4, h: 4 },
   // Row 2: Recent Trades + Mini Calendar
-  { i: 'recent-trades', type: 'recentTrades', size: 'small', x: 0, y: 5, w: 4, h: 4 },
-  { i: 'mini-calendar', type: 'calendarMini', size: 'large', x: 4, y: 5, w: 8, h: 4 },
+  { i: 'recent-trades', type: 'recentTrades', size: 'small', x: 0, y: 5, w: 4, h: 5 },
+  { i: 'mini-calendar', type: 'calendarMini', size: 'large', x: 4, y: 5, w: 8, h: 5 },
   // Row 3: Charts
-  { i: 'net-daily-pnl', type: 'netDailyPnL', size: 'small-long', x: 0, y: 9, w: 4, h: 4 },
-  { i: 'daily-cumulative-pnl', type: 'dailyCumulativePnL', size: 'small-long', x: 4, y: 9, w: 4, h: 4 },
-  { i: 'account-balance', type: 'accountBalanceChart', size: 'small-long', x: 8, y: 9, w: 4, h: 4 },
+  { i: 'net-daily-pnl', type: 'netDailyPnL', size: 'small-long', x: 0, y: 10, w: 4, h: 4 },
+  { i: 'daily-cumulative-pnl', type: 'dailyCumulativePnL', size: 'small-long', x: 4, y: 10, w: 4, h: 4 },
+  { i: 'account-balance', type: 'accountBalanceChart', size: 'small-long', x: 8, y: 10, w: 4, h: 4 },
   // Row 4: Day of Week + Weekday PnL
-  { i: 'day-of-week', type: 'dayOfWeekPerformance', size: 'medium', x: 0, y: 13, w: 6, h: 4 },
-  { i: 'weekday-pnl', type: 'weekdayPnL', size: 'small-long', x: 6, y: 13, w: 6, h: 4 },
+  { i: 'day-of-week', type: 'dayOfWeekPerformance', size: 'medium', x: 0, y: 14, w: 6, h: 4 },
+  { i: 'weekday-pnl', type: 'weekdayPnL', size: 'small-long', x: 6, y: 14, w: 6, h: 4 },
   // Row 5: More Charts
-  { i: 'trade-duration', type: 'tradeDurationPerformance', size: 'small-long', x: 0, y: 17, w: 4, h: 4 },
-  { i: 'pnl-by-strategy', type: 'pnlByStrategy', size: 'small-long', x: 4, y: 17, w: 4, h: 4 },
-  { i: 'pnl-by-instrument', type: 'pnlByInstrument', size: 'small-long', x: 8, y: 17, w: 4, h: 4 },
+  { i: 'trade-duration', type: 'tradeDurationPerformance', size: 'small-long', x: 0, y: 18, w: 4, h: 4 },
+  { i: 'pnl-by-strategy', type: 'pnlByStrategy', size: 'small-long', x: 4, y: 18, w: 4, h: 4 },
+  { i: 'pnl-by-instrument', type: 'pnlByInstrument', size: 'small-long', x: 8, y: 18, w: 4, h: 4 },
   // Row 6: Performance/Analysis
-  { i: 'performance-score', type: 'performanceScore', size: 'small-long', x: 0, y: 21, w: 4, h: 4 },
-  { i: 'win-rate-by-strategy', type: 'winRateByStrategy', size: 'small-long', x: 4, y: 21, w: 4, h: 4 },
-  { i: 'session-analysis', type: 'sessionAnalysis', size: 'medium', x: 8, y: 21, w: 4, h: 4 },
+  { i: 'performance-score', type: 'performanceScore', size: 'small-long', x: 0, y: 22, w: 4, h: 4 },
+  { i: 'win-rate-by-strategy', type: 'winRateByStrategy', size: 'small-long', x: 4, y: 22, w: 4, h: 4 },
+  { i: 'session-analysis', type: 'sessionAnalysis', size: 'medium', x: 8, y: 22, w: 4, h: 4 },
   // Row 7: Trading Overview + Weekly Tracker
-  { i: 'trading-overview', type: 'tradingOverview', size: 'large', x: 0, y: 25, w: 6, h: 4 },
-  { i: 'weekly-tracker', type: 'weeklyTracker', size: 'medium', x: 6, y: 25, w: 6, h: 3 },
+  { i: 'trading-overview', type: 'tradingOverview', size: 'large', x: 0, y: 26, w: 6, h: 4 },
+  { i: 'weekly-tracker', type: 'weeklyTracker', size: 'medium', x: 6, y: 26, w: 6, h: 3 },
   // Row 8: Full Calendar
-  { i: 'calendar-advanced', type: 'calendarAdvanced', size: 'extra-large', x: 0, y: 28, w: 12, h: 7 },
+  { i: 'calendar-advanced', type: 'calendarAdvanced', size: 'extra-large', x: 0, y: 30, w: 12, h: 8 },
 ]
 
 export function TemplateProvider({ children }: { children: React.ReactNode }) {
