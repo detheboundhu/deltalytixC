@@ -58,7 +58,7 @@ const DayCell = memo(function DayCell({
   return (
     <div
       className={cn(
-        "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-md border cursor-pointer transition-all duration-150 select-none group min-h-[44px] md:min-h-[64px]",
+        "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-md border cursor-pointer transition-all duration-150 select-none group min-h-0",
 
         // No trades — dark neutral
         !hasTrades && isCurrentMonth && "bg-card/50 border-border/30 hover:border-border/60",
