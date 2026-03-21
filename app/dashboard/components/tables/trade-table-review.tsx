@@ -661,39 +661,113 @@ export function TradeTableReview() {
 
       <div className="rounded-3xl border border-border bg-background shadow-md">
         {isMobile ? (
-          <div className="p-4 space-y-3">
-            {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => {
-                const trade = row.original
-                return (
-                  <TradeTableMobileCard
-                    key={row.id}
-                    trade={trade}
-                    timezone={timezone}
-                    isSelected={row.getIsSelected()}
-                    isExpanded={row.getIsExpanded()}
-                    canExpand={row.getCanExpand()}
-                    onToggleSelect={() => row.toggleSelected()}
-                    onToggleExpand={() => row.toggleExpanded()}
-                    onViewDetails={() => handleViewDetails(trade)}
-                    onEdit={() => handleEditTrade(trade)}
-                    onViewChart={() => handleViewChart(trade)}
-                  />
-                )
-              })
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
-                <div className="p-4 bg-muted/30 rounded-full">
-                  <BarChart3 className="h-8 w-8 opacity-40" />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-semibold">No trades found</p>
-                  <p className="text-xs text-muted-foreground/70 mt-1 max-w-[200px]">
-                    Adjust your filters or import trades to see them here
-                  </p>
-                </div>
-              </div>
-            )}
+          <div className="relative w-full overflow-hidden rounded-3xl">
+            <Table className="w-full text-sm">
+              <TableHeader className="sticky top-0 z-20 bg-background border-b shadow-sm">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="h-9 px-3 text-[11px] uppercase tracking-wide font-medium text-muted-foreground">Instr.</TableHead>
+                  <TableHead className="h-9 px-2 text-[11px] uppercase tracking-wide font-medium text-muted-foreground text-center">Side</TableHead>
+                  <TableHead className="h-9 px-2 text-[11px] uppercase tracking-wide font-medium text-muted-foreground text-right">PnL</TableHead>
+                  <TableHead className="h-9 px-2 text-[11px] uppercase tracking-wide font-medium text-muted-foreground text-center w-[60px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row) => {
+                    const trade = row.original
+                    const isLong = trade.side?.toUpperCase() === 'BUY' || trade.side?.toUpperCase() === 'LONG'
+                    const pnlValue = trade.pnl
+                    const isExpanded = row.getIsExpanded()
+
+                    return (
+                      <React.Fragment key={row.id}>
+                        <TableRow
+                          className="hover:bg-muted/30 transition-colors cursor-pointer"
+                          onClick={() => row.toggleExpanded()}
+                        >
+                          <TableCell className="px-3 py-2.5">
+                            <span className="font-bold tracking-tight text-xs">{trade.instrument}</span>
+                          </TableCell>
+                          <TableCell className="px-2 py-2.5 text-center">
+                            <Badge variant={isLong ? 'default' : 'destructive'} className="text-[10px] uppercase font-bold px-1.5 py-0">
+                              {trade.side?.toUpperCase().slice(0, 4)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="px-2 py-2.5 text-right">
+                            <span className={cn('font-bold font-mono text-xs', pnlValue >= 0 ? 'text-profit' : 'text-loss')}>
+                              {pnlValue >= 0 ? '+' : ''}{formatCurrency(pnlValue)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="px-2 py-2.5 text-center">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-6 px-2 text-[10px]"
+                              onClick={(e) => { e.stopPropagation(); handleViewDetails(trade) }}
+                            >
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                        {/* Accordion detail row */}
+                        {isExpanded && (
+                          <TableRow className="bg-muted/10 border-b border-border/30">
+                            <TableCell colSpan={4} className="px-3 py-3">
+                              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Date</span>
+                                  <span className="font-mono">{formatInTimeZone(new Date(trade.entryDate), timezone, 'yyyy-MM-dd')}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Entry</span>
+                                  <span className="font-mono">{formatCurrency(parseFloat(String(trade.entryPrice)), getDecimalPlaces(trade.instrument, parseFloat(String(trade.entryPrice))))}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Close</span>
+                                  <span className="font-mono">{formatCurrency(parseFloat(String(trade.closePrice)), getDecimalPlaces(trade.instrument, parseFloat(String(trade.closePrice))))}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Duration</span>
+                                  <span className="font-mono">{parsePositionTime(trade.timeInPosition || 0)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Comm.</span>
+                                  <span className="font-mono">{formatCurrency(trade.commission)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Qty</span>
+                                  <span className="font-mono">{formatQuantity(trade.quantity)}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/30">
+                                <Button variant="outline" size="sm" className="h-7 text-[11px] flex-1" onClick={() => handleEditTrade(trade)}>
+                                  Edit
+                                </Button>
+                                <Button variant="outline" size="sm" className="h-7 text-[11px] flex-1" onClick={() => handleViewChart(trade)}>
+                                  <BarChart3 className="h-3 w-3 mr-1" /> Chart
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    )
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2">
+                        <div className="p-3 bg-muted/30 rounded-full">
+                          <BarChart3 className="h-6 w-6 opacity-40" />
+                        </div>
+                        <p className="text-sm font-semibold">No trades found</p>
+                        <p className="text-xs text-muted-foreground/70">Adjust filters or import trades</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <div className="relative w-full overflow-x-auto rounded-3xl max-h-[800px] overflow-y-auto">

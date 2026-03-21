@@ -13,7 +13,6 @@ import { useData } from '@/context/data-provider'
 import { formatTimeInZone } from '@/lib/time-utils'
 import { classifyTrade, cn } from '@/lib/utils'
 import {
-    BarChart2,
     Zap,
     Share2,
     Target,
@@ -332,30 +331,24 @@ export default function ReportsPage() {
         <div className="w-full max-w-7xl mx-auto py-8 px-4 sm:px-6 pb-20 md:pb-8 overflow-hidden" id="report-content">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 pb-6 border-b border-border/50">
-                    <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                            <BarChart2 className="h-6 w-6" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight">Systematic Reports</h1>
-                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest mt-0.5 opacity-70">
-                                Trade Audit Center • {periodLabel}
-                            </p>
-                        </div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                    <div>
+                        <h1 className="text-xl font-bold tracking-tight">Reports</h1>
+                        <p className="text-[11px] text-muted-foreground font-medium mt-0.5">
+                            {periodLabel}
+                        </p>
                     </div>
-
                     <div className="no-export flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={isExporting} className="h-9 font-black uppercase tracking-tighter text-[10px] border-border/40 hover:bg-muted/10 transition-all">
-                            <TrendingUp className="h-3.5 w-3.5 mr-2 opacity-60" />
-                            Render Report
+                        <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={isExporting} className="h-8 text-[11px] font-bold uppercase tracking-wider border-border/30 hover:bg-muted-foreground/10 rounded-xl gap-1.5">
+                            <TrendingUp className="h-3.5 w-3.5 opacity-60" />
+                            Export
                         </Button>
 
                         <Dialog>
                             <DialogTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-9 font-black uppercase tracking-tighter text-[10px] border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-colors duration-200">
-                                    <Share2 className="h-3.5 w-3.5 mr-2" />
-                                    Share Intelligence
+                                <Button variant="outline" size="sm" className="h-8 text-[11px] font-bold uppercase tracking-wider border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 rounded-xl gap-1.5">
+                                    <Share2 className="h-3.5 w-3.5" />
+                                    Share
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-2xl bg-card border border-border/10 p-0 overflow-hidden rounded-[32px]">

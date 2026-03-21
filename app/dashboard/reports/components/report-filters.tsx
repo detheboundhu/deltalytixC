@@ -9,7 +9,8 @@ import {
     Clock,
     CheckCircle2,
     Target,
-    AlertCircle
+    AlertCircle,
+    SlidersHorizontal
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -27,6 +28,11 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { CustomDateRangePicker, DateRange } from '@/components/ui/custom-date-range-picker'
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 
 interface ReportFiltersProps {
     accounts: any[]
@@ -36,7 +42,6 @@ interface ReportFiltersProps {
     onDateRangeChange: (range: DateRange | undefined) => void
     onPresetSelect: (range: string) => void
     activePreset?: string
-    // Advanced Filters
     filters: {
         symbol: string
         session: string
@@ -66,36 +71,38 @@ export function ReportFilters({
     onFilterChange
 }: ReportFiltersProps) {
     const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+    const [showAdvanced, setShowAdvanced] = useState(false)
+
+    const activeFilterCount = Object.values(filters).filter(v => v !== 'all').length
 
     return (
-        <div className="flex flex-col space-y-3 mb-6 no-export">
-            <div className="flex flex-wrap items-center gap-2 bg-muted/10 p-2 rounded-2xl border border-border/40">
+        <div className="flex flex-col gap-3 mb-6 no-export">
+            {/* Primary Controls — single row: Account | Presets | Date | Advanced toggle */}
+            <div className="flex flex-wrap items-center gap-2">
                 {/* Account Selector */}
-                <div className="flex items-center gap-2 px-3 py-1.5 border-r border-border/40 max-sm:border-r-0">
-                    <Wallet className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="flex flex-col">
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-0.5">Account</span>
-                        <Select
-                            value={selectedAccountId || 'all'}
-                            onValueChange={(val) => onAccountChange(val === 'all' ? null : val)}
-                        >
-                            <SelectTrigger className="w-[140px] border-none bg-transparent hover:bg-muted/50 transition-colors h-7 p-0 text-[10px] font-black uppercase tracking-widest focus:ring-0">
-                                <SelectValue placeholder="All Accounts" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all" className="text-[10px] font-bold uppercase">All Accounts</SelectItem>
-                                {accounts.map(acc => (
-                                    <SelectItem key={acc.id} value={acc.id} className="text-[10px] font-bold uppercase">
-                                        {acc.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
+                <Select
+                    value={selectedAccountId || 'all'}
+                    onValueChange={(val) => onAccountChange(val === 'all' ? null : val)}
+                >
+                    <SelectTrigger className="h-9 w-[160px] text-[11px] font-bold uppercase tracking-wider border-border/30 bg-muted/10 hover:bg-muted/20 transition-colors rounded-xl gap-1.5">
+                        <Wallet className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <SelectValue placeholder="All Accounts" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all" className="text-[11px] font-bold uppercase">All Accounts</SelectItem>
+                        {accounts.map(acc => (
+                            <SelectItem key={acc.id} value={acc.id} className="text-[11px] font-bold uppercase">
+                                {acc.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
-                {/* Date Range Presets */}
-                <div className="flex items-center p-1 bg-background/50 rounded-lg border border-border/20 gap-1">
+                {/* Divider */}
+                <div className="h-5 w-px bg-border/30 hidden sm:block" />
+
+                {/* Date Presets */}
+                <div className="flex items-center bg-muted/10 rounded-xl border border-border/20 p-0.5 gap-0.5">
                     {['7D', '30D', '90D', 'YTD', 'ALL'].map(preset => (
                         <Button
                             key={preset}
@@ -103,10 +110,10 @@ export function ReportFilters({
                             size="sm"
                             onClick={() => onPresetSelect(preset)}
                             className={cn(
-                                "h-7 px-2.5 text-[9px] font-black tracking-widest transition-all",
+                                "h-8 px-3 text-[10px] font-black tracking-widest rounded-lg transition-all",
                                 activePreset === preset
-                                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                                    : "hover:bg-primary/10 hover:text-primary"
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "hover:bg-muted/50 text-muted-foreground"
                             )}
                         >
                             {preset}
@@ -114,7 +121,8 @@ export function ReportFilters({
                     ))}
                 </div>
 
-                <div className="h-4 w-px bg-border/40 hidden md:block" />
+                {/* Divider */}
+                <div className="h-5 w-px bg-border/30 hidden sm:block" />
 
                 {/* Custom Date Picker */}
                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
@@ -123,30 +131,23 @@ export function ReportFilters({
                             variant="outline"
                             size="sm"
                             className={cn(
-                                "h-9 flex flex-col items-start gap-0.5 border-border/40 bg-background hover:bg-muted/30 px-3 min-w-[160px]",
+                                "h-9 gap-2 border-border/30 bg-muted/10 hover:bg-muted/20 px-3 rounded-xl text-[11px] font-bold uppercase tracking-wider",
                                 !dateRange && "text-muted-foreground"
                             )}
                         >
-                            <div className="flex items-center gap-1.5">
-                                <CalendarIcon className="h-3 w-3" />
-                                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Duration</span>
-                            </div>
-                            <div className="flex items-center gap-2 w-full justify-between">
-                                <span className="text-[9px] font-black uppercase tracking-widest">
-                                    {dateRange?.from ? (
-                                        dateRange.to ? (
-                                            <>
-                                                {format(dateRange.from, "LLL dd")} - {format(dateRange.to, "LLL dd, y")}
-                                            </>
-                                        ) : (
-                                            format(dateRange.from, "LLL dd, y")
-                                        )
+                            <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span>
+                                {dateRange?.from ? (
+                                    dateRange.to ? (
+                                        <>{format(dateRange.from, "MMM dd")} – {format(dateRange.to, "MMM dd, yy")}</>
                                     ) : (
-                                        "Custom Range"
-                                    )}
-                                </span>
-                                <ChevronDown className="h-2 w-2 opacity-30" />
-                            </div>
+                                        format(dateRange.from, "MMM dd, yyyy")
+                                    )
+                                ) : (
+                                    "Custom Range"
+                                )}
+                            </span>
+                            <ChevronDown className="h-3 w-3 opacity-40" />
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 border-border/10 rounded-[24px] shadow-lg" align="end">
@@ -162,104 +163,128 @@ export function ReportFilters({
                         />
                     </PopoverContent>
                 </Popover>
+
+                {/* Spacer */}
+                <div className="flex-1" />
+
+                {/* Advanced Filters Toggle */}
+                <Button
+                    variant={showAdvanced ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className={cn(
+                        "h-9 gap-2 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all",
+                        showAdvanced
+                            ? "bg-primary text-primary-foreground"
+                            : "border-border/30 bg-muted/10 hover:bg-muted/20"
+                    )}
+                >
+                    <SlidersHorizontal className="h-3.5 w-3.5" />
+                    Filters
+                    {activeFilterCount > 0 && (
+                        <span className="flex items-center justify-center h-4 w-4 rounded-full bg-primary-foreground/20 text-[9px] font-black">
+                            {activeFilterCount}
+                        </span>
+                    )}
+                </Button>
             </div>
 
-            {/* Advanced Filters Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-                {/* Symbol */}
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1 px-1">
-                        <Hash className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Symbol</span>
-                    </div>
-                    <Select value={filters.symbol} onValueChange={(v) => onFilterChange('symbol', v)}>
-                        <SelectTrigger className="h-8 text-[10px] font-bold uppercase tracking-widest border-border/20 bg-background/50 hover:bg-muted/30 transition-colors">
-                            <SelectValue placeholder="All Symbols" />
-                        </SelectTrigger>
-                        <SelectContent className="border-border/10 rounded-xl">
-                            <SelectItem value="all" className="text-[10px] font-bold uppercase">All Symbols</SelectItem>
-                            {options.symbols.map(s => (
-                                <SelectItem key={s} value={s} className="text-[10px] font-bold uppercase">{s}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+            {/* Advanced Filters — collapsible row */}
+            <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+                <CollapsibleContent className="data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-2 pb-1 border-t border-border/20">
+                        {/* Symbol */}
+                        <FilterSelect
+                            icon={<Hash className="h-3 w-3" />}
+                            label="Symbol"
+                            value={filters.symbol}
+                            onChange={(v) => onFilterChange('symbol', v)}
+                            placeholder="All Symbols"
+                            options={options.symbols.map(s => ({ value: s, label: s }))}
+                        />
 
-                {/* Session */}
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1 px-1">
-                         <Clock className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Session</span>
-                    </div>
-                    <Select value={filters.session} onValueChange={(v) => onFilterChange('session', v)}>
-                        <SelectTrigger className="h-8 text-[10px] font-bold uppercase tracking-widest border-border/20 bg-background/50 hover:bg-muted/30 transition-colors">
-                            <SelectValue placeholder="All Sessions" />
-                        </SelectTrigger>
-                        <SelectContent className="border-border/10 rounded-xl">
-                            <SelectItem value="all" className="text-[10px] font-bold uppercase">All Sessions</SelectItem>
-                            {options.sessions.map(s => (
-                                <SelectItem key={s} value={s} className="text-[10px] font-bold uppercase">{s}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                        {/* Session */}
+                        <FilterSelect
+                            icon={<Clock className="h-3 w-3" />}
+                            label="Session"
+                            value={filters.session}
+                            onChange={(v) => onFilterChange('session', v)}
+                            placeholder="All Sessions"
+                            options={options.sessions.map(s => ({ value: s, label: s }))}
+                        />
 
-                {/* Outcome */}
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1 px-1">
-                        <CheckCircle2 className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Outcome</span>
-                    </div>
-                    <Select value={filters.outcome} onValueChange={(v) => onFilterChange('outcome', v)}>
-                        <SelectTrigger className="h-8 text-[10px] font-bold uppercase tracking-widest border-border/20 bg-background/50 hover:bg-muted/30 transition-colors">
-                            <SelectValue placeholder="All Outcomes" />
-                        </SelectTrigger>
-                        <SelectContent className="border-border/10 rounded-xl">
-                            <SelectItem value="all" className="text-[10px] font-bold uppercase">All Outcomes</SelectItem>
-                            {options.outcomes.map(o => (
-                                <SelectItem key={o.value} value={o.value} className="text-[10px] font-bold uppercase">{o.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                        {/* Outcome */}
+                        <FilterSelect
+                            icon={<CheckCircle2 className="h-3 w-3" />}
+                            label="Outcome"
+                            value={filters.outcome}
+                            onChange={(v) => onFilterChange('outcome', v)}
+                            placeholder="All Outcomes"
+                            options={options.outcomes}
+                        />
 
-                {/* Strategy */}
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1 px-1">
-                        <Target className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Strategy</span>
-                    </div>
-                    <Select value={filters.strategy} onValueChange={(v) => onFilterChange('strategy', v)}>
-                        <SelectTrigger className="h-8 text-[10px] font-bold uppercase tracking-widest border-border/20 bg-background/50 hover:bg-muted/30 transition-colors">
-                            <SelectValue placeholder="All Strategies" />
-                        </SelectTrigger>
-                        <SelectContent className="border-border/10 rounded-xl">
-                            <SelectItem value="all" className="text-[10px] font-bold uppercase">All Systems</SelectItem>
-                            {options.strategies.map(s => (
-                                <SelectItem key={s.id} value={s.id} className="text-[10px] font-bold uppercase">{s.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                        {/* Strategy */}
+                        <FilterSelect
+                            icon={<Target className="h-3 w-3" />}
+                            label="Strategy"
+                            value={filters.strategy}
+                            onChange={(v) => onFilterChange('strategy', v)}
+                            placeholder="All Systems"
+                            options={options.strategies.map(s => ({ value: s.id, label: s.name }))}
+                        />
 
-                {/* Rule Broken */}
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1 px-1">
-                        <AlertCircle className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Rule Status</span>
+                        {/* Rule Status */}
+                        <FilterSelect
+                            icon={<AlertCircle className="h-3 w-3" />}
+                            label="Rule Status"
+                            value={filters.ruleBroken}
+                            onChange={(v) => onFilterChange('ruleBroken', v)}
+                            placeholder="All Status"
+                            options={[
+                                { value: 'broken', label: 'Broken' },
+                                { value: 'followed', label: 'Followed' },
+                            ]}
+                        />
                     </div>
-                    <Select value={filters.ruleBroken} onValueChange={(v) => onFilterChange('ruleBroken', v)}>
-                        <SelectTrigger className="h-8 text-[10px] font-bold uppercase tracking-widest border-border/20 bg-background/50 hover:bg-muted/30 transition-colors">
-                            <SelectValue placeholder="All Status" />
-                        </SelectTrigger>
-                        <SelectContent className="border-border/10 rounded-xl">
-                            <SelectItem value="all" className="text-[10px] font-bold uppercase">Rule Status</SelectItem>
-                            <SelectItem value="broken" className="text-[10px] font-bold uppercase text-short">Broken</SelectItem>
-                            <SelectItem value="followed" className="text-[10px] font-bold uppercase text-long">Followed</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
+                </CollapsibleContent>
+            </Collapsible>
+        </div>
+    )
+}
+
+/** Reusable filter select with icon + label */
+function FilterSelect({
+    icon,
+    label,
+    value,
+    onChange,
+    placeholder,
+    options,
+}: {
+    icon: React.ReactNode
+    label: string
+    value: string
+    onChange: (value: string) => void
+    placeholder: string
+    options: { value: string; label: string }[]
+}) {
+    return (
+        <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1 px-1 text-muted-foreground">
+                {icon}
+                <span className="text-[9px] font-black uppercase tracking-[0.1em]">{label}</span>
             </div>
+            <Select value={value} onValueChange={onChange}>
+                <SelectTrigger className="h-8 text-[11px] font-bold uppercase tracking-wider border-border/20 bg-muted/10 hover:bg-muted/20 transition-colors rounded-lg">
+                    <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+                <SelectContent className="border-border/10 rounded-xl">
+                    <SelectItem value="all" className="text-[11px] font-bold uppercase">{placeholder}</SelectItem>
+                    {options.map(o => (
+                        <SelectItem key={o.value} value={o.value} className="text-[11px] font-bold uppercase">{o.label}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
         </div>
     )
 }
