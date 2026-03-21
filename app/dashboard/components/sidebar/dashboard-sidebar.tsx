@@ -14,7 +14,6 @@ import {
   Database,
   FileText,
   RefreshCw,
-  PanelLeftClose,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -53,7 +52,7 @@ const toolItems = [
 export function DashboardSidebar() {
   const pathname = usePathname()
   const { refreshTrades } = useData()
-  const { toggleSidebar, state } = useSidebar()
+  const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
 
   const getActiveId = () => {
@@ -74,7 +73,7 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
-      {/* Header — Logo: show only icon when collapsed */}
+      {/* Header — Logo */}
       <SidebarHeader className="h-12 flex items-center justify-center border-b border-border">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -155,23 +154,7 @@ export function DashboardSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer — Sidebar toggle (moved here from top, replacing profile) */}
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              onClick={toggleSidebar}
-            >
-              <PanelLeftClose className={cn(
-                'transition-transform',
-                isCollapsed && 'rotate-180'
-              )} />
-              <span>Collapse</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+      {/* No footer toggle — SidebarTrigger in navbar handles collapse */}
     </Sidebar>
   )
 }

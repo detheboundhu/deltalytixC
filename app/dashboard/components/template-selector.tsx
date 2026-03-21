@@ -12,12 +12,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LayoutGrid, Check, Plus, Pencil, Trash2 } from 'lucide-react'
+import { LayoutGrid, Check, Plus, Pencil, Trash2, Copy, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 export function TemplateSelector() {
-  const { templates, activeTemplate, switchTemplate, createTemplate, deleteTemplate } = useTemplates()
+  const { templates, activeTemplate, switchTemplate, createTemplate, deleteTemplate, updateLayout } = useTemplates()
   const { isEditMode, enterEditMode } = useTemplateEditStore()
   const [isCreating, setIsCreating] = useState(false)
   const [newName, setNewName] = useState('')
@@ -44,6 +44,20 @@ export function TemplateSelector() {
     }
   }
 
+  /** Clone the default template into a new editable one */
+  const handleCloneDefault = async () => {
+    if (!activeTemplate) return
+    try {
+      const cloned = await createTemplate(`${activeTemplate.name} (Copy)`)
+      // Copy the layout from existing active template to the clone
+      await updateLayout(cloned.id, activeTemplate.layout)
+      await switchTemplate(cloned.id)
+      toast.success('Template cloned — you can now edit it')
+    } catch (e) {
+      // error toast handled in context
+    }
+  }
+
   const handleDelete = async (templateId: string, name: string) => {
     if (!confirm(`Delete template "${name}"?`)) return
     try {
@@ -54,9 +68,16 @@ export function TemplateSelector() {
   }
 
   const handleEdit = () => {
-    if (activeTemplate) {
-      enterEditMode(activeTemplate.layout)
+    if (!activeTemplate) return
+
+    // Default templates are read-only — clone first
+    if (activeTemplate.isDefault) {
+      toast.info('Default template is read-only. Clone it to edit.')
+      handleCloneDefault()
+      return
     }
+
+    enterEditMode(activeTemplate.layout)
   }
 
   return (
@@ -74,13 +95,17 @@ export function TemplateSelector() {
         {templates.map(t => (
           <DropdownMenuItem
             key={t.id}
-            className="flex items-center justify-between cursor-pointer"
+            className="flex items-center justify-between cursor-pointer group"
             onClick={() => handleSwitch(t.id)}
           >
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              {t.isActive && <Check className="h-3.5 w-3.5 text-foreground shrink-0" />}
-              {!t.isActive && <div className="w-3.5" />}
+              {t.isActive ? (
+                <Check className="h-3.5 w-3.5 text-foreground shrink-0" />
+              ) : (
+                <div className="w-3.5" />
+              )}
               <span className="truncate">{t.name}</span>
+              {t.isDefault && <Lock className="h-3 w-3 text-muted-foreground shrink-0" />}
             </div>
             {!t.isDefault && (
               <button
@@ -98,15 +123,23 @@ export function TemplateSelector() {
 
         <DropdownMenuSeparator />
 
-        {/* Edit current */}
-        {!isEditMode && (
+        {/* Edit current (only non-default) */}
+        {!isEditMode && activeTemplate && !activeTemplate.isDefault && (
           <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
             <Pencil className="h-3.5 w-3.5 mr-2" />
             Edit Layout
           </DropdownMenuItem>
         )}
 
-        {/* Create new */}
+        {/* Clone default */}
+        {activeTemplate?.isDefault && (
+          <DropdownMenuItem onClick={handleCloneDefault} className="cursor-pointer">
+            <Copy className="h-3.5 w-3.5 mr-2" />
+            Clone & Edit
+          </DropdownMenuItem>
+        )}
+
+        {/* Create new (empty) */}
         {isCreating ? (
           <div className="p-2 flex items-center gap-2">
             <Input
@@ -115,7 +148,10 @@ export function TemplateSelector() {
               className="h-7 text-xs"
               value={newName}
               onChange={e => setNewName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleCreate()}
+              onKeyDown={e => {
+                if (e.key === 'Enter') handleCreate()
+                if (e.key === 'Escape') setIsCreating(false)
+              }}
             />
             <Button size="sm" className="h-7 px-2 text-xs" onClick={handleCreate}>
               Add
