@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { useUserStore } from '@/store/user-store'
 import { ImportLoading } from '../components/import-loading'
-import { CheckCircle } from '@phosphor-icons/react'
+import { CheckCircle2 } from 'lucide-react'
 
 interface MatchTraderProcessorProps {
   csvData: string[][]
@@ -190,7 +190,7 @@ const MatchTraderProcessor = ({
     <div className="flex items-center justify-center h-full">
       <div className="text-center space-y-4 max-w-md">
         <div className="w-16 h-16 rounded-full bg-long/10 flex items-center justify-center mx-auto">
-          <CheckCircle weight="light" className="w-8 h-8 text-long" />
+          <CheckCircle2 className="w-8 h-8 text-long" />
         </div>
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">Trades Processed Successfully</h3>

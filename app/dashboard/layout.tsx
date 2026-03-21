@@ -4,7 +4,6 @@ import { TagsProvider } from "@/context/tags-provider";
 import Modals from "@/components/modals";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ReactElement, Suspense } from "react";
-import Navbar from "./components/navbar";
 import { AutoRefreshProvider } from "./components/auto-refresh-provider";
 import { SidebarLayout } from "./components/sidebar-layout";
 import { MobileBottomNav } from "@/components/ui/mobile-nav";
@@ -22,17 +21,11 @@ export default function RootLayout({ children }: { children: ReactElement }) {
             {/* Data syncs via Supabase Realtime - no polling needed */}
             <AutoRefreshProvider>
               <div className="min-h-screen flex flex-col">
-                <Navbar />
-                <div className="flex flex-1">
-                  <Suspense fallback={<div className="flex flex-1" />}>
-                    <SidebarLayout>
-                      {/* Add bottom padding on mobile for nav */}
-                      <div className="pb-24 lg:pb-0">
-                        {children}
-                      </div>
-                    </SidebarLayout>
-                  </Suspense>
-                </div>
+                <Suspense fallback={<div className="flex flex-1" />}>
+                  <SidebarLayout>
+                    {children}
+                  </SidebarLayout>
+                </Suspense>
                 <Modals />
                 <MobileBottomNav />
                 <QuickAddFAB />

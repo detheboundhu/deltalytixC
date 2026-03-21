@@ -1,7 +1,7 @@
 'use client'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Database, GitBranch, Key, Link } from '@phosphor-icons/react'
+import { Database, GitBranch, Key, Link } from 'lucide-react'
 
 export default function DatabaseDocs() {
   return (
@@ -18,7 +18,7 @@ export default function DatabaseDocs() {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Database weight="light" className="h-5 w-5 text-primary" />
+              <Database className="h-5 w-5 text-primary" />
             </div>
             <h2>Core Models</h2>
           </div>
@@ -54,7 +54,7 @@ export default function DatabaseDocs() {
 }`}
                 </pre>
                 <div className="flex items-start gap-2 text-sm">
-                  <Link weight="light" className="h-4 w-4 text-primary mt-1 shrink-0" />
+                  <Link className="h-4 w-4 text-primary mt-1 shrink-0" />
                   <p className="text-muted-foreground">
                     <strong className="text-foreground">Relations:</strong> One-to-many with Account, Trade, Group, TradeTag, MasterAccount, DailyNote
                   </p>
@@ -111,7 +111,7 @@ export default function DatabaseDocs() {
                 </pre>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
-                    <Key weight="light" className="h-4 w-4 text-primary mt-1 shrink-0" />
+                    <Key className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <p className="text-muted-foreground">
                       <strong className="text-foreground">Key Points:</strong> Decimal types for prices prevent floating-point errors. 
                       <code>entryId</code> groups partial closes for accurate win rate.
@@ -231,7 +231,7 @@ enum MasterAccountStatus {
                 </pre>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
-                    <Key weight="light" className="h-4 w-4 text-primary mt-1 shrink-0" />
+                    <Key className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <p className="text-muted-foreground">
                       <strong className="text-foreground">Daily Anchors:</strong> Stored each day to calculate daily drawdown accurately. 
                       Breach detection runs via cron job.
@@ -246,7 +246,7 @@ enum MasterAccountStatus {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <GitBranch weight="light" className="h-5 w-5 text-primary" />
+              <GitBranch className="h-5 w-5 text-primary" />
             </div>
             <h2>Supporting Models</h2>
           </div>
@@ -405,7 +405,7 @@ enum MasterAccountStatus {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Key weight="light" className="h-5 w-5 text-primary" />
+              <Key className="h-5 w-5 text-primary" />
             </div>
             <h2>Database Indexes</h2>
           </div>
@@ -463,7 +463,7 @@ enum MasterAccountStatus {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Database weight="light" className="h-5 w-5 text-primary" />
+              <Database className="h-5 w-5 text-primary" />
             </div>
             <h2>Enums</h2>
           </div>
@@ -536,7 +536,7 @@ enum MasterAccountStatus {
         <Card className="border-primary bg-primary/5">
           <CardContent className="pt-6">
             <div className="flex gap-4">
-              <Database weight="light" className="h-6 w-6 text-primary shrink-0 mt-1" />
+              <Database className="h-6 w-6 text-primary shrink-0 mt-1" />
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-foreground">Prisma CLI Commands</h3>
                 <p className="text-sm text-muted-foreground">

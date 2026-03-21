@@ -29,7 +29,7 @@ function useGridContainerWidth() {
 }
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { X, Plus, DotsSixVertical } from '@phosphor-icons/react'
+import { X, Plus, GripVertical } from 'lucide-react'
 import { WIDGET_REGISTRY } from '../config/widget-registry-lazy'
 import { useTemplateEditStore } from '@/store/template-edit-store'
 import { useTemplates } from '@/context/template-provider'
@@ -271,16 +271,16 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
             isEditMode && 'border-2 border-dashed border-border/50 rounded-xl p-2'
           )}
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-3">
+          <div className="flex flex-wrap gap-3">
             {kpiLayout.map((widget, index) => (
-              <div key={`kpi-slot-${index}`} className="relative w-full h-full">
+              <div key={`kpi-slot-${index}`} className="relative flex-1 min-w-[160px]">
                 {widget ? (
                   <div className="relative group h-full">
                     {/* Edit mode controls */}
                     {isEditMode && (
                       <>
                         <div className="absolute top-2 left-2 cursor-move z-10 bg-background/80 backdrop-blur-sm rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <DotsSixVertical weight="light" className="h-4 w-4 text-muted-foreground" />
+                          <GripVertical className="h-4 w-4 text-muted-foreground" />
                         </div>
                         <Button
                           variant="destructive"
@@ -288,7 +288,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
                           className="absolute top-2 right-2 h-6 w-6 rounded-full p-0 shadow-md z-10 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => handleRemoveWidget(widget.i)}
                         >
-                          <X weight="light" className="h-3 w-3" />
+                          <X className="h-3 w-3" />
                         </Button>
                       </>
                     )}
@@ -301,7 +301,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
                       onClick={() => handleAddWidget({ slotIndex: index })}
                     >
                       <CardContent className="h-full flex flex-col items-center justify-center p-4">
-                        <Plus weight="light" className="h-5 w-5 text-muted-foreground mb-1.5" />
+                        <Plus className="h-5 w-5 text-muted-foreground mb-1.5" />
                         <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
                           Add KPI
                         </span>
@@ -341,7 +341,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
                   {isEditMode && (
                     <>
                       <div className="widget-drag-handle absolute top-2 left-2 cursor-grab active:cursor-grabbing z-10 bg-background/80 backdrop-blur-sm rounded-md p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm border border-border/50">
-                        <DotsSixVertical weight="bold" className="h-4 w-4 text-muted-foreground" />
+                        <GripVertical className="h-4 w-4 text-muted-foreground" />
                       </div>
                       <Button
                         variant="destructive"
@@ -349,7 +349,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
                         className="absolute top-2 right-2 h-6 w-6 rounded-full p-0 shadow-md z-10 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => handleRemoveWidget(widget.i)}
                       >
-                        <X weight="light" className="h-3 w-3" />
+                        <X className="h-3 w-3" />
                       </Button>
                     </>
                   )}
@@ -373,7 +373,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
             onClick={() => handleAddWidget()}
           >
             <CardContent className="h-full flex flex-col items-center justify-center p-4">
-              <Plus weight="light" className="h-6 w-6 text-muted-foreground mb-1.5" />
+              <Plus className="h-6 w-6 text-muted-foreground mb-1.5" />
               <span className="text-xs font-bold text-muted-foreground">
                 Add Widget
               </span>

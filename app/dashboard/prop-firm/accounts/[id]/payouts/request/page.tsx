@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, CurrencyDollar, WarningCircle, CheckCircle, CircleNotch } from "@phosphor-icons/react"
+import { ArrowLeft, DollarSign, AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface EligibilityData {
@@ -145,7 +145,7 @@ export default function RequestPayoutPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto p-6 flex items-center justify-center min-h-[400px]">
-        <CircleNotch className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -175,7 +175,7 @@ export default function RequestPayoutPage() {
         <Card className="border-warning">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <WarningCircle className="h-5 w-5 text-warning" />
+              <AlertCircle className="h-5 w-5 text-warning" />
               <CardTitle>Payout Not Available</CardTitle>
             </div>
           </CardHeader>
@@ -200,7 +200,7 @@ export default function RequestPayoutPage() {
         <Card className="border-long">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-long" />
+              <CheckCircle2 className="h-5 w-5 text-long" />
               <CardTitle>Eligible for Payout</CardTitle>
             </div>
           </CardHeader>
@@ -242,7 +242,7 @@ export default function RequestPayoutPage() {
             <div className="space-y-2">
               <Label htmlFor="amount">Amount ($)</Label>
               <div className="relative">
-                <CurrencyDollar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="amount"
                   type="number"
@@ -284,7 +284,7 @@ export default function RequestPayoutPage() {
               >
                 {isSubmitting ? (
                   <>
-                    <CircleNotch className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Submitting...
                   </>
                 ) : (

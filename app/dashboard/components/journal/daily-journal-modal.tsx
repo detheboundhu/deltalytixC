@@ -21,10 +21,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import { LexicalEditor } from '@/components/ui/editor/lexical-editor'
 import { EmotionPicker, EmotionType, getEmotionIcon } from './emotion-picker'
 import { toast } from 'sonner'
-import { CircleNotch, BookOpen, FloppyDisk, X } from '@phosphor-icons/react'
+import { Loader2, BookOpen, Save, X } from 'lucide-react'
 import { cn, BREAK_EVEN_THRESHOLD } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -204,7 +204,7 @@ export function DailyJournalModal({
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" weight="light" />
+              <BookOpen className="h-5 w-5 text-primary" />
               <DialogTitle>Daily Journal</DialogTitle>
             </div>
             <DialogDescription className="text-base font-medium">
@@ -214,7 +214,7 @@ export function DailyJournalModal({
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <CircleNotch className="h-8 w-8 animate-spin text-muted-foreground" weight="light" />
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
             <div className="space-y-6">
@@ -290,12 +290,11 @@ export function DailyJournalModal({
                 <label htmlFor="journal-note" className="text-sm font-medium">
                   Journal Entry
                 </label>
-                <Textarea
-                  id="journal-note"
+                <LexicalEditor
                   placeholder="What happened today? Any lessons learned, mistakes made, or insights gained?"
                   value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  className="min-h-[200px] resize-none"
+                  onChange={setNote}
+                  minHeight="200px"
                 />
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>
@@ -318,7 +317,7 @@ export function DailyJournalModal({
               onClick={handleClose}
               disabled={isSaving}
             >
-              <X className="h-4 w-4 mr-2" weight="light" />
+              <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
             <Button
@@ -327,12 +326,12 @@ export function DailyJournalModal({
             >
               {isSaving ? (
                 <>
-                  <CircleNotch className="h-4 w-4 mr-2 animate-spin" weight="light" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <FloppyDisk className="h-4 w-4 mr-2" weight="light" />
+                  <Save className="h-4 w-4 mr-2" />
                   Save Journal
                 </>
               )}

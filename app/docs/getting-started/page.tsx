@@ -1,7 +1,7 @@
 'use client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CheckCircle2, AlertCircle, Info, Zap, FileText, BarChart3, TrendingUp, Building } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { CheckCircle, WarningCircle, Info, Lightning, FileText, ChartBar, TrendUp, Building } from '@phosphor-icons/react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 
 export default function GettingStarted() {
@@ -19,7 +19,7 @@ export default function GettingStarted() {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <CheckCircle className="h-5 w-5 text-primary" weight="light" />
+              <CheckCircle2 className="h-5 w-5 text-primary" />
             </div>
             <h2>Prerequisites</h2>
           </div>
@@ -31,7 +31,7 @@ export default function GettingStarted() {
             <CardContent>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
                   <div>
                     <p className="font-medium text-foreground">Authentication Account</p>
                     <p className="text-sm text-muted-foreground">
@@ -40,7 +40,7 @@ export default function GettingStarted() {
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
                   <div>
                     <p className="font-medium text-foreground">Trading History (Optional)</p>
                     <p className="text-sm text-muted-foreground">
@@ -50,7 +50,7 @@ export default function GettingStarted() {
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
                   <div>
                     <p className="font-medium text-foreground">Modern Browser</p>
                     <p className="text-sm text-muted-foreground">
@@ -87,15 +87,15 @@ export default function GettingStarted() {
                 </p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
                     <strong>Continue with Discord</strong> - Fastest option for Discord users
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
                     <strong>Continue with Google</strong> - For Google/Gmail accounts
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
                     <strong>Email OTP</strong> - Secure login via 6-digit code
                   </li>
                 </ul>
@@ -121,7 +121,7 @@ export default function GettingStarted() {
             <Card className="border-primary/50 bg-primary/5">
               <CardContent className="pt-6">
                 <div className="flex gap-3">
-                  <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" weight="light" />
+                  <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div className="space-y-2">
                     <p className="font-medium text-foreground">Security Note</p>
                     <p className="text-sm text-muted-foreground">
@@ -153,7 +153,7 @@ export default function GettingStarted() {
               <Card className="border-primary/30">
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
-                    <FileText className="h-5 w-5 text-primary" weight="light" />
+                    <FileText className="h-5 w-5 text-primary" />
                     <CardTitle className="text-base">CSV Import (Recommended)</CardTitle>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -193,7 +193,7 @@ export default function GettingStarted() {
               <Card>
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
-                    <Lightning className="h-5 w-5 text-primary" weight="light" />
+                    <Zap className="h-5 w-5 text-primary" />
                     <CardTitle className="text-base">Manual Entry</CardTitle>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -230,28 +230,28 @@ export default function GettingStarted() {
             <Card className="border-primary/50 bg-primary/5">
               <CardContent className="pt-6">
                 <div className="flex gap-3">
-                  <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" weight="light" />
+                  <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div className="space-y-2">
                     <p className="font-medium text-foreground">Supported CSV Formats</p>
                     <ul className="text-sm text-muted-foreground space-y-1">
                       <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
                         MT4/MT5 exports (Account History → Save as Report)
                       </li>
                       <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
                         Exness (Trading History → Download CSV)
                       </li>
                       <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
                         Match Trader (Reports → CSV Export)
                       </li>
                       <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
                         TradeZella exports
                       </li>
                       <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-primary" weight="light" />
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
                         Custom formats (AI will attempt to map columns)
                       </li>
                     </ul>
@@ -278,28 +278,28 @@ export default function GettingStarted() {
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <ChartBar className="h-5 w-5 text-primary" weight="light" />
+                  <BarChart3 className="h-5 w-5 text-primary" />
                   <h4 className="font-semibold text-foreground">KPI Widgets</h4>
                 </div>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>Win Rate</strong> - Percentage of winning trades (excludes break-even)</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>Profit Factor</strong> - Ratio of gross profit to gross loss</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>Average Win/Loss</strong> - Mean P&L per trade type</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>Current Streak</strong> - Consecutive wins or losses</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>Total P&L</strong> - Cumulative profit/loss</span>
                   </li>
                 </ul>
@@ -307,28 +307,28 @@ export default function GettingStarted() {
 
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <TrendUp className="h-5 w-5 text-primary" weight="light" />
+                  <TrendingUp className="h-5 w-5 text-primary" />
                   <h4 className="font-semibold text-foreground">Visualizations</h4>
                 </div>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>Calendar</strong> - Daily P&L heatmap with journal integration</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>Equity Curve</strong> - Account balance over time</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>P&L by Instrument</strong> - Performance breakdown by asset</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>P&L by Strategy</strong> - Tag-based strategy analysis</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" weight="light" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <span><strong>Recent Trades</strong> - Latest activity with quick actions</span>
                   </li>
                 </ul>
@@ -338,7 +338,7 @@ export default function GettingStarted() {
             <Card className="border-primary/50 bg-primary/5">
               <CardContent className="pt-6">
                 <div className="flex gap-3">
-                  <Lightning className="h-5 w-5 text-primary shrink-0 mt-0.5" weight="light" />
+                  <Zap className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div className="space-y-2">
                     <p className="font-medium text-foreground">Pro Tip: Use Filters</p>
                     <p className="text-sm text-muted-foreground">
@@ -427,7 +427,7 @@ export default function GettingStarted() {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <TrendUp className="h-5 w-5 text-primary" weight="light" />
+              <TrendingUp className="h-5 w-5 text-primary" />
             </div>
             <h2>Next Steps</h2>
           </div>
@@ -442,7 +442,7 @@ export default function GettingStarted() {
                 <CardContent className="pt-6">
                   <div className="flex gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg h-fit">
-                      <Building className="h-5 w-5 text-primary" weight="light" />
+                      <Building className="h-5 w-5 text-primary" />
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-semibold text-foreground">Set Up Prop Firm Accounts</h4>
@@ -465,7 +465,7 @@ export default function GettingStarted() {
                 <CardContent className="pt-6">
                   <div className="flex gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg h-fit">
-                      <FileText className="h-5 w-5 text-primary" weight="light" />
+                      <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-semibold text-foreground">Start a Trading Journal</h4>
@@ -482,7 +482,7 @@ export default function GettingStarted() {
                 <CardContent className="pt-6">
                   <div className="flex gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg h-fit">
-                      <ChartBar className="h-5 w-5 text-primary" weight="light" />
+                      <BarChart3 className="h-5 w-5 text-primary" />
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-semibold text-foreground">Add Tags for Strategy Tracking</h4>
@@ -499,7 +499,7 @@ export default function GettingStarted() {
                 <CardContent className="pt-6">
                   <div className="flex gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg h-fit">
-                      <Lightning className="h-5 w-5 text-primary" weight="light" />
+                      <Zap className="h-5 w-5 text-primary" />
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-semibold text-foreground">Use Advanced Export</h4>
@@ -518,7 +518,7 @@ export default function GettingStarted() {
         <Card className="border-primary bg-primary/5">
           <CardContent className="pt-6">
             <div className="flex gap-4">
-              <WarningCircle className="h-6 w-6 text-primary shrink-0 mt-1" weight="light" />
+              <AlertCircle className="h-6 w-6 text-primary shrink-0 mt-1" />
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-foreground">Need Help?</h3>
                 <p className="text-sm text-muted-foreground">

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { Component, ErrorInfo, ReactNode, ReactElement } from 'react'
-import { Warning, ArrowsClockwise } from '@phosphor-icons/react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -94,7 +94,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <Card className={`border-destructive/50 ${className}`}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
-              <Warning weight="light" className="h-5 w-5" />
+              <AlertTriangle className="h-5 w-5" />
               Something went wrong
             </CardTitle>
           </CardHeader>
@@ -116,7 +116,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 onClick={this.handleRetry}
                 className="gap-2"
               >
-                <ArrowsClockwise weight="light" className="h-4 w-4" />
+                <RefreshCw className="h-4 w-4" />
                 Try Again
               </Button>
             </CardFooter>
@@ -185,7 +185,7 @@ export function DataError({ error, onRetry, className = '' }: DataErrorProps): R
 
   return (
     <div className={`flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg ${className}`}>
-      <Warning weight="light" className="h-5 w-5 text-destructive shrink-0" />
+      <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
       <p className="text-sm text-destructive flex-1">{error}</p>
       {onRetry && (
         <Button
@@ -194,7 +194,7 @@ export function DataError({ error, onRetry, className = '' }: DataErrorProps): R
           onClick={onRetry}
           className="shrink-0"
         >
-          <ArrowsClockwise weight="light" className="h-4 w-4" />
+          <RefreshCw className="h-4 w-4" />
         </Button>
       )}
     </div>

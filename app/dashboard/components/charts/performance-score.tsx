@@ -16,7 +16,7 @@ import { WidgetCard } from '../widget-card'
 import { useData } from "@/context/data-provider"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
-import { TrendUp as TrendUp, TrendDown as TrendDown, Trophy, Info } from "@phosphor-icons/react"
+import { TrendingUp, TrendingDown, Trophy, Info } from "lucide-react"
 import { calculateZellaScore, calculateMetricsFromTrades } from "@/lib/zella-score"
 import {
   Tooltip as UiTooltip,
@@ -127,9 +127,9 @@ function ScoreBadge({ score, hasData }: { score: number; hasData: boolean }) {
       getScoreColor(score)
     )}>
       {score >= 60 ? (
-        <TrendUp weight="light" className="h-3.5 w-3.5" />
+        <TrendingUp className="h-3.5 w-3.5" />
       ) : (
-        <TrendDown weight="light" className="h-3.5 w-3.5" />
+        <TrendingDown className="h-3.5 w-3.5" />
       )}
       <span className="text-sm font-bold">{score}</span>
     </div>
@@ -322,7 +322,7 @@ export default function PerformanceScore({ size = 'small-long' }: PerformanceSco
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center space-y-2">
-              <Trophy weight="light" className="h-12 w-12 text-muted-foreground/30 mx-auto" />
+              <Trophy className="h-12 w-12 text-muted-foreground/30 mx-auto" />
               <p className="text-sm text-muted-foreground">No trading data available</p>
               <p className="text-xs text-muted-foreground">Import trades to see your score</p>
             </div>

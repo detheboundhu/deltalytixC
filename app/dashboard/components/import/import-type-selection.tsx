@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Link, FileCsv, Database } from "@phosphor-icons/react"
+import { Link, FileSpreadsheet, Database } from "lucide-react"
 import {
   Command,
   CommandEmpty,
@@ -24,9 +24,9 @@ interface ImportTypeSelectionProps {
 }
 
 const categoryIcons: Record<PlatformConfig['category'], React.ReactNode> = {
-  'Direct Account Sync': <Link weight="light" className="h-4 w-4" />,
-  'Intelligent Import': <FileCsv weight="light" className="h-4 w-4" />,
-  'Platform CSV Import': <Database weight="light" className="h-4 w-4" />
+  'Direct Account Sync': <Link className="h-4 w-4" />,
+  'Intelligent Import': <FileSpreadsheet className="h-4 w-4" />,
+  'Platform CSV Import': <Database className="h-4 w-4" />
 }
 
 function isWeekend() {

@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useData } from "@/context/data-provider"
 import { useState } from "react"
-import { CaretDown } from "@phosphor-icons/react"
+import { ChevronDown } from "lucide-react"
 
 export function PnlRangeFilter() {
   const { pnlRange, setPnlRange } = useData()
@@ -48,7 +48,7 @@ export function PnlRangeFilter() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex gap-2">
           {getButtonLabel()}
-          <CaretDown weight="light" className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">

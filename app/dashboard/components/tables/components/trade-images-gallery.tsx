@@ -2,7 +2,7 @@
 import React from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash, Plus, X, CircleNotch, Upload } from '@phosphor-icons/react'
+import { Pencil, Trash2, Plus, X, Loader2, Upload } from 'lucide-react'
 import { FileDropzone } from '@/components/ui/file-dropzone'
 
 export type ImageField = 'imageOne' | 'imageTwo' | 'imageThree' | 'imageFour' | 'imageFive' | 'imageSix'
@@ -52,12 +52,12 @@ export function TradeImagesGallery({
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center">
-                                            <X className="h-4 w-4 text-destructive/40" weight="light" />
+                                            <X className="h-4 w-4 text-destructive/40" />
                                         </div>
                                     )}
                                     <div className="absolute inset-0 bg-background/90 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
                                         <InputButton
-                                            icon={<Pencil className="h-3.5 w-3.5" weight="light" />}
+                                            icon={<Pencil className="h-3.5 w-3.5" />}
                                             onClick={(file) => onUpload(field, file)}
                                             className="bg-secondary border-border hover:bg-accent"
                                             title="Edit"
@@ -70,7 +70,7 @@ export function TradeImagesGallery({
                                             title="Delete"
                                             onClick={() => onRemove(field)}
                                         >
-                                            <Trash className="h-3.5 w-3.5" weight="light" />
+                                            <Trash2 className="h-3.5 w-3.5" />
                                         </Button>
                                     </div>
                                 </>
@@ -83,14 +83,14 @@ export function TradeImagesGallery({
                                     }}
                                     accept={{ 'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'] }}
                                     className="h-full w-full bg-muted/30 hover:bg-muted/50 border-dashed"
-                                    icon={<Upload className="h-4 w-4 text-muted-foreground/40 mb-1" weight="light" />}
+                                    icon={<Upload className="h-4 w-4 text-muted-foreground/40 mb-1" />}
                                     description="Drag or Click"
                                     disabled={uploadingField === field}
                                 />
                             )}
                             {uploadingField === field && (
                                 <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                                    <CircleNotch className="h-4 w-4 animate-spin text-primary" weight="light" />
+                                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
                                 </div>
                             )}
                         </div>

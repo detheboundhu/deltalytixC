@@ -1,157 +1,221 @@
-
 'use client'
 
 import React, { useMemo } from "react"
-import { format, eachMonthOfInterval, startOfYear, endOfYear, getMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, startOfMonth, endOfMonth, getDay, isToday } from "date-fns"
+import {
+  format,
+  eachMonthOfInterval,
+  startOfYear,
+  endOfYear,
+  getMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isSameMonth,
+  startOfMonth,
+  endOfMonth,
+  isToday,
+} from "date-fns"
 import { cn, formatCurrency, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { CalendarData } from "@/app/dashboard/types/calendar"
-import { useUserStore } from "@/store/user-store"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { WEEKDAYS_SHORT } from "@/app/dashboard/constants/calendar-styles"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
-// Mini Month Component
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
+
+// ============================================================================
+// Mini Month — compact heatmap with visible day numbers
+// ============================================================================
 function MiniMonth({
-    monthDate,
-    calendarData,
-    year
+  monthDate,
+  calendarData,
+  year,
 }: {
-    monthDate: Date
-    calendarData: CalendarData
-    year: number
+  monthDate: Date
+  calendarData: CalendarData
+  year: number
 }) {
-    // Calculate Month Stats
-    const stats = useMemo(() => {
-        let pnl = 0
-        let trades = 0
-        Object.entries(calendarData).forEach(([key, data]) => {
-            const [kYear, kMonth] = key.split('-').map(Number)
-            if (kYear === year && (kMonth - 1) === getMonth(monthDate)) {
-                pnl += data.pnl
-                trades += data.tradeNumber
-            }
-        })
-        return { pnl, trades }
-    }, [calendarData, monthDate, year])
+  const stats = useMemo(() => {
+    let pnl = 0
+    let trades = 0
+    Object.entries(calendarData).forEach(([key, data]) => {
+      const [kYear, kMonth] = key.split('-').map(Number)
+      if (kYear === year && kMonth - 1 === getMonth(monthDate)) {
+        pnl += data.pnl
+        trades += data.tradeNumber
+      }
+    })
+    return { pnl, trades }
+  }, [calendarData, monthDate, year])
 
-    // Calculate days for the grid (ISO: Monday start)
-    const gridDays = useMemo(() => {
-        const monthStart = startOfMonth(monthDate)
-        const monthEnd = endOfMonth(monthDate)
-        const start = startOfWeek(monthStart, { weekStartsOn: 1 })
-        const end = endOfWeek(monthEnd, { weekStartsOn: 1 })
-        return eachDayOfInterval({ start, end })
-    }, [monthDate])
+  // Sunday-start grid
+  const gridDays = useMemo(() => {
+    const monthStart = startOfMonth(monthDate)
+    const monthEnd = endOfMonth(monthDate)
+    const start = startOfWeek(monthStart, { weekStartsOn: 0 })
+    const end = endOfWeek(monthEnd, { weekStartsOn: 0 })
+    return eachDayOfInterval({ start, end })
+  }, [monthDate])
 
-    return (
-        <div className="flex flex-col gap-3 p-4 rounded-xl border border-border/40 bg-card/20 hover:bg-card/40 transition-all duration-300 group shadow-sm hover:shadow-md">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-black tracking-tight uppercase text-muted-foreground/80 group-hover:text-foreground transition-colors">
-                    {format(monthDate, 'MMMM')}
-                </span>
+  return (
+    <div className="flex flex-col gap-2 p-3 md:p-4 rounded-xl border border-border/30 bg-card/30 hover:bg-card/50 transition-all group">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-black tracking-tight text-muted-foreground/70 group-hover:text-foreground transition-colors italic">
+          {format(monthDate, 'MMMM')}
+        </span>
+        {stats.trades > 0 && (
+          <span
+            className={cn(
+              "text-[10px] font-black px-1.5 py-0.5 rounded border",
+              stats.pnl > BREAK_EVEN_THRESHOLD
+                ? "bg-long/10 border-long/20 text-long"
+                : stats.pnl < -BREAK_EVEN_THRESHOLD
+                  ? "bg-short/10 border-short/20 text-short"
+                  : "bg-muted/30 border-border/20 text-muted-foreground",
+            )}
+          >
+            {formatCurrency(stats.pnl, 0)}
+          </span>
+        )}
+      </div>
 
-                {stats.trades > 0 && (
-                    <div className={cn(
-                        "text-[10px] font-black px-2 py-0.5 rounded-md border shadow-sm",
-                        stats.pnl > BREAK_EVEN_THRESHOLD ? "bg-long/10 border-long/20 text-long" :
-                        stats.pnl < -BREAK_EVEN_THRESHOLD ? "bg-short/10 border-short/20 text-short" :
-                        "bg-muted/30 border-border/20 text-muted-foreground"
-                    )}>
-                        {formatCurrency(stats.pnl, 0)}
+      {/* Weekday Headers */}
+      <div className="grid grid-cols-7 gap-0.5">
+        {WEEKDAYS.map((day) => (
+          <div
+            key={day}
+            className="text-[8px] font-bold text-center text-muted-foreground/30 uppercase"
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+
+      {/* Day Grid */}
+      <TooltipProvider>
+        <div className="grid grid-cols-7 gap-0.5">
+          {gridDays.map((day) => {
+            const isCurrentMonth = isSameMonth(day, monthDate)
+            const isTodayDate = isToday(day)
+            const key = format(day, 'yyyy-MM-dd')
+            const data = calendarData[key]
+            const hasTrades = data && data.tradeNumber > 0
+
+            return (
+              <Tooltip key={key}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      "aspect-square w-full rounded-[3px] border flex items-center justify-center transition-all text-[8px] font-bold",
+                      !isCurrentMonth && "opacity-0 pointer-events-none",
+
+                      // No trades
+                      isCurrentMonth &&
+                        !hasTrades &&
+                        "bg-muted/5 border-transparent text-muted-foreground/20",
+
+                      // Profit — green
+                      hasTrades &&
+                        data.pnl > BREAK_EVEN_THRESHOLD &&
+                        "bg-long/20 border-long/25 text-long/80",
+
+                      // Loss — red/orange
+                      hasTrades &&
+                        data.pnl < -BREAK_EVEN_THRESHOLD &&
+                        "bg-short/20 border-short/25 text-short/80",
+
+                      // Breakeven
+                      hasTrades &&
+                        !(data.pnl > BREAK_EVEN_THRESHOLD) &&
+                        !(data.pnl < -BREAK_EVEN_THRESHOLD) &&
+                        "bg-muted/30 border-border/20 text-muted-foreground/40",
+
+                      // Today
+                      isTodayDate &&
+                        isCurrentMonth &&
+                        "ring-1 ring-primary/60 ring-offset-1 ring-offset-background text-primary",
+                    )}
+                  >
+                    {isCurrentMonth && format(day, 'd')}
+                  </div>
+                </TooltipTrigger>
+                {isCurrentMonth && (
+                  <TooltipContent
+                    side="top"
+                    className="text-[10px] py-1.5 px-2.5 bg-popover/95 backdrop-blur-sm border-border/40 shadow-xl"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="font-bold text-muted-foreground">
+                          {format(day, 'MMM d, yyyy')}
+                        </span>
+                        {hasTrades && (
+                          <span className="bg-muted/50 px-1 rounded text-[9px] font-bold">
+                            {data.tradeNumber} trades
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        className={cn(
+                          "font-black text-xs tracking-tight",
+                          !hasTrades
+                            ? "text-muted-foreground/50"
+                            : data.pnl > BREAK_EVEN_THRESHOLD
+                              ? "text-long"
+                              : data.pnl < -BREAK_EVEN_THRESHOLD
+                                ? "text-short"
+                                : "text-muted-foreground",
+                        )}
+                      >
+                        {data ? formatCurrency(data.pnl) : '$0.00'}
+                      </div>
                     </div>
+                  </TooltipContent>
                 )}
-            </div>
-
-            {/* Weekday Headers */}
-            <div className="grid grid-cols-7 gap-1">
-                {WEEKDAYS_SHORT.map((day, i) => (
-                    <div key={i} className="text-[9px] font-bold text-center text-muted-foreground/40 uppercase">
-                        {day}
-                    </div>
-                ))}
-            </div>
-
-            {/* Mini Grid */}
-            <TooltipProvider>
-                <div className="grid grid-cols-7 gap-1">
-                    {gridDays.map((day) => {
-                        const isCurrentMonth = isSameMonth(day, monthDate)
-                        const isTodayDate = isToday(day)
-                        const key = format(day, 'yyyy-MM-dd')
-                        const data = calendarData[key]
-                        const hasTrades = data && data.tradeNumber > 0
-
-                        return (
-                            <Tooltip key={key}>
-                                <TooltipTrigger asChild>
-                                    <div
-                                        className={cn(
-                                            "aspect-square w-full rounded-[3px] transition-all duration-200 border",
-                                            !isCurrentMonth && "opacity-0 pointer-events-none",
-                                            isCurrentMonth && !hasTrades && "bg-muted/10 border-transparent hover:bg-muted/20",
-                                            hasTrades && data.pnl > BREAK_EVEN_THRESHOLD && "bg-long/20 border-long/30 hover:bg-long/40 hover:border-long/50",
-                                            hasTrades && data.pnl < -BREAK_EVEN_THRESHOLD && "bg-short/20 border-short/30 hover:bg-short/40 hover:border-short/50",
-                                            hasTrades && ! (data.pnl > BREAK_EVEN_THRESHOLD) && ! (data.pnl < -BREAK_EVEN_THRESHOLD) && "bg-muted/40 border-border/30",
-                                            isTodayDate && isCurrentMonth && "ring-1 ring-primary/50 ring-offset-1 ring-offset-background"
-                                        )}
-                                    />
-                                </TooltipTrigger>
-                                {isCurrentMonth && (
-                                    <TooltipContent side="top" className="text-[10px] py-1.5 px-2.5 bg-popover/95 backdrop-blur-sm border-border/40 shadow-xl">
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center justify-between gap-4">
-                                                <span className="font-bold text-muted-foreground">{format(day, 'MMM d, yyyy')}</span>
-                                                {hasTrades && (
-                                                    <span className="bg-muted/50 px-1 rounded text-[9px] font-bold">
-                                                        {data.tradeNumber} trades
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className={cn(
-                                                "font-black text-xs tracking-tight",
-                                                !hasTrades ? "text-muted-foreground/50" :
-                                                data.pnl > BREAK_EVEN_THRESHOLD ? "text-long" :
-                                                data.pnl < -BREAK_EVEN_THRESHOLD ? "text-short" :
-                                                "text-muted-foreground"
-                                            )}>
-                                                {data ? formatCurrency(data.pnl) : '$0.00'}
-                                            </div>
-                                        </div>
-                                    </TooltipContent>
-                                )}
-                            </Tooltip>
-                        )
-                    })}
-                </div>
-            </TooltipProvider>
+              </Tooltip>
+            )
+          })}
         </div>
-    )
+      </TooltipProvider>
+    </div>
+  )
 }
 
+// ============================================================================
+// Yearly View — 12 mini months in responsive grid
+// ============================================================================
 export default function YearlyView({
-    year,
-    calendarData
+  year,
+  calendarData,
 }: {
-    year: number
-    calendarData: CalendarData
+  year: number
+  calendarData: CalendarData
 }) {
-    const months = useMemo(() => eachMonthOfInterval({
+  const months = useMemo(
+    () =>
+      eachMonthOfInterval({
         start: startOfYear(new Date(year, 0, 1)),
-        end: endOfYear(new Date(year, 0, 1))
-    }), [year])
+        end: endOfYear(new Date(year, 0, 1)),
+      }),
+    [year],
+  )
 
-    return (
-        <div className="h-full overflow-y-auto p-4 md:p-6 bg-card/10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 max-w-[1600px] mx-auto">
-                {months.map(month => (
-                    <MiniMonth
-                        key={month.toISOString()}
-                        monthDate={month}
-                        calendarData={calendarData}
-                        year={year}
-                    />
-                ))}
-            </div>
-        </div>
-    )
+  return (
+    <div className="h-full overflow-y-auto p-3 md:p-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 max-w-[1600px] mx-auto">
+        {months.map((month) => (
+          <MiniMonth
+            key={month.toISOString()}
+            monthDate={month}
+            calendarData={calendarData}
+            year={year}
+          />
+        ))}
+      </div>
+    </div>
+  )
 }

@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { Target, DotsThree as MoreHorizontal, Eye, Pencil as Edit, Trash } from "@phosphor-icons/react"
+import { Target, MoreHorizontal, Eye, Pencil as Edit, Trash2 as Trash } from "lucide-react"
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -72,21 +71,21 @@ export function BacktestCard({ backtest, onView, onEdit, onDelete }: BacktestCar
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <MoreHorizontal className="h-4 w-4" weight="light" />
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={onView}>
-                <Eye className="h-4 w-4 mr-2" weight="light" />
+                <Eye className="h-4 w-4 mr-2" />
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onEdit}>
-                <Edit className="h-4 w-4 mr-2" weight="light" />
+                <Edit className="h-4 w-4 mr-2" />
                 Edit Backtest
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                <Trash className="h-4 w-4 mr-2" weight="light" />
+                <Trash className="h-4 w-4 mr-2" />
                 Delete Backtest
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -185,4 +184,3 @@ export function BacktestCard({ backtest, onView, onEdit, onDelete }: BacktestCar
     </Card>
   )
 }
-

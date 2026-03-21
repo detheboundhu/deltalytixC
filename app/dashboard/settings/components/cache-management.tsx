@@ -17,7 +17,7 @@ import {
   getCacheStats
 } from '@/lib/cache-manager'
 import { invalidateAccountsCache } from '@/hooks/use-accounts'
-import { Trash, ArrowsClockwise, Info, CheckCircle } from '@phosphor-icons/react'
+import { Trash2 as Trash, RefreshCw as ArrowsClockwise, Info, CheckCircle2 as CheckCircle } from "lucide-react"
 import { toast } from 'sonner'
 
 export function CacheManagement() {
@@ -132,7 +132,7 @@ export function CacheManagement() {
 
         {/* Information Alert */}
         <Alert>
-          <Info weight="light" className="h-4 w-4" />
+          <Info className="h-4 w-4" />
           <AlertDescription>
             The app automatically clears stale caches when detecting version changes.
             Only use manual clearing if you&apos;re experiencing issues with outdated data.
@@ -142,7 +142,7 @@ export function CacheManagement() {
         {/* Last Cleared */}
         {lastCleared && (
           <div className="flex items-center gap-2 text-sm text-profit">
-            <CheckCircle weight="light" className="h-4 w-4" />
+            <CheckCircle className="h-4 w-4" />
             <span>
               Cache cleared at {lastCleared.toLocaleTimeString()}
             </span>
@@ -165,9 +165,9 @@ export function CacheManagement() {
               disabled={isClearing}
             >
               {isClearing ? (
-                <ArrowsClockwise weight="light" className="h-4 w-4 animate-spin" />
+                <ArrowsClockwise className="h-4 w-4 animate-spin" />
               ) : (
-                <Trash weight="light" className="h-4 w-4" />
+                <Trash className="h-4 w-4" />
               )}
               <span className="ml-2">Clear</span>
             </Button>
@@ -187,9 +187,9 @@ export function CacheManagement() {
               disabled={isClearing}
             >
               {isClearing ? (
-                <ArrowsClockwise weight="light" className="h-4 w-4 animate-spin" />
+                <ArrowsClockwise className="h-4 w-4 animate-spin" />
               ) : (
-                <Trash weight="light" className="h-4 w-4" />
+                <Trash className="h-4 w-4" />
               )}
               <span className="ml-2">Clear All</span>
             </Button>

@@ -12,12 +12,12 @@ import { classifyTrade, cn, formatCurrency, cleanContent } from '@/lib/utils'
 import { useUserStore } from '@/store/user-store'
 import {
   ArrowLeft,
-  ChartBar,
+  BarChart3,
   Download,
-  Lightning,
-  PencilSimple,
+  Zap,
+  PenLine,
   Play,
-} from '@phosphor-icons/react'
+} from 'lucide-react'
 import { Trade } from '@prisma/client'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -114,7 +114,7 @@ export function TradeDetailPanel({ trade, onClose, basePath }: TradeDetailPanelP
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <Button variant="ghost" size="sm" onClick={onClose} className="h-8 px-2 text-xs hover:bg-accent/50 shrink-0">
-                <ArrowLeft className="mr-1 h-3.5 w-3.5" weight="light" />
+                <ArrowLeft className="mr-1 h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
               <div className="h-4 w-px bg-border/40 shrink-0" />
@@ -143,7 +143,7 @@ export function TradeDetailPanel({ trade, onClose, basePath }: TradeDetailPanelP
               )}
             </div>
             <Button variant="secondary" onClick={handleEdit} className="h-8 px-3 rounded-lg text-xs font-semibold shrink-0">
-              <PencilSimple className="h-3.5 w-3.5 mr-1.5" />
+              <PenLine className="h-3.5 w-3.5 mr-1.5" />
               Edit
             </Button>
           </div>
@@ -276,7 +276,7 @@ export function TradeDetailPanel({ trade, onClose, basePath }: TradeDetailPanelP
                       {chartLinks.map((link: string, index: number) => (
                         <a key={index} href={link} target="_blank" rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg bg-muted/30 border border-border/50 hover:bg-muted/50 hover:border-border transition-all">
-                          <ChartBar className="h-3.5 w-3.5 text-muted-foreground" weight="light" />
+                          <BarChart3 className="h-3.5 w-3.5 text-muted-foreground" />
                           Chart {index + 1}
                         </a>
                       ))}
@@ -301,7 +301,7 @@ export function TradeDetailPanel({ trade, onClose, basePath }: TradeDetailPanelP
                           ))}
                           {tradeData.newsTraded && (
                             <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-warning/10 border border-warning/20 text-warning">
-                              <Lightning className="h-3.5 w-3.5 fill-warning text-warning" weight="fill" />
+                              <Zap className="h-3.5 w-3.5 fill-warning text-warning" />
                               <span className="text-[10px] font-bold uppercase tracking-tight">Active News Trader</span>
                             </div>
                           )}
@@ -374,7 +374,7 @@ export function TradeDetailPanel({ trade, onClose, basePath }: TradeDetailPanelP
         <div className="px-4 sm:px-6 py-3 border-t border-border/40 bg-muted/5 shrink-0 flex flex-col-reverse sm:flex-row items-center justify-between gap-2">
           <Link href={`/dashboard/table?view=replay&tradeId=${trade.id}&backUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname + window.location.search : basePath)}`} className="w-full sm:w-auto">
             <Button variant="default" className="gap-2 h-9 px-5 rounded-xl shadow-lg shadow-primary/10 font-semibold w-full sm:w-auto text-xs">
-              <Play className="h-3.5 w-3.5" weight="fill" />
+              <Play className="h-3.5 w-3.5" />
               Trade Replay
             </Button>
           </Link>
@@ -417,7 +417,7 @@ export function TradeDetailPanel({ trade, onClose, basePath }: TradeDetailPanelP
                 className="absolute bottom-4 right-4"
                 onClick={() => downloadImage(selectedImage!, trade, selectedImageIndex)}
               >
-                <Download className="h-4 w-4 mr-2" weight="light" />
+                <Download className="h-4 w-4 mr-2" />
                 Download
               </Button>
             </div>

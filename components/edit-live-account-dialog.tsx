@@ -17,9 +17,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
-  FloppyDisk,
+  Save as FloppyDisk,
   User
-} from "@phosphor-icons/react"
+} from "lucide-react"
 
 const editAccountSchema = z.object({
   name: z.string().min(1, 'Account name is required').max(100, 'Name too long'),
@@ -123,7 +123,7 @@ export function EditLiveAccountDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" weight="light" />
+            <User className="h-5 w-5" />
             Edit Account
           </DialogTitle>
           <DialogDescription>
@@ -192,7 +192,7 @@ export function EditLiveAccountDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving && <FloppyDisk className="mr-2 h-4 w-4 animate-spin" weight="light" />}
+              {isSaving && <FloppyDisk className="mr-2 h-4 w-4 animate-spin" />}
               Save Changes
             </Button>
           </DialogFooter>

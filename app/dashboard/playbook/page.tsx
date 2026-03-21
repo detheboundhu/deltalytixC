@@ -22,7 +22,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { BREAK_EVEN_THRESHOLD, cn } from '@/lib/utils'; // Assuming cn utility is imported from here
 import { motion } from 'framer-motion'
-import { Eye, FileText, DotsThreeVertical, Pencil, Plus, Trash } from '@phosphor-icons/react'
+import { Eye, FileText, MoreVertical, Pencil, Plus, Trash2 as Trash } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { AddEditModelModal } from './components/add-edit-model-modal'
@@ -83,7 +83,7 @@ function StrategyBlock({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 opacity-40 group-hover:opacity-100 transition-opacity">
-              <DotsThreeVertical className="h-4 w-4" />
+              <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-background border-border/40">

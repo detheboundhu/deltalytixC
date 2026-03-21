@@ -17,30 +17,30 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Plus,
-  MagnifyingGlass as Search,
-  ArrowsClockwise as ArrowClockwise,
-  TrendUp as TrendUp,
-  TrendDown as TrendDown,
-  Buildings as Buildings,
+  Search,
+  RefreshCw as ArrowClockwise,
+  TrendingUp as TrendUp,
+  TrendingDown as TrendDown,
+  Building2 as Buildings,
   User,
-  CurrencyDollar as DollarSign,
-  Pulse as Activity,
-  DotsThree as MoreHorizontal,
-  WarningCircle as AlertTriangle,
+  DollarSign,
+  Activity,
+  MoreHorizontal,
+  AlertCircle as AlertTriangle,
   Eye,
   Pencil as Edit,
-  Trash,
+  Trash2 as Trash,
   Archive,
-  ArrowCounterClockwise as ArchiveRestore,
+  RotateCcw as ArchiveRestore,
   Target,
   Trophy,
   XCircle,
   Wallet,
-  ChartBar as BarChart3,
-  Sparkle as Sparkles,
-  CaretRight as ChevronRight,
+  BarChart3,
+  Sparkles,
+  ChevronRight,
   X
-} from "@phosphor-icons/react"
+} from "lucide-react"
 import { CreateLiveAccountDialog } from "../components/accounts/create-live-account-dialog"
 import { CreatePropFirmDialog } from "../components/prop-firm/create-prop-firm-dialog"
 import { EditLiveAccountDialog } from "@/components/edit-live-account-dialog"
@@ -479,7 +479,7 @@ export default function AccountsPage() {
                       disabled={isRefreshing}
                       className="h-9 w-9"
                     >
-                      <ArrowClockwise className={cn("h-4 w-4", isRefreshing && "animate-spin")} weight="light" />
+                      <ArrowClockwise className={cn("h-4 w-4", isRefreshing && "animate-spin")}  />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Refresh accounts</TooltipContent>
@@ -495,7 +495,7 @@ export default function AccountsPage() {
                   <DropdownMenuContent align="end" className="w-52">
                     <DropdownMenuItem onClick={() => setCreateLiveDialogOpen(true)} className="gap-3 py-2.5">
                       <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
-                        <User weight="light" className="h-4 w-4 text-muted-foreground" />
+                        <User  className="h-4 w-4 text-muted-foreground" />
                       </div>
                       <div>
                         <div className="font-medium">Live Account</div>
@@ -504,7 +504,7 @@ export default function AccountsPage() {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setCreatePropFirmDialogOpen(true)} className="gap-3 py-2.5">
                       <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
-                        <Buildings className="h-4 w-4 text-muted-foreground" weight="light" />
+                        <Buildings className="h-4 w-4 text-muted-foreground"  />
                       </div>
                       <div>
                         <div className="font-medium">Prop Firm</div>
@@ -527,26 +527,26 @@ export default function AccountsPage() {
             <StatCard
               label="Total Equity"
               value={formatCompactCurrency(accountStats.totalEquity)}
-              icon={<Wallet weight="light" className="h-4 w-4" />}
+              icon={<Wallet  className="h-4 w-4" />}
               trend={accountStats.pnl >= 0 ? 'up' : 'down'}
               trendValue={`${accountStats.pnl >= 0 ? '+' : ''}${formatCompactCurrency(accountStats.pnl)}`}
             />
             <StatCard
               label="Accounts"
               value={accountStats.total}
-              icon={<Activity weight="light" className="h-4 w-4" />}
+              icon={<Activity  className="h-4 w-4" />}
               subtext={`${accountStats.live} live, ${accountStats.propFirm} prop`}
             />
             <StatCard
               label="Funded"
               value={accountStats.funded}
-              icon={<Trophy weight="light" className="h-4 w-4" />}
+              icon={<Trophy  className="h-4 w-4" />}
               highlight={accountStats.funded > 0}
             />
             <StatCard
               label="Total Trades"
               value={accountStats.totalTrades.toLocaleString()}
-              icon={<BarChart3 weight="light" className="h-4 w-4" />}
+              icon={<BarChart3  className="h-4 w-4" />}
             />
           </motion.div>
 
@@ -559,7 +559,7 @@ export default function AccountsPage() {
           >
             {/* Search */}
             <div className="relative flex-1 max-w-md">
-              <Search weight="light" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Search  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 ref={searchInputRef}
                 placeholder="Search accounts..."
@@ -574,7 +574,7 @@ export default function AccountsPage() {
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
                   onClick={() => setSearchQuery('')}
                 >
-                  <X weight="light" className="h-3 w-3" />
+                  <X  className="h-3 w-3" />
                 </Button>
               ) : (
                 <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
@@ -588,11 +588,11 @@ export default function AccountsPage() {
               <TabsList className="h-9 w-full sm:w-auto grid grid-cols-3">
                 <TabsTrigger value="all" className="text-xs px-3">All</TabsTrigger>
                 <TabsTrigger value="live" className="text-xs px-3 gap-1.5">
-                  <User weight="light" className="h-3 w-3" />
+                  <User  className="h-3 w-3" />
                   <span className="hidden sm:inline">Live</span>
                 </TabsTrigger>
                 <TabsTrigger value="prop-firm" className="text-xs px-3 gap-1.5">
-                  <Buildings weight="light" className="h-3 w-3" />
+                  <Buildings  className="h-3 w-3" />
                   <span className="hidden sm:inline">Prop</span>
                 </TabsTrigger>
               </TabsList>
@@ -659,7 +659,7 @@ export default function AccountsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
                 <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                  <Trash className="h-5 w-5 text-destructive" weight="light" />
+                  <Trash className="h-5 w-5 text-destructive"  />
                 </div>
                 <span>Delete Account</span>
               </AlertDialogTitle>
@@ -782,7 +782,7 @@ function StatCard({
               "flex items-center gap-1 text-[10px] font-bold",
               trend === 'up' ? "text-long" : "text-short"
             )}>
-              {trend === 'up' ? <TrendUp className="h-2.5 w-2.5" weight="light" /> : <TrendDown className="h-2.5 w-2.5" weight="light" />}
+              {trend === 'up' ? <TrendUp className="h-2.5 w-2.5"  /> : <TrendDown className="h-2.5 w-2.5"  />}
               {trendValue}
             </div>
           ) : subtext ? (
@@ -790,7 +790,7 @@ function StatCard({
           ) : null}
         </div>
         {highlight && (
-          <Sparkles weight="light" className="absolute -right-1 -bottom-1 h-12 w-12 text-primary/5 pointer-events-none" />
+          <Sparkles  className="absolute -right-1 -bottom-1 h-12 w-12 text-primary/5 pointer-events-none" />
         )}
       </CardContent>
     </Card>
@@ -921,7 +921,7 @@ function AccountCard({
                 onClick={(e) => { e.stopPropagation(); onDelete() }}
                 className="text-destructive focus:text-destructive"
               >
-                <Trash className="h-4 w-4 mr-2" weight="light" />
+                <Trash className="h-4 w-4 mr-2"  />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

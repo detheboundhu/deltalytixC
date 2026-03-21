@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { TrendUp, TrendDown, Clock, ChartBar } from "@phosphor-icons/react"
+import { TrendingUp, TrendingDown, Clock, BarChart3 } from "lucide-react"
 import { CalendarEntry } from "@/app/dashboard/types/calendar"
 import { groupTradesByExecution } from '@/lib/utils'
 import { cn } from '@/lib/utils'
@@ -50,7 +50,7 @@ function StatCard({ icon: Icon, label, value, subtext, trend = 'neutral', classN
           trend === 'positive' && 'text-long',
           trend === 'negative' && 'text-short',
           trend === 'neutral' && 'text-muted-foreground',
-        )} weight="light" />
+        )} />
       </div>
 
       <div className="flex-1 min-w-0">
@@ -142,7 +142,7 @@ export function DailyStats({ dayData, isWeekly = false }: DailyStatsProps) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       <StatCard
-        icon={stats.totalPnL >= 0 ? TrendUp : TrendDown}
+        icon={stats.totalPnL >= 0 ? TrendingUp : TrendingDown}
         label="Net P&L"
         value={formatCurrency(stats.totalPnL)}
         subtext={`${stats.accountCount} ${stats.accountCount > 1 ? "accounts" : "account"}`}
@@ -158,14 +158,14 @@ export function DailyStats({ dayData, isWeekly = false }: DailyStatsProps) {
       />
 
       <StatCard
-        icon={TrendDown}
+        icon={TrendingDown}
         label="Max Drawdown"
         value={`-${formatCurrency(stats.maxDrawdown)}`}
         trend={stats.maxDrawdown > 0 ? 'negative' : 'neutral'}
       />
 
       <StatCard
-        icon={ChartBar}
+        icon={BarChart3}
         label="Max Profit"
         value={formatCurrency(stats.maxProfit)}
         trend={stats.maxProfit > 0 ? 'positive' : 'neutral'}

@@ -11,17 +11,17 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import {
-  TrendUp,
-  TrendDown,
-  WarningCircle,
-  CheckCircle,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  CheckCircle2,
   Clock,
-  CurrencyDollar,
+  DollarSign,
   Target,
-  CalendarBlank,
-  Lightning,
-  ArrowsClockwise
-} from '@phosphor-icons/react'
+  Calendar,
+  Zap,
+  RefreshCcw
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 // PropFirmEngine import removed - no longer used
 // PropFirmAccountFilters import removed - no longer used
@@ -159,7 +159,7 @@ export function RealtimeStatusIndicator({
       <Card className={cn('w-full', className)}>
         <CardContent className="p-6">
           <div className="flex items-center justify-center space-x-2">
-            <ArrowsClockwise className="h-4 w-4 animate-spin" weight="light" />
+            <RefreshCcw className="h-4 w-4 animate-spin" />
             <span className="text-sm text-muted-foreground">Loading account status...</span>
           </div>
         </CardContent>
@@ -174,12 +174,12 @@ export function RealtimeStatusIndicator({
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <WarningCircle className="h-4 w-4 text-destructive" weight="light" />
+            <AlertCircle className="h-4 w-4 text-destructive" />
               <span className="text-sm text-destructive">{error || 'Account not found'}</span>
             </div>
             {showActions && (
               <Button size="sm" variant="outline" onClick={handleRefresh}>
-                <ArrowsClockwise className="h-3 w-3 mr-1" weight="light" />
+                <RefreshCcw className="h-3 w-3 mr-1" />
                 Retry
               </Button>
             )}
@@ -202,11 +202,11 @@ export function RealtimeStatusIndicator({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active': return <Clock className="h-3 w-3" weight="light" />
-      case 'passed': return <CheckCircle className="h-3 w-3" weight="light" />
-      case 'funded': return <CurrencyDollar className="h-3 w-3" weight="light" />
-      case 'failed': return <WarningCircle className="h-3 w-3" weight="light" />
-      default: return <Clock className="h-3 w-3" weight="light" />
+      case 'active': return <Clock className="h-3 w-3" />
+      case 'passed': return <CheckCircle2 className="h-3 w-3" />
+      case 'funded': return <DollarSign className="h-3 w-3" />
+      case 'failed': return <AlertCircle className="h-3 w-3" />
+      default: return <Clock className="h-3 w-3" />
     }
   }
 
@@ -297,7 +297,7 @@ export function RealtimeStatusIndicator({
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
-              <ArrowsClockwise className={cn('h-3 w-3 mr-1', isRefreshing && 'animate-spin')} weight="light" />
+              <RefreshCcw className={cn('h-3 w-3 mr-1', isRefreshing && 'animate-spin')} />
               Refresh
             </Button>
           )}
@@ -309,7 +309,7 @@ export function RealtimeStatusIndicator({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="flex items-center space-x-1 mb-1">
-              <CurrencyDollar className="h-3 w-3 text-muted-foreground" weight="light" />
+              <DollarSign className="h-3 w-3 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">Current Equity</span>
             </div>
             <p className="text-lg font-bold">
@@ -318,7 +318,7 @@ export function RealtimeStatusIndicator({
           </div>
           <div>
             <div className="flex items-center space-x-1 mb-1">
-              <TrendUp className="h-3 w-3 text-muted-foreground" weight="light" />
+              <TrendingUp className="h-3 w-3 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">Profit/Loss</span>
             </div>
             <p className={cn(
@@ -335,7 +335,7 @@ export function RealtimeStatusIndicator({
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-1">
-                <Target className="h-3 w-3 text-muted-foreground" weight="light" />
+                <Target className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">Profit Target</span>
               </div>
               <span className="text-xs font-medium">
@@ -395,7 +395,7 @@ export function RealtimeStatusIndicator({
             {/* Breach Warning */}
             {accountStatus.drawdown.isBreached && (
               <div className="flex items-center space-x-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md">
-                <WarningCircle className="h-4 w-4 text-destructive" weight="light" />
+                <AlertCircle className="h-4 w-4 text-destructive" />
                 <span className="text-sm font-medium text-destructive">
                   {accountStatus.drawdown.breachType?.replace('_', ' ').toUpperCase()} BREACH
                 </span>
@@ -426,7 +426,7 @@ export function RealtimeStatusIndicator({
         {/* Ready to Advance */}
         {accountStatus.progress?.readyToAdvance && (
           <div className="flex items-center space-x-2 p-2 bg-long/10 border border-long/20 rounded-md">
-            <CheckCircle className="h-4 w-4 text-long" weight="light" />
+            <CheckCircle2 className="h-4 w-4 text-long" />
             <span className="text-sm font-medium text-long">
               Ready to advance to next phase!
             </span>
@@ -437,7 +437,7 @@ export function RealtimeStatusIndicator({
         <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-2">
           <span>Last updated: {lastRefresh.toLocaleTimeString()}</span>
           <div className="flex items-center space-x-1">
-            <Lightning className="h-3 w-3" weight="light" />
+            <Zap className="h-3 w-3" />
             <span>Live</span>
           </div>
         </div>

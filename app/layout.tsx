@@ -5,7 +5,7 @@ import { SafeToaster } from "@/components/safe-toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 // Removed Vercel Analytics and Speed Insights to comply with essential-only cookie policy
 import { AuthProvider } from "@/context/auth-provider";
-import { ConsentBanner } from "@/components/consent-banner";
+import CookieNotice from "@/components/ui/cookie-notice";
 import { ConsoleFilterWrapper } from "@/components/console-filter-wrapper";
 import { ThemeProvider } from "@/context/theme-provider";
 import { QueryProvider } from "@/lib/query/query-provider";
@@ -151,15 +151,10 @@ export default async function RootLayout({
 
         {/* Analytics removed to comply with essential-only cookie policy */}
 
-        {/* Preload Inter font with fallback handling */}
+        {/* Preload Satoshi font from Fontshare */}
         <link
           rel="preconnect"
-          href="https://fonts.googleapis.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
+          href="https://api.fontshare.com"
           crossOrigin="anonymous"
         />
 
@@ -171,15 +166,8 @@ export default async function RootLayout({
         />
 
         {/* Performance: DNS prefetch for external resources */}
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.fontshare.com" />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL || ''} />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-          crossOrigin="anonymous"
-        />
 
         <link
           rel="apple-touch-icon"
@@ -193,16 +181,16 @@ export default async function RootLayout({
         />
         <style>
           {`
-            /* Font fallback for when Google Fonts fails */
+            /* Font fallback for when Fontshare CDN fails */
             @font-face {
-              font-family: 'Inter Fallback';
-              src: local('Inter'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI'), local('Roboto');
+              font-family: 'Satoshi Fallback';
+              src: local('Satoshi'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI'), local('Roboto');
               font-display: swap;
             }
             
             /* Ensure font variables are available */
             :root {
-              --font-inter: 'Inter', 'Inter Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+              --font-satoshi: 'Satoshi', 'Satoshi Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             }
 
             /* Base layout */
@@ -261,7 +249,7 @@ export default async function RootLayout({
                 <AuthProvider>
                   <TooltipProvider>
                     <DeploymentMonitor />
-                    <ConsentBanner />
+                    <CookieNotice />
                     <SafeToaster />
                     <SeasonalManager />
                     {children}

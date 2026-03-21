@@ -12,10 +12,19 @@ interface DashboardSkeletonProps {
   height?: string
 }
 
-// Base skeleton block component - no animation
+// Base skeleton block component with shimmer
 function SkeletonBlock({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <div className={cn("bg-muted/60 rounded", className)} style={style} />
+    <div
+      className={cn(
+        "bg-muted/60 rounded relative overflow-hidden",
+        "before:absolute before:inset-0 before:translate-x-[-100%]",
+        "before:bg-gradient-to-r before:from-transparent before:via-muted/40 before:to-transparent",
+        "before:animate-[shimmer_2s_ease-in-out_infinite]",
+        className
+      )}
+      style={style}
+    />
   )
 }
 

@@ -1,230 +1,228 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
+import { useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
-  SquaresFour,
-  Table,
-  Users,
-  ChartBar,
-  Shield,
+  LayoutDashboard,
+  BarChart3,
   BookOpen,
-  TrendUp,
-  CaretLeft,
-  CaretRight,
+  Users,
+  Table,
   List,
-  Flask
-} from "@phosphor-icons/react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { motion } from "framer-motion"
+  FlaskConical,
+  Settings,
+  Database,
+  FileText,
+  RefreshCw,
+  LogOut,
+  ChevronDown,
+} from 'lucide-react'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarSeparator,
+} from '@/components/ui/sidebar'
+import { Logo } from '@/components/logo'
+import { cn } from '@/lib/utils'
+import { useData } from '@/context/data-provider'
+import { useAuth } from '@/context/auth-provider'
+import { signOut } from '@/server/auth'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useUserStore } from '@/store/user-store'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-interface SidebarProps {
-  activeTab: string
-  onTabChange: (tab: string) => void
-  onCollapsedChange?: (collapsed: boolean) => void
-  className?: string
-}
-
-interface NavigationItem {
-  id: string
-  label: string
-  icon: React.ComponentType<{ className?: string; weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone" }>
-}
-
-const navigationItems: NavigationItem[] = [
-  {
-    id: 'widgets',
-    label: 'Dashboard',
-    icon: SquaresFour
-  },
-  {
-    id: 'reports',
-    label: 'Reports',
-    icon: ChartBar
-  },
-  {
-    id: 'journal',
-    label: 'Journal',
-    icon: BookOpen
-  },
-  {
-    id: 'accounts',
-    label: 'Accounts',
-    icon: Users
-  },
-  {
-    id: 'table',
-    label: 'Trades',
-    icon: Table
-  },
-  {
-    id: 'playbook',
-    label: 'Playbook',
-    icon: List
-  },
-  {
-    id: 'backtesting',
-    label: 'Backtesting',
-    icon: Flask
-  },
+const navItems = [
+  { id: 'widgets', label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+  { id: 'reports', label: 'Reports', icon: BarChart3, href: '/dashboard/reports' },
+  { id: 'journal', label: 'Journal', icon: BookOpen, href: '/dashboard/journal' },
+  { id: 'accounts', label: 'Accounts', icon: Users, href: '/dashboard/accounts' },
+  { id: 'table', label: 'Trades', icon: Table, href: '/dashboard/table' },
+  { id: 'playbook', label: 'Playbook', icon: List, href: '/dashboard/playbook' },
+  { id: 'backtesting', label: 'Backtesting', icon: FlaskConical, href: '/dashboard/backtesting' },
 ]
 
-export function DashboardSidebar({ activeTab, onTabChange, onCollapsedChange, className }: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [isHydrated, setIsHydrated] = useState(false)
-  const [isSheetOpen, setIsSheetOpen] = useState(false)
+const toolItems = [
+  { id: 'settings', label: 'Settings', icon: Settings, href: '/dashboard/settings' },
+  { id: 'data', label: 'Data', icon: Database, href: '/dashboard/data' },
+  { id: 'docs', label: 'Documentation', icon: FileText, href: '/docs' },
+]
 
+export function DashboardSidebar() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const { refreshTrades } = useData()
+  const { forceClearAuth } = useAuth()
+  const user = useUserStore(state => state.supabaseUser)
 
-  useEffect(() => {
-    const savedState = localStorage.getItem('dashboard-sidebar-collapsed')
-    if (savedState) {
-      setIsCollapsed(JSON.parse(savedState))
-    }
-    setIsHydrated(true)
-  }, [])
-
-  // Save state to localStorage and notify parent (only after hydration)
-  useEffect(() => {
-    if (isHydrated) {
-      localStorage.setItem('dashboard-sidebar-collapsed', JSON.stringify(isCollapsed))
-      onCollapsedChange?.(isCollapsed)
-    }
-  }, [isCollapsed, onCollapsedChange, isHydrated])
-
-  // Check if mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
-
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  const toggleCollapsed = () => {
-    setIsCollapsed(!isCollapsed)
+  const getActiveId = () => {
+    if (pathname === '/dashboard') return 'widgets'
+    if (pathname?.startsWith('/dashboard/table')) return 'table'
+    if (pathname?.startsWith('/dashboard/accounts')) return 'accounts'
+    if (pathname?.startsWith('/dashboard/journal')) return 'journal'
+    if (pathname?.startsWith('/dashboard/backtesting')) return 'backtesting'
+    if (pathname?.startsWith('/dashboard/playbook')) return 'playbook'
+    if (pathname?.startsWith('/dashboard/reports')) return 'reports'
+    if (pathname?.startsWith('/dashboard/settings')) return 'settings'
+    if (pathname?.startsWith('/dashboard/data')) return 'data'
+    if (pathname?.startsWith('/docs')) return 'docs'
+    return 'widgets'
   }
 
-  const NavigationContent = () => (
-    <div className="flex flex-col h-full">
-      {/* Navigation Items */}
-      <nav className="flex-1 space-y-2 p-4">
-        {navigationItems.map((item, index) => {
-          const Icon = item.icon
-          const isActive = activeTab === item.id
+  const activeId = getActiveId()
 
-          return (
-            <TooltipProvider key={item.id}>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.3 }}
-                  >
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start transition-colors duration-200 ease-out group",
-                        isCollapsed && !isMobile ? "px-2" : "px-3",
-                        isMobile ? "h-12 text-base" : "h-10",
-                        isActive
-                          ? "bg-muted text-foreground shadow-sm scale-[1.02]"
-                          : "hover:bg-muted/50 hover:shadow-sm hover:scale-[1.02] hover:translate-x-1"
-                      )}
-                      onClick={() => {
-                        onTabChange(item.id)
-                        // Close mobile sheet when navigation item is selected
-                        if (isMobile) {
-                          setIsSheetOpen(false)
-                        }
-                      }}
-                    >
-                      <Icon weight="light" className={cn(
-                        "h-5 w-5 shrink-0 transition-all duration-300",
-                        isCollapsed && !isMobile ? "mr-0" : "mr-3",
-                        isActive
-                          ? "scale-110 text-foreground"
-                          : "text-muted-foreground group-hover:scale-110 group-hover:text-foreground"
-                      )} />
-                      {(!isCollapsed || isMobile) && (
-                        <span className="truncate font-medium">{item.label}</span>
-                      )}
-                    </Button>
-                  </motion.div>
-                </TooltipTrigger>
-                {isCollapsed && !isMobile && (
-                  <TooltipContent side="right" className="font-medium bg-background border border-border shadow-md">
-                    {item.label}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
-          )
-        })}
-      </nav>
-
-
-
-      {/* Collapse Toggle - Desktop Only */}
-      {!isMobile && (
-        <motion.div
-          className="p-4 border-t border-border"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleCollapsed}
-            className={cn(
-              "w-full transition-all duration-300 hover:bg-muted/50 hover:shadow-sm",
-              isCollapsed ? "px-2" : "px-3"
-            )}
-          >
-            {isCollapsed ? (
-              <CaretRight weight="light" className="h-4 w-4 transition-transform duration-300 hover:scale-110" />
-            ) : (
-              <>
-                <CaretLeft weight="light" className="h-4 w-4 mr-2 transition-transform duration-300 hover:scale-110" />
-                <span className="text-sm font-medium">Collapse</span>
-              </>
-            )}
-          </Button>
-        </motion.div>
-      )}
-    </div>
-  )
-
-  // Mobile sidebar - hidden since we use bottom nav
-  // Keep the sheet available for additional menu items if needed in the future
-  if (isMobile) {
-    return null
+  const handleLogout = async () => {
+    localStorage.clear()
+    sessionStorage.clear()
+    forceClearAuth()
+    await signOut()
   }
 
-  // Desktop sidebar
   return (
-    <motion.div
-      className={cn(
-        "fixed left-0 top-0 z-30 h-full bg-background border-r border-border shadow-md transition-all duration-300 ease-in-out",
-        // Prevent layout shift during hydration
-        !isHydrated ? "w-64" : isCollapsed ? "w-16" : "w-64",
-        className
-      )}
-      style={{
-        top: 'var(--navbar-height, 56px)',
-        height: 'calc(100vh - var(--navbar-height, 56px))'
-      }}
-      initial={{ x: -100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-    >
-      <NavigationContent />
-    </motion.div>
+    <Sidebar collapsible="icon" className="border-r border-border">
+      {/* Header — Logo */}
+      <SidebarHeader className="h-14 flex items-center justify-center border-b border-border">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              asChild
+            >
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <Logo className="h-6 w-6 shrink-0" />
+                <span className="text-sm font-bold tracking-tight truncate">Deltalytix</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      {/* Main nav */}
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton
+                    tooltip={item.label}
+                    isActive={activeId === item.id}
+                    asChild
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        {/* Tools */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Tools</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {toolItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton
+                    tooltip={item.label}
+                    isActive={activeId === item.id}
+                    asChild
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+
+              {/* Refresh Data action */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Refresh Data"
+                  onClick={() => refreshTrades()}
+                >
+                  <RefreshCw />
+                  <span>Refresh Data</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      {/* Footer — User + Logout */}
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={user?.user_metadata?.avatar_url} />
+                    <AvatarFallback className="rounded-lg uppercase text-xs">
+                      {user?.email?.[0] || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user?.email || ''}
+                    </span>
+                  </div>
+                  <ChevronDown className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   )
 }

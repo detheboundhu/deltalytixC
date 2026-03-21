@@ -1,34 +1,27 @@
-// Temporarily disabled Google Fonts due to network connectivity issues
-// import { Inter } from "next/font/google";
-
-// PERFORMANCE FIX: Using system fonts to avoid Google Fonts network dependency
-// export const inter = Inter({
-//   subsets: ["latin"],
-//   variable: "--font-inter",
-//   display: 'optional', // Changed from 'swap' to 'optional' - app works without font
-//   fallback: ['system-ui', 'sans-serif'], // Simplified fallback
-// })
-
-// Using system font as primary font
-export const inter = {
-  variable: "--font-inter",
+// Satoshi font — premium, clean, NOT Inter
+// Loaded via CDN in globals.css @font-face
+export const satoshi = {
+  variable: "--font-satoshi",
   className: "font-sans",
   style: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif'
+    fontFamily: '"Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   }
 }
 
-// System font fallback for when Google Fonts is completely unavailable
+// Keep backward-compatible export name so layout.tsx doesn't break
+export const inter = satoshi
+
+// System font fallback for when CDN is completely unavailable
 export const systemFont = {
   variable: '--font-system',
   className: 'font-sans',
   style: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif'
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   }
 }
 
-// CSS class name that includes both Next.js font and fallback
-export const fontClassName = `${inter.variable} font-sans`
+// CSS class name
+export const fontClassName = `${satoshi.variable} font-sans`
 
 // For components that need direct access to the font family
-export const fontFamily = 'var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif'
+export const fontFamily = 'var(--font-satoshi), "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'

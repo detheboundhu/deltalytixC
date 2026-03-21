@@ -4,7 +4,7 @@ import React from 'react'
 import { WidgetCard } from '../widget-card'
 import { CircularProgress } from '@/components/ui/circular-progress'
 import { useTradeStatistics } from '@/hooks/use-trade-statistics'
-import { Info } from '@phosphor-icons/react'
+import { Info } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,

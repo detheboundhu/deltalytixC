@@ -3,10 +3,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Trash, FloppyDisk, Check } from '@phosphor-icons/react'
+import { LexicalEditor } from '@/components/ui/editor/lexical-editor'
+import { Trash2, Save, Check } from 'lucide-react'
 import { cn, cleanContent } from '@/lib/utils'
-import { updateTradeCommentAction } from '@/server/database'
 import {
   Popover,
   PopoverContent,
@@ -109,17 +108,17 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
               )}
               {showSuccess && !isUpdating && (
                 <div className="flex items-center gap-2 text-sm text-long animate-in fade-in zoom-in duration-300">
-                  <Check className="h-3 w-3" weight="light" />
+                  <Check className="h-3 w-3" />
                   Saved
                 </div>
               )}
             </div>
             <div className="space-y-2">
-              <Textarea
+              <LexicalEditor
                 value={localComment}
-                onChange={(e) => setLocalComment(e.target.value)}
+                onChange={setLocalComment}
                 placeholder="Add your trade analysis and reflections..."
-                className="min-h-[300px] resize-none"
+                minHeight="300px"
               />
             </div>
             <div className="flex justify-between">
@@ -130,7 +129,7 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
                 onClick={handleClear}
                 className="text-destructive hover:text-destructive"
               >
-                <Trash className="h-4 w-4 mr-2" weight="light" />
+                <Trash2 className="h-4 w-4 mr-2" />
                 Clear Comment
               </Button>
               <Button
@@ -138,7 +137,7 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
                 disabled={isUpdating}
                 onClick={handleSave}
               >
-                <FloppyDisk className="h-4 w-4 mr-2" weight="light" />
+                <Save className="h-4 w-4 mr-2" />
                 {"Save"}
               </Button>
             </div>
@@ -147,4 +146,4 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
       </Popover>
     </div>
   )
-} 
+}

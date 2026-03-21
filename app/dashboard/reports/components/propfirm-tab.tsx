@@ -5,16 +5,16 @@ import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
     Trophy,
-    Warning,
-    CheckCircle,
+    AlertTriangle,
+    CheckCircle2,
     XCircle,
     Clock,
-    CurrencyDollar,
-    TrendDown,
-    TrendUp,
-    Buildings,
-    Pulse,
-} from '@phosphor-icons/react'
+    DollarSign,
+    TrendingDown,
+    TrendingUp,
+    Building2,
+    Activity,
+} from 'lucide-react'
 
 // ────────────────────────────────────────────────────────────
 // STATUS HELPERS
@@ -72,7 +72,7 @@ function AccountCard({ account }: { account: any }) {
             <div className="flex items-start justify-between">
                 <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-1.5">
-                        <Buildings weight="light" className="h-3.5 w-3.5 text-primary/70" />
+                        <Building2 className="h-3.5 w-3.5 text-primary/70" />
                         <span className="text-[9px] font-black text-primary/80 uppercase tracking-widest">{account.propFirmName}</span>
                     </div>
                     <span className="text-[11px] font-black uppercase tracking-tight text-foreground">{account.accountName}</span>
@@ -127,7 +127,7 @@ function AccountCard({ account }: { account: any }) {
             {/* Risk Row */}
             <div className="grid grid-cols-2 gap-3 border-t border-border/30 pt-3">
                 <div className="flex items-center gap-1.5">
-                    <TrendDown weight="light" className="h-3 w-3 text-short/70" />
+                    <TrendingDown className="h-3 w-3 text-short/70" />
                     <div className="flex flex-col">
                         <span className="text-[8px] text-muted-foreground/50 uppercase font-bold tracking-wider">Max DD</span>
                         <span className="text-[10px] font-black font-mono text-short">
@@ -137,7 +137,7 @@ function AccountCard({ account }: { account: any }) {
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <TrendUp weight="light" className="h-3 w-3 text-long/70" />
+                    <TrendingUp className="h-3 w-3 text-long/70" />
                     <div className="flex flex-col">
                         <span className="text-[8px] text-muted-foreground/50 uppercase font-bold tracking-wider">Peak Profit</span>
                         <span className="text-[10px] font-black font-mono text-long">
@@ -152,7 +152,7 @@ function AccountCard({ account }: { account: any }) {
                 <div className="flex items-center gap-3 border-t border-border/30 pt-3">
                     {account.totalPayouts > 0 && (
                         <div className="flex items-center gap-1">
-                            <CurrencyDollar weight="fill" className="h-3 w-3 text-primary" />
+                            <DollarSign className="h-3 w-3 text-primary" />
                             <span className="text-[9px] font-black text-primary">
                                 ${account.totalPayouts.toLocaleString('en-US', { minimumFractionDigits: 2 })} Received
                             </span>
@@ -160,7 +160,7 @@ function AccountCard({ account }: { account: any }) {
                     )}
                     {account.breachCount > 0 && (
                         <div className="flex items-center gap-1">
-                            <Warning weight="fill" className="h-3 w-3 text-amber-400" />
+                            <AlertTriangle className="h-3 w-3 text-amber-400" />
                             <span className="text-[9px] font-black text-amber-400">{account.breachCount} Breach{account.breachCount > 1 ? 'es' : ''}</span>
                         </div>
                     )}
@@ -193,7 +193,7 @@ export function PropFirmTab() {
     if (!data || data.accounts.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border/60 rounded-2xl bg-muted/5">
-                <Buildings weight="light" className="h-10 w-10 text-muted-foreground/30 mb-4" />
+                <Building2 className="h-10 w-10 text-muted-foreground/30 mb-4" />
                 <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/50 mb-2">No Prop Firm Accounts</h3>
                 <p className="text-[10px] text-muted-foreground/40 font-medium">Import trades linked to prop firm phases to see analytics here</p>
             </div>
@@ -201,12 +201,12 @@ export function PropFirmTab() {
     }
 
     const accountStats = [
-        { label: 'Total Accounts', value: data.totalAccounts, icon: Buildings, color: 'text-foreground' },
-        { label: 'Active', value: data.activeAccounts, icon: Pulse, color: 'text-blue-400' },
-        { label: 'Funded', value: data.fundedAccounts, icon: CheckCircle, color: 'text-primary' },
+        { label: 'Total Accounts', value: data.totalAccounts, icon: Building2, color: 'text-foreground' },
+        { label: 'Active', value: data.activeAccounts, icon: Activity, color: 'text-blue-400' },
+        { label: 'Funded', value: data.fundedAccounts, icon: CheckCircle2, color: 'text-primary' },
         { label: 'Failed', value: data.failedAccounts, icon: XCircle, color: 'text-short' },
         { label: 'Phases Passed', value: data.passedPhases, icon: Trophy, color: 'text-long' },
-        { label: 'Total Breaches', value: data.totalBreaches, icon: Warning, color: 'text-amber-400' },
+        { label: 'Total Breaches', value: data.totalBreaches, icon: AlertTriangle, color: 'text-amber-400' },
     ]
 
     return (
@@ -219,7 +219,7 @@ export function PropFirmTab() {
                     <div className="grid grid-cols-3 gap-4">
                         {accountStats.map(({ label, value, icon: Icon, color }) => (
                             <div key={label} className="flex items-center gap-2.5">
-                                <Icon weight="light" className={cn("h-4 w-4 shrink-0", color)} />
+                                <Icon className={cn("h-4 w-4 shrink-0", color)} />
                                 <div className="flex flex-col gap-0.5">
                                     <span className={cn("text-lg font-black font-mono leading-none", color)}>{value}</span>
                                     <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50">{label}</span>
@@ -238,7 +238,7 @@ export function PropFirmTab() {
                         </span>
                     </div>
                     <div className="flex items-center gap-2.5 mt-4 pt-4 border-t border-border/20">
-                        <CurrencyDollar weight="light" className="h-4 w-4 shrink-0 text-primary" />
+                        <DollarSign className="h-4 w-4 shrink-0 text-primary" />
                         <div className="flex flex-col gap-0.5">
                             <span className="text-lg font-black font-mono leading-none text-primary">${data.totalPayoutsReceived.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                             <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50">Total Payouts</span>

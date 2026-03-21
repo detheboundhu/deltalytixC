@@ -1,7 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { Bell, Check, Checks, Trash, CircleNotch, X } from '@phosphor-icons/react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import {
+  Bell,
+  Check,
+  CheckCheck,
+  Trash2,
+  X,
+  Filter,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -10,21 +17,60 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
 import { NotificationItem } from './notification-item'
 import { FundedApprovalDialog } from '@/components/prop-firm/funded-approval-dialog'
 import { PhaseTransitionApprovalDialog } from '@/components/prop-firm/phase-transition-approval-dialog'
 import { AdjustDateDialog } from './adjust-date-dialog'
 import { toast } from 'sonner'
-import { Notification } from '@prisma/client'
+import { Notification, NotificationType } from '@prisma/client'
 import { useDatabaseRealtime } from '@/lib/realtime/database-realtime'
 import { useUserStore } from '@/store/user-store'
+import { Spinner } from '@/components/ui/spinner'
+
+type FilterCategory = 'all' | 'alerts' | 'updates' | 'system'
+
+const ALERT_TYPES: NotificationType[] = [
+  'RISK_ALERT',
+  'RISK_DAILY_LOSS_80',
+  'RISK_DAILY_LOSS_95',
+  'RISK_MAX_DRAWDOWN_80',
+  'RISK_MAX_DRAWDOWN_95',
+  'STRATEGY_DEVIATION',
+  'STRATEGY_SESSION_VIOLATION',
+  'FUNDED_DECLINED',
+  'PAYOUT_REJECTED',
+]
+
+const UPDATE_TYPES: NotificationType[] = [
+  'FUNDED_PENDING_APPROVAL',
+  'FUNDED_APPROVED',
+  'PHASE_TRANSITION_PENDING',
+  'PAYOUT_APPROVED',
+  'IMPORT_STATUS',
+  'IMPORT_PROCESSING',
+  'IMPORT_COMPLETE',
+  'WEEKLY_PERFORMANCE',
+  'TRADE_STATUS',
+]
+
+const SYSTEM_TYPES: NotificationType[] = [
+  'SYSTEM',
+  'SYSTEM_ANNOUNCEMENT',
+]
+
+const categories: { key: FilterCategory; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'alerts', label: 'Alerts' },
+  { key: 'updates', label: 'Updates' },
+  { key: 'system', label: 'System' },
+]
 
 export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('all')
   const user = useUserStore(state => state.user)
 
   // Dialog states
@@ -33,7 +79,6 @@ export function NotificationCenter() {
   const [adjustDateDialogOpen, setAdjustDateDialogOpen] = useState(false)
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
 
-  // Use ref for isOpen to avoid stale closures in real-time callback
   const isOpenRef = useRef(isOpen)
   useEffect(() => {
     isOpenRef.current = isOpen
@@ -42,9 +87,8 @@ export function NotificationCenter() {
   const fetchNotifications = useCallback(async () => {
     try {
       setIsLoading(true)
-      // Add cache-busting timestamp to prevent stale data
       const response = await fetch(`/api/notifications?t=${Date.now()}`, {
-        cache: 'no-store' // Prevent browser caching
+        cache: 'no-store'
       })
       const result = await response.json()
 
@@ -59,10 +103,8 @@ export function NotificationCenter() {
     }
   }, [])
 
-  // Explicitly refresh unread count (useful after server-side operations)
   const refreshUnreadCount = useCallback(async () => {
     try {
-      // Add cache-busting to prevent stale count
       const response = await fetch(`/api/notifications?unreadOnly=true&limit=1&t=${Date.now()}`, {
         cache: 'no-store'
       })
@@ -71,77 +113,63 @@ export function NotificationCenter() {
         setUnreadCount(result.data.unreadCount)
       }
     } catch (error) {
-      // Silent fail - will update on next fetch
+      // Silent fail
     }
   }, [])
 
-  // Fetch unread count on mount is handled by fetchNotifications below,
-  // which already returns unreadCount in its response. No separate call needed.
-
-  // Auto-fetch full notifications on mount (includes unreadCount)
   useEffect(() => {
     fetchNotifications()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Run once on mount
+  }, [])
 
-  // Refetch when popover opens for fresh data
   useEffect(() => {
     if (isOpen) {
       fetchNotifications()
     }
   }, [isOpen, fetchNotifications])
 
-  // Poll for new notifications every 60 seconds when popover is closed
-  // This keeps the badge count accurate without requiring user interaction
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isOpenRef.current) {
         refreshUnreadCount()
       }
-    }, 60000) // 60 seconds
+    }, 60000)
 
     return () => clearInterval(interval)
   }, [refreshUnreadCount])
 
-  // Subscribe to realtime notification changes
   useDatabaseRealtime({
     userId: user?.id,
     enabled: !!user?.id,
     onNotificationChange: (change) => {
-      // Only refresh if the notification belongs to the current user
       const notificationUserId = (change.newRecord?.userId || change.oldRecord?.userId) as string | undefined
       if (notificationUserId === user?.id) {
-        // Handle different event types
         if (change.event === 'INSERT' && change.newRecord) {
-          // New notification created - optimistically update count
           const isRead = change.newRecord.isRead as boolean | undefined
-          // Treat undefined as unread (default state for new notifications)
           if (isRead !== true) {
-            // Optimistically increment count for new unread notifications
-            // Increment if explicitly unread (false) or undefined (default unread state)
             setUnreadCount(prev => prev + 1)
           }
-
-          // Use ref to check current popover state (avoids stale closure)
           if (isOpenRef.current) {
-            // If popover is open, fetch full list to show the new notification
             fetchNotifications()
           }
         } else if (change.event === 'UPDATE' || change.event === 'DELETE') {
-          // Notification updated or deleted - need to fetch accurate count
-          // Use ref to check current popover state (avoids stale closure)
           if (isOpenRef.current) {
-            // If popover is open, fetch full list (which includes count)
             fetchNotifications()
           } else {
-            // If popover is closed, always refresh count to ensure badge is accurate
-            // This ensures badge updates even when panel is closed
             refreshUnreadCount()
           }
         }
       }
     }
   })
+
+  const filteredNotifications = useMemo(() => {
+    if (selectedFilter === 'all') return notifications
+    const typeSet = selectedFilter === 'alerts' ? ALERT_TYPES
+      : selectedFilter === 'updates' ? UPDATE_TYPES
+      : SYSTEM_TYPES
+    return notifications.filter(n => typeSet.includes(n.type as NotificationType))
+  }, [notifications, selectedFilter])
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -193,7 +221,6 @@ export function NotificationCenter() {
 
   const handleClearAll = async () => {
     try {
-      // Use bulk delete endpoint
       await fetch('/api/notifications', { method: 'DELETE' })
 
       setNotifications([])
@@ -205,26 +232,19 @@ export function NotificationCenter() {
   }
 
   const handleNotificationAction = (notification: Notification) => {
-    // Handle funded approval actions
     if (notification.type === 'FUNDED_PENDING_APPROVAL' && notification.actionRequired) {
       setSelectedNotification(notification)
       setApprovalDialogOpen(true)
       setIsOpen(false)
-    }
-    // Handle phase transition actions
-    else if (notification.type === 'PHASE_TRANSITION_PENDING' && notification.actionRequired) {
+    } else if (notification.type === 'PHASE_TRANSITION_PENDING' && notification.actionRequired) {
       setSelectedNotification(notification)
       setPhaseTransitionDialogOpen(true)
       setIsOpen(false)
-    }
-    // Handle date adjustment actions
-    else if (notification.type === 'SYSTEM' && notification.actionRequired && notification.invalidationKey?.startsWith('adjust-date-')) {
+    } else if (notification.type === 'SYSTEM' && notification.actionRequired && notification.invalidationKey?.startsWith('adjust-date-')) {
       setSelectedNotification(notification)
       setAdjustDateDialogOpen(true)
       setIsOpen(false)
-    }
-    else {
-      // Mark as read for non-actionable notifications
+    } else {
       if (!notification.isRead) {
         handleMarkAsRead(notification.id)
       }
@@ -240,10 +260,7 @@ export function NotificationCenter() {
   const handlePhaseTransitionComplete = () => {
     setPhaseTransitionDialogOpen(false)
     setSelectedNotification(null)
-    // Fetch full notifications list
     fetchNotifications()
-    // Also explicitly refresh unread count after a delay to catch any new notifications
-    // created server-side during phase transition
     setTimeout(() => {
       refreshUnreadCount()
     }, 500)
@@ -259,30 +276,32 @@ export function NotificationCenter() {
     <>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative h-8 w-8"
+          <button
+            className="relative inline-flex items-center justify-center rounded-full p-2 hover:bg-muted transition-colors"
             aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
           >
-            <Bell className="h-4 w-4" weight="light" />
+            <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
               <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                variant="default"
+                className="absolute -top-1 -right-1 text-xs px-1.5 py-0 min-w-[18px] h-[18px] flex items-center justify-center"
               >
                 {unreadCount > 9 ? '9+' : unreadCount}
               </Badge>
             )}
-          </Button>
+          </button>
         </PopoverTrigger>
+
         <PopoverContent
           className="w-80 sm:w-96 p-0"
           align="end"
           sideOffset={8}
         >
-          <div className="flex items-center justify-between p-4 border-b">
-            <h3 className="font-semibold text-sm">Notifications</h3>
+          {/* Header with filter icon */}
+          <div className="flex justify-between items-center border-b px-4 py-2">
+            <h2 className="text-sm font-medium flex items-center gap-2">
+              <Filter className="h-4 w-4" /> Notifications
+            </h2>
             <div className="flex items-center gap-1">
               {unreadCount > 0 && (
                 <Button
@@ -291,7 +310,7 @@ export function NotificationCenter() {
                   className="h-7 text-xs px-2"
                   onClick={handleMarkAllAsRead}
                 >
-                  <Checks className="h-3 w-3 mr-1" weight="light" />
+                  <CheckCheck className="h-3 w-3 mr-1" />
                   Read all
                 </Button>
               )}
@@ -302,86 +321,77 @@ export function NotificationCenter() {
                   className="h-7 text-xs px-2 text-muted-foreground hover:text-destructive"
                   onClick={handleClearAll}
                 >
-                  <Trash className="h-3 w-3 mr-1" weight="light" />
-                  Clear all
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Clear
                 </Button>
               )}
             </div>
           </div>
 
+          {/* Category filter buttons */}
+          <div className="flex gap-2 px-4 py-2 border-b overflow-x-auto">
+            {categories.map((cat) => (
+              <Button
+                key={cat.key}
+                variant={selectedFilter === cat.key ? "secondary" : "ghost"}
+                size="sm"
+                className="h-7 text-xs shrink-0"
+                onClick={() => setSelectedFilter(cat.key)}
+              >
+                {cat.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Notifications list */}
           <ScrollArea className="h-[400px]">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <CircleNotch className="h-6 w-6 animate-spin text-muted-foreground" weight="light" />
+                <Spinner size="md" />
               </div>
-            ) : notifications.length === 0 ? (
+            ) : filteredNotifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Bell className="h-10 w-10 text-muted-foreground/50 mb-3" weight="light" />
-                <p className="text-sm text-muted-foreground">All caught up!</p>
+                <Bell className="h-10 w-10 text-muted-foreground/50 mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  {selectedFilter === 'all'
+                    ? 'All caught up!'
+                    : `No ${selectedFilter} notifications`}
+                </p>
                 <p className="text-xs text-muted-foreground/70 mt-1">
-                  We'll let you know when something happens
+                  We&apos;ll let you know when something happens
                 </p>
               </div>
             ) : (
-              <div className="divide-y">
-                {['Today', 'Yesterday', 'Old'].map((group) => {
-                  const groupedNotifications = notifications.filter(n => {
-                    const date = new Date(n.createdAt)
-                    const today = new Date()
-                    const yesterday = new Date(today)
-                    yesterday.setDate(yesterday.getDate() - 1)
-
-                    if (group === 'Today') {
-                      return date.toDateString() === today.toDateString()
-                    } else if (group === 'Yesterday') {
-                      return date.toDateString() === yesterday.toDateString()
-                    } else {
-                      return date < yesterday && date.toDateString() !== yesterday.toDateString()
-                    }
-                  })
-
-                  if (groupedNotifications.length === 0) return null
-
-                  return (
-                    <div key={group}>
-                      <div className="bg-muted px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 z-10">
-                        {group}
-                      </div>
-                      {groupedNotifications.map((notification) => (
-                        <NotificationItem
-                          key={notification.id}
-                          notification={notification}
-                          onMarkAsRead={handleMarkAsRead}
-                          onDelete={handleDelete}
-                          onAction={handleNotificationAction}
-                        />
-                      ))}
-                    </div>
-                  )
-                })}
+              <div className="divide-y divide-border">
+                {filteredNotifications.map((notification) => (
+                  <NotificationItem
+                    key={notification.id}
+                    notification={notification}
+                    onMarkAsRead={handleMarkAsRead}
+                    onDelete={handleDelete}
+                    onAction={handleNotificationAction}
+                  />
+                ))}
               </div>
             )}
           </ScrollArea>
         </PopoverContent>
-      </Popover >
+      </Popover>
 
-      {/* Funded Approval Dialog */}
-      < FundedApprovalDialog
+      <FundedApprovalDialog
         open={approvalDialogOpen}
         onOpenChange={setApprovalDialogOpen}
         notification={selectedNotification}
         onComplete={handleApprovalComplete}
       />
 
-      {/* Phase Transition Dialog */}
-      < PhaseTransitionApprovalDialog
+      <PhaseTransitionApprovalDialog
         open={phaseTransitionDialogOpen}
         onOpenChange={setPhaseTransitionDialogOpen}
         notification={selectedNotification}
         onComplete={handlePhaseTransitionComplete}
       />
 
-      {/* Adjust Date Dialog */}
       <AdjustDateDialog
         open={adjustDateDialogOpen}
         onOpenChange={setAdjustDateDialogOpen}
@@ -391,4 +401,3 @@ export function NotificationCenter() {
     </>
   )
 }
-

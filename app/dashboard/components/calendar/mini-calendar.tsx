@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, startOfWeek, getDay, endOfWeek, addDays, getWeek } from "date-fns"
 import { formatInTimeZone } from 'date-fns-tz'
 import { enUS } from 'date-fns/locale'
-import { CaretLeft, CaretRight, Camera } from "@phosphor-icons/react"
+import { ChevronLeft as CaretLeft, ChevronRight as CaretRight, Camera } from "lucide-react"
 import { WidgetCard } from '../widget-card'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -161,7 +161,7 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30 font-bold shrink-0">
               <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-6 w-6 hover:bg-background" aria-label="Previous month">
-                <CaretLeft className="h-3.5 w-3.5" weight="light" />
+                <CaretLeft className="h-3.5 w-3.5" />
               </Button>
               <div className="px-2 min-w-[80px] text-center">
                 <span className="text-[11px] font-black capitalize tracking-tight">
@@ -169,7 +169,7 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
                 </span>
               </div>
               <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-6 w-6 hover:bg-background" aria-label="Next month">
-                <CaretRight className="h-3.5 w-3.5" weight="light" />
+                <CaretRight className="h-3.5 w-3.5" />
               </Button>
             </div>
 
@@ -208,7 +208,7 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
                className="h-7 px-2 text-[10px] font-bold gap-1.5 hover:bg-primary/5 hover:text-primary transition-all bg-muted/20 border border-border/30 rounded-lg"
                title="Snapshot"
              >
-               <Camera className="h-3.5 w-3.5" weight="light" />
+               <Camera className="h-3.5 w-3.5" />
                <span className="hidden sm:inline">Snapshot</span>
              </Button>
           </div>

@@ -18,19 +18,18 @@ import { FormatPreview } from './components/format-preview'
 import { platforms } from './config/platforms'
 import {
   Trophy,
-  CheckCircle,
+  CheckCircle2,
   ArrowUp,
-  FileXls,
+  FileSpreadsheet,
   MapPin,
   Wallet,
   Eye,
-  CaretRight,
+  ChevronRight,
   ArrowLeft,
-  CircleNotch,
-  FileCsv,
+  Loader2,
   Upload,
   ArrowRight
-} from '@phosphor-icons/react'
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUserStore } from '@/store/user-store'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -76,12 +75,12 @@ export type Step =
 
 // Step icons mapping
 const stepIcons: Record<string, React.ReactNode> = {
-  'select-import-type': <FileCsv weight="light" className="h-3.5 w-3.5" />,
-  'upload-file': <Upload weight="light" className="h-3.5 w-3.5" />,
-  'select-headers': <MapPin weight="light" className="h-3.5 w-3.5" />,
-  'map-columns': <MapPin weight="light" className="h-3.5 w-3.5" />,
-  'select-account': <Wallet weight="light" className="h-3.5 w-3.5" />,
-  'preview-trades': <Eye weight="light" className="h-3.5 w-3.5" />,
+  'select-import-type': <FileSpreadsheet className="h-3.5 w-3.5" />,
+  'upload-file': <Upload className="h-3.5 w-3.5" />,
+  'select-headers': <MapPin className="h-3.5 w-3.5" />,
+  'map-columns': <MapPin className="h-3.5 w-3.5" />,
+  'select-account': <Wallet className="h-3.5 w-3.5" />,
+  'preview-trades': <Eye className="h-3.5 w-3.5" />,
 }
 
 export default function ImportButton() {
@@ -226,13 +225,13 @@ export default function ImportButton() {
           toast.success("Evaluation Complete!", {
             description: "Your account has passed. Check notifications to confirm approval.",
             duration: 10000,
-            icon: <Trophy weight="light" className="h-4 w-4 text-primary" />
+            icon: <Trophy className="h-4 w-4 text-primary" />
           })
         } else if ((evalData.status === 'passed' || evalData.status === 'ready_for_transition') && result.isPropFirm && result.masterAccountId && result.phaseAccountId) {
           toast.success("Profit Target Reached!", {
             description: evalData.message || 'Ready to advance to next phase',
             duration: 10000,
-            icon: <CheckCircle weight="light" className="h-4 w-4 text-long" />
+            icon: <CheckCircle2 className="h-4 w-4 text-long" />
           })
 
           const dialogData = {
@@ -360,7 +359,7 @@ export default function ImportButton() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           >
-            <CircleNotch weight="light" className="h-12 w-12 text-primary animate-spin" />
+            <Loader2 className="h-12 w-12 text-primary animate-spin" />
           </motion.div>
           <div className="text-center space-y-2">
             <h3 className="text-lg font-semibold">Saving Trades</h3>
@@ -520,7 +519,7 @@ export default function ImportButton() {
           onMouseEnter={() => { }}
           onMouseLeave={() => { }}
         >
-          <Upload weight="light" className="h-4 w-4 mr-2" />
+          <Upload className="h-4 w-4 mr-2" />
           <span className='hidden md:block'>Import Trades</span>
         </Button>
       </motion.div>
@@ -572,7 +571,7 @@ export default function ImportButton() {
                         )}
                       >
                         {currentStepIndex > idx ? (
-                          <CheckCircle weight="light" className="h-3 w-3" />
+                          <CheckCircle2 className="h-3 w-3" />
                         ) : (
                           stepIcons[s.id] || <span className="text-xs">{idx + 1}</span>
                         )}
@@ -627,7 +626,7 @@ export default function ImportButton() {
                       disabled={isSaving}
                       className="gap-2"
                     >
-                      <ArrowLeft weight="light" className="h-4 w-4" />
+                      <ArrowLeft className="h-4 w-4" />
                       Back
                     </Button>
                   )}
@@ -641,18 +640,18 @@ export default function ImportButton() {
                   >
                     {isSaving ? (
                       <>
-                        <CircleNotch weight="light" className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                         Saving...
                       </>
                     ) : currentStep?.isLastStep ? (
                       <>
-                        <CheckCircle weight="light" className="h-4 w-4" />
+                        <CheckCircle2 className="h-4 w-4" />
                         Save Trades
                       </>
                     ) : (
                       <>
                         Next
-                        <ArrowRight weight="light" className="h-4 w-4" />
+                        <ArrowRight className="h-4 w-4" />
                       </>
                     )}
                   </Button>

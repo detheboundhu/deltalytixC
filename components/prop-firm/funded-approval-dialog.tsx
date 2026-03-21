@@ -18,11 +18,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Trophy,
   XCircle,
-  CheckCircle,
-  CircleNotch,
-  WarningCircle,
-  Confetti
-} from "@phosphor-icons/react"
+  CheckCircle2,
+  Loader2,
+  AlertCircle,
+  PartyPopper
+} from "lucide-react"
 import { toast } from "sonner"
 import {
   handleFundedApprovalAction,
@@ -177,7 +177,7 @@ export function FundedApprovalDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-primary" weight="light" />
+            <Trophy className="h-5 w-5 text-primary" />
             Firm Approval Status
           </DialogTitle>
           <DialogDescription>
@@ -191,7 +191,7 @@ export function FundedApprovalDialog({
         {!action ? (
           <div className="space-y-4">
             <Alert>
-              <Confetti className="h-4 w-4" weight="light" />
+              <PartyPopper className="h-4 w-4" />
               <AlertDescription>
                 Your account met the profit target! What was the firm's decision?
               </AlertDescription>
@@ -203,7 +203,7 @@ export function FundedApprovalDialog({
                 className="h-24 flex-col gap-2 border-long/50 hover:border-long hover:bg-long/10"
                 onClick={() => setAction('approved')}
               >
-                <CheckCircle className="h-8 w-8 text-long" weight="light" />
+                <CheckCircle2 className="h-8 w-8 text-long" />
                 <span className="text-sm font-medium">Firm Approved</span>
               </Button>
 
@@ -212,7 +212,7 @@ export function FundedApprovalDialog({
                 className="h-24 flex-col gap-2 border-destructive/50 hover:border-destructive hover:bg-destructive/10"
                 onClick={() => setAction('declined')}
               >
-                <XCircle className="h-8 w-8 text-destructive" weight="light" />
+                <XCircle className="h-8 w-8 text-destructive" />
                 <span className="text-sm font-medium">Firm Declined</span>
               </Button>
             </div>
@@ -220,7 +220,7 @@ export function FundedApprovalDialog({
         ) : action === 'approved' ? (
           <div className="space-y-4">
             <Alert className="border-long/50 bg-long/10">
-              <CheckCircle className="h-4 w-4 text-long" weight="light" />
+              <CheckCircle2 className="h-4 w-4 text-long" />
               <AlertDescription>
                 Great news! Enter your funded account ID to activate.
               </AlertDescription>
@@ -256,7 +256,7 @@ export function FundedApprovalDialog({
               >
                 {isSubmitting ? (
                   <>
-                    <CircleNotch className="h-4 w-4 mr-2 animate-spin" weight="light" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Activating...
                   </>
                 ) : (
@@ -268,7 +268,7 @@ export function FundedApprovalDialog({
         ) : (
           <div className="space-y-4">
             <Alert variant="destructive">
-              <WarningCircle className="h-4 w-4" weight="light" />
+              <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 We're sorry to hear that. Please select the reason for decline.
               </AlertDescription>
@@ -319,7 +319,7 @@ export function FundedApprovalDialog({
               >
                 {isSubmitting ? (
                   <>
-                    <CircleNotch className="h-4 w-4 mr-2 animate-spin" weight="light" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Processing...
                   </>
                 ) : (

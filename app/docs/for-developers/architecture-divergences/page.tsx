@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowsLeftRight, Shield, Wrench } from '@phosphor-icons/react'
+import { ArrowLeftRight, Shield, Wrench } from 'lucide-react'
 
 export default function ArchitectureDivergencesDocs() {
   return (
@@ -19,7 +19,7 @@ export default function ArchitectureDivergencesDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ArrowsLeftRight weight="light" className="h-5 w-5 text-primary" />
+              <ArrowLeftRight className="h-5 w-5 text-primary" />
               React Query vs SWR
             </CardTitle>
           </CardHeader>
@@ -33,7 +33,7 @@ export default function ArchitectureDivergencesDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wrench weight="light" className="h-5 w-5 text-primary" />
+              <Wrench className="h-5 w-5 text-primary" />
               Dashboard stats ownership
             </CardTitle>
           </CardHeader>
@@ -47,7 +47,7 @@ export default function ArchitectureDivergencesDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Shield weight="light" className="h-5 w-5 text-primary" />
+              <Shield className="h-5 w-5 text-primary" />
               Other decisions
             </CardTitle>
           </CardHeader>

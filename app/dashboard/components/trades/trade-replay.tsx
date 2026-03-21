@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button'
 import {
     Calendar,
     Clock,
-    TrendUp,
-    TrendDown,
-    CircleNotch,
-    WarningCircle
-} from "@phosphor-icons/react"
+    TrendingUp as TrendUp,
+    TrendingDown as TrendDown,
+    Loader2 as CircleNotch,
+    AlertCircle as WarningCircle
+} from "lucide-react"
 import { cn, BREAK_EVEN_THRESHOLD } from '@/lib/utils'
 import { format, parseISO } from 'date-fns'
 import { createChart, ColorType, IChartApi, ISeriesApi, Time, CandlestickSeries, createSeriesMarkers } from 'lightweight-charts'
@@ -247,7 +247,7 @@ export default function TradeReplay({ trade, onClose }: TradeReplayProps) {
 
             {error && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/95 z-20 p-6 text-center">
-                    <WarningCircle className="h-10 w-10 text-destructive mb-4" weight="light" />
+                    <WarningCircle className="h-10 w-10 text-destructive mb-4" />
                     <h3 className="text-sm font-semibold mb-2">Market Data Error</h3>
                     <p className="text-xs text-muted-foreground mb-4">{error}</p>
                     <Button

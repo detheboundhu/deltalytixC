@@ -1,36 +1,27 @@
-import { CircleNotch } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
-    size?: "sm" | "md" | "lg" | "xl";
-    variant?: "default" | "primary" | "secondary";
+  size?: "sm" | "md" | "lg" | "xl"
 }
 
-export function Spinner({ className, size = "md", variant = "default", ...props }: SpinnerProps) {
-    const sizeClasses = {
-        sm: "h-4 w-4",
-        md: "h-6 w-6",
-        lg: "h-8 w-8",
-        xl: "h-12 w-12",
-    };
+const sizeMap = {
+  sm: "w-[32px]",
+  md: "w-[48px]",
+  lg: "w-[65px]",
+  xl: "w-[90px]",
+}
 
-    const variantClasses = {
-        default: "text-muted-foreground",
-        primary: "text-primary",
-        secondary: "text-secondary",
-    };
-
-    return (
-        <div className={cn("flex justify-center items-center", className)} {...props}>
-            <CircleNotch
-                weight="light"
-                className={cn(
-                    "animate-spin",
-                    sizeClasses[size],
-                    variantClasses[variant]
-                )}
-            />
-            <span className="sr-only">Loading...</span>
-        </div>
-    );
+export function Spinner({ className, size = "md", ...props }: SpinnerProps) {
+  return (
+    <div
+      className={cn("flex justify-center items-center", className)}
+      {...props}
+    >
+      <div className={cn("relative aspect-square", sizeMap[size])}>
+        <span className="absolute rounded-[50px] animate-luma-spin shadow-[inset_0_0_0_3px] shadow-foreground/20" />
+        <span className="absolute rounded-[50px] animate-luma-spin animation-delay-half shadow-[inset_0_0_0_3px] shadow-foreground/20" />
+      </div>
+      <span className="sr-only">Loading...</span>
+    </div>
+  )
 }

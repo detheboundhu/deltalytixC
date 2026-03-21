@@ -20,7 +20,7 @@ import { uploadService } from '@/lib/upload-service'
 import { useUserStore } from '@/store/user-store'
 import { ExtendedTrade, MarketBias, TradeOutcome } from '@/types/trade-extended'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, CircleNotch, NotePencil, Strategy, Newspaper } from '@phosphor-icons/react'
+import { ArrowLeft, Loader2, PenLine, Route, Newspaper } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -302,7 +302,7 @@ export function TradeEditPanel({ trade, onClose, onSave }: TradeEditPanelProps) 
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <Button variant="ghost" size="sm" onClick={handleCloseAttempt} className="h-8 px-2 text-xs hover:bg-accent/50 shrink-0">
-                <ArrowLeft className="mr-1 h-3.5 w-3.5" weight="light" />
+                <ArrowLeft className="mr-1 h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
               <div className="h-4 w-px bg-border/40 shrink-0" />
@@ -329,15 +329,15 @@ export function TradeEditPanel({ trade, onClose, onSave }: TradeEditPanelProps) 
           <div className="px-4 sm:px-6 pt-3 shrink-0">
             <TabsList className="w-full sm:w-auto justify-start h-auto p-1 gap-1 bg-muted/50">
               <TabsTrigger value="details" className="text-xs px-3 py-1.5 h-auto gap-1.5">
-                <NotePencil className="h-3.5 w-3.5" weight="light" />
+                <PenLine className="h-3.5 w-3.5" />
                 Notes & Images
               </TabsTrigger>
               <TabsTrigger value="strategy" className="text-xs px-3 py-1.5 h-auto gap-1.5">
-                <Strategy className="h-3.5 w-3.5" weight="light" />
+                <Route className="h-3.5 w-3.5" />
                 Strategy
               </TabsTrigger>
               <TabsTrigger value="news" className="text-xs px-3 py-1.5 h-auto gap-1.5">
-                <Newspaper className="h-3.5 w-3.5" weight="light" />
+                <Newspaper className="h-3.5 w-3.5" />
                 News
               </TabsTrigger>
             </TabsList>
@@ -425,7 +425,7 @@ export function TradeEditPanel({ trade, onClose, onSave }: TradeEditPanelProps) 
           <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full sm:w-auto h-9 px-5 rounded-xl shadow-lg shadow-primary/10 font-semibold text-xs">
             {isSubmitting ? (
               <>
-                <CircleNotch className="mr-2 h-3.5 w-3.5 animate-spin" weight="light" />
+                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                 Saving...
               </>
             ) : (

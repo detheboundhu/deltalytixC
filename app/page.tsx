@@ -1,6 +1,6 @@
 'use client'
 
-import { Moon } from "@phosphor-icons/react"
+import { Moon, Sun } from "lucide-react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -18,7 +18,6 @@ export default function RootPage() {
   const router = useRouter()
   const [isProcessingLogout, setIsProcessingLogout] = useState(false)
   const [isClient, setIsClient] = useState(false)
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null)
 
   useEffect(() => {
     setIsClient(true)
@@ -44,7 +43,6 @@ export default function RootPage() {
     try {
       setIsProcessingLogout(true)
       await signOut()
-      // Force clear client state for immediate feedback
       forceClearAuth()
       window.location.reload()
     } catch (error) {
@@ -55,13 +53,9 @@ export default function RootPage() {
     }
   }
 
-
-
   const { theme, toggleTheme } = useTheme()
 
-  // --- RENDERING ---
-
-  // 1. Authenticated State - Immediate Redirect
+  // Authenticated — redirect
   if (isAuthenticated && !isLoading && !isProcessingLogout) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -77,67 +71,63 @@ export default function RootPage() {
     )
   }
 
-  // 2. Unauthenticated State - Minimalist Login
+  // Unauthenticated — 21st.dev dark minimal login
   return (
     <div className="min-h-screen bg-background overflow-hidden relative flex flex-col items-center justify-center selection:bg-primary/30">
 
-      {/* Main Content */}
+      {/* Main Content — no card, floats on background */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full max-w-[400px] relative z-10 px-6"
+        className="w-full max-w-[340px] relative z-10 px-6"
       >
+        {/* Logo */}
         <div className="flex flex-col items-center mb-10">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="mb-8"
+            className="mb-6 flex items-center gap-3"
           >
-            <Logo className="w-14 h-14" />
+            <Logo className="w-10 h-10" />
+            <span className="text-xl font-bold tracking-tight text-foreground">
+              Deltalytix
+            </span>
           </motion.div>
-
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-heading-text">
-              Welcome Back
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Sign in to your trading terminal
-            </p>
-          </div>
         </div>
 
+        {/* Auth Form — renders directly, no card wrapper */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <div className="relative z-10 w-full max-w-sm bg-card border border-border/40 rounded-2xl shadow-sm p-8 sm:p-10">
-            <UserAuthForm />
-          </div>
+          <UserAuthForm />
         </motion.div>
 
-        {/* Minimal Footer */}
+        {/* Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 1 }}
-          className="mt-12 flex flex-col items-center gap-6"
+          className="mt-10 flex flex-col items-center gap-4"
         >
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground transition-colors h-8 text-[11px] uppercase tracking-widest font-medium"
-              onClick={() => toggleTheme()}
-            >
-              <Moon weight="light" className="h-3 w-3 mr-2" />
-              {theme === 'dark' ? 'Light' : 'Dark'}
-            </Button>
-          </div>
-          <p className="text-[10px] text-muted-foreground/50 uppercase tracking-[0.2em] font-medium">
-            &copy; {new Date().getFullYear()} Deltalytix &bull; Secure Terminal
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground transition-colors h-8 text-[11px] uppercase tracking-widest font-medium"
+            onClick={() => toggleTheme()}
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-3 w-3 mr-2" />
+            ) : (
+              <Moon className="h-3 w-3 mr-2" />
+            )}
+            {theme === 'dark' ? 'Light' : 'Dark'}
+          </Button>
+          <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.2em] font-medium">
+            &copy; {new Date().getFullYear()} Deltalytix
           </p>
         </motion.div>
       </motion.div>

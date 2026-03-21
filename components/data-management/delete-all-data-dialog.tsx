@@ -16,12 +16,13 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
-  Trash,
-  Warning, Download,
-  CircleNotch,
-  CheckCircle,
+  Trash2,
+  AlertTriangle,
+  Download,
+  Loader2,
+  CheckCircle2,
   XCircle
-} from "@phosphor-icons/react"
+} from "lucide-react"
 import { toast } from "sonner"
 
 interface DeleteAllDataDialogProps {
@@ -148,7 +149,7 @@ export function DeleteAllDataDialog({ open, onOpenChange }: DeleteAllDataDialogP
       <AlertDialogContent className="max-w-lg">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-            <Warning weight="light" className="h-5 w-5" />
+            <AlertTriangle className="h-5 w-5" />
             Delete All Data
           </AlertDialogTitle>
         </AlertDialogHeader>
@@ -158,7 +159,7 @@ export function DeleteAllDataDialog({ open, onOpenChange }: DeleteAllDataDialogP
             <AlertDialogDescription asChild>
               <div className="space-y-4">
                 <Alert variant="destructive">
-                  <Warning weight="light" className="h-4 w-4" />
+                  <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>This action cannot be undone</AlertTitle>
                   <AlertDescription>
                     All your trading data will be permanently deleted. Your user account will remain active.
@@ -187,17 +188,17 @@ export function DeleteAllDataDialog({ open, onOpenChange }: DeleteAllDataDialogP
                   >
                     {isDownloadingBackup ? (
                       <>
-                        <CircleNotch weight="light" className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         Generating backup...
                       </>
                     ) : backupDownloaded ? (
                       <>
-                        <CheckCircle weight="light" className="h-4 w-4 mr-2 text-profit" />
+                        <CheckCircle2 className="h-4 w-4 mr-2 text-profit" />
                         Backup downloaded
                       </>
                     ) : (
                       <>
-                        <Download weight="light" className="h-4 w-4 mr-2" />
+                        <Download className="h-4 w-4 mr-2" />
                         Download Backup
                       </>
                     )}
@@ -240,13 +241,13 @@ export function DeleteAllDataDialog({ open, onOpenChange }: DeleteAllDataDialogP
                   />
                   {confirmText && confirmText !== 'DELETE ALL DATA' && (
                     <p className="text-xs text-destructive flex items-center gap-1">
-                      <XCircle weight="light" className="h-3 w-3" />
+                      <XCircle className="h-3 w-3" />
                       Text does not match
                     </p>
                   )}
                   {confirmText === 'DELETE ALL DATA' && (
                     <p className="text-xs text-profit flex items-center gap-1">
-                      <CheckCircle weight="light" className="h-3 w-3" />
+                      <CheckCircle2 className="h-3 w-3" />
                       Confirmation matches
                     </p>
                   )}
@@ -274,7 +275,7 @@ export function DeleteAllDataDialog({ open, onOpenChange }: DeleteAllDataDialogP
             <AlertDialogDescription asChild>
               <div className="space-y-4">
                 <Alert variant="destructive">
-                  <Warning weight="light" className="h-4 w-4" />
+                  <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Final Warning</AlertTitle>
                   <AlertDescription>
                     You are about to permanently delete all your data. This action is irreversible.
@@ -309,12 +310,12 @@ export function DeleteAllDataDialog({ open, onOpenChange }: DeleteAllDataDialogP
               >
                 {isDeleting ? (
                   <>
-                    <CircleNotch weight="light" className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Deleting...
                   </>
                 ) : (
                   <>
-                    <Trash weight="light" className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4 mr-2" />
                     Delete All My Data
                   </>
                 )}

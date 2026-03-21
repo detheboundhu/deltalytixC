@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useState, useMemo, useEffect } from "react"
-import { MagnifyingGlass, Funnel, Calendar, ArrowLeft } from "@phosphor-icons/react"
+import { Search, Filter, Calendar, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -271,7 +271,7 @@ export function CombinedFilters({ onSave, open: controlledOpen, onOpenChange }: 
           onClick={() => setCurrentView('instrument')}
         >
           <div className="flex items-center gap-3 w-full">
-            <Funnel weight="light" className="h-5 w-5 text-muted-foreground" />
+            <Filter className="h-5 w-5 text-muted-foreground" />
             <div className="flex-1 text-left">
               <div className="font-medium text-sm">Instrument Filter</div>
               <div className="text-xs text-muted-foreground">
@@ -289,7 +289,7 @@ export function CombinedFilters({ onSave, open: controlledOpen, onOpenChange }: 
           onClick={() => setCurrentView('date')}
         >
           <div className="flex items-center gap-3 w-full">
-            <Calendar weight="light" className="h-5 w-5 text-muted-foreground" />
+            <Calendar className="h-5 w-5 text-muted-foreground" />
             <div className="flex-1 text-left">
               <div className="font-medium text-sm">Date Range Filter</div>
               <div className="text-xs text-muted-foreground">
@@ -316,7 +316,7 @@ export function CombinedFilters({ onSave, open: controlledOpen, onOpenChange }: 
           className="h-8 w-8 p-0"
           onClick={() => setCurrentView('menu')}
         >
-          <ArrowLeft weight="light" className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
           <h4 className="font-semibold text-sm sm:text-base">Instrument Filter</h4>
@@ -328,7 +328,7 @@ export function CombinedFilters({ onSave, open: controlledOpen, onOpenChange }: 
 
       {/* Search */}
       <div className="relative">
-        <MagnifyingGlass weight="light" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search instruments..."
           value={searchQuery}
@@ -365,7 +365,7 @@ export function CombinedFilters({ onSave, open: controlledOpen, onOpenChange }: 
       <ScrollArea className="h-48 sm:h-72 pr-3">
         {totalInstruments === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
-            <Funnel weight="light" className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/30 mb-2 sm:mb-3" />
+            <Filter className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/30 mb-2 sm:mb-3" />
             <p className="text-xs sm:text-sm text-muted-foreground">No instruments available</p>
             <p className="text-xs text-muted-foreground mt-1">Import trades to see instruments</p>
           </div>
@@ -454,7 +454,7 @@ export function CombinedFilters({ onSave, open: controlledOpen, onOpenChange }: 
           className="h-8 w-8 p-0"
           onClick={() => setCurrentView('menu')}
         >
-          <ArrowLeft weight="light" className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
           <h4 className="font-semibold text-sm sm:text-base">Date Range Filter</h4>
@@ -492,7 +492,7 @@ export function CombinedFilters({ onSave, open: controlledOpen, onOpenChange }: 
               variant="outline"
               className="w-full justify-start text-left font-normal h-10 sm:h-11 text-sm border-border bg-background hover:bg-muted/50 transition-colors"
             >
-              <Calendar weight="light" className="mr-2 h-4 w-4 text-muted-foreground" />
+              <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
               <span className="text-foreground">
                 {startDate && endDate
                   ? `${format(startDate, 'MMM d, yyyy')} - ${format(endDate, 'MMM d, yyyy')}`
@@ -563,7 +563,7 @@ export function CombinedFilters({ onSave, open: controlledOpen, onOpenChange }: 
           size="sm"
           className="h-8 px-3 hover:bg-muted/50 transition-all duration-200 border border-border/50 bg-card/50"
         >
-          <Funnel weight="light" className="mr-2 h-4 w-4" />
+          <Filter className="mr-2 h-4 w-4" />
           <span className="text-sm">Filters</span>
           {(instruments.length > 0 || (dateRange?.from && dateRange?.to)) && (
             <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">

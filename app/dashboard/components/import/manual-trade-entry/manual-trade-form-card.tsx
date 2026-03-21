@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { LexicalEditor } from '@/components/ui/editor/lexical-editor'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
@@ -17,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Calculator, TrendUp, TrendDown, WarningCircle } from '@phosphor-icons/react'
+import { Calculator, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
 import { Trade } from '@prisma/client'
 import { generateTradeHash } from '@/lib/utils'
 import { calculatePnL, calculateDuration } from '@/lib/utils/trade-calculations'
@@ -345,7 +346,7 @@ export default function ManualTradeFormCard({ accountId, accountNumber: propFirm
           <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <WarningCircle weight="light" className="h-4 w-4 text-destructive" />
+                <AlertCircle className="h-4 w-4 text-destructive" />
               </div>
               <div className="ml-3">
                 <p className="text-sm text-destructive">{phaseValidationError}</p>
@@ -433,13 +434,13 @@ export default function ManualTradeFormCard({ accountId, accountNumber: propFirm
                     <SelectContent>
                       <SelectItem value="LONG">
                         <div className="flex items-center">
-                          <TrendUp weight="light" className="w-4 h-4 mr-2 text-long" />
+                          <TrendingUp className="w-4 h-4 mr-2 text-long" />
                           Long
                         </div>
                       </SelectItem>
                       <SelectItem value="SHORT">
                         <div className="flex items-center">
-                          <TrendDown weight="light" className="w-4 h-4 mr-2 text-short" />
+                          <TrendingDown className="w-4 h-4 mr-2 text-short" />
                           Short
                         </div>
                       </SelectItem>
@@ -547,7 +548,7 @@ export default function ManualTradeFormCard({ accountId, accountNumber: propFirm
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center">
-              <Calculator weight="light" className="w-4 h-4 mr-2" />
+              <Calculator className="w-4 h-4 mr-2" />
               Financial Results
             </CardTitle>
           </CardHeader>
@@ -681,10 +682,17 @@ export default function ManualTradeFormCard({ accountId, accountNumber: propFirm
 
             <div className="space-y-2 md:col-span-2 lg:col-span-4">
               <Label htmlFor="comment">Trade Notes</Label>
-              <Textarea
-                placeholder="Analysis, confluence factors, market conditions, lessons learned..."
-                className="min-h-[60px]"
-                {...register('comment')}
+              <Controller
+                name="comment"
+                control={control}
+                render={({ field }) => (
+                  <LexicalEditor
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    placeholder="Analysis, confluence factors, market conditions, lessons learned..."
+                    minHeight="60px"
+                  />
+                )}
               />
             </div>
           </CardContent>

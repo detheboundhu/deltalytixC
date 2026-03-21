@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle, Warning, Database, Lightning, Package } from '@phosphor-icons/react'
+import { CheckCircle2, AlertTriangle, Database, Zap, Package } from 'lucide-react'
 
 export default function TradezellaComparisonDocs() {
   return (
@@ -19,7 +19,7 @@ export default function TradezellaComparisonDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lightning weight="light" className="h-5 w-5 text-primary" />
+              <Zap className="h-5 w-5 text-primary" />
               Server-side computation (90%)
             </CardTitle>
           </CardHeader>
@@ -29,7 +29,7 @@ export default function TradezellaComparisonDocs() {
               <code> /api/v1/trades</code> and <code> /api/v1/reports/stats</code>.
             </p>
             <div className="flex items-start gap-2">
-              <CheckCircle weight="light" className="h-4 w-4 text-primary mt-1 shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
               <p><strong className="text-foreground">Verdict:</strong> Match.</p>
             </div>
           </CardContent>
@@ -38,7 +38,7 @@ export default function TradezellaComparisonDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Database weight="light" className="h-5 w-5 text-primary" />
+              <Database className="h-5 w-5 text-primary" />
               Indexes & query patterns
             </CardTitle>
           </CardHeader>
@@ -48,7 +48,7 @@ export default function TradezellaComparisonDocs() {
               DeltalytixC has the equivalent indexes in Prisma schema.
             </p>
             <div className="flex items-start gap-2">
-              <CheckCircle weight="light" className="h-4 w-4 text-primary mt-1 shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
               <p><strong className="text-foreground">Verdict:</strong> Match.</p>
             </div>
           </CardContent>
@@ -57,7 +57,7 @@ export default function TradezellaComparisonDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Package weight="light" className="h-5 w-5 text-primary" />
+              <Package className="h-5 w-5 text-primary" />
               Payload size & pagination (the gap)
             </CardTitle>
           </CardHeader>
@@ -67,7 +67,7 @@ export default function TradezellaComparisonDocs() {
               (cursor/limit) while stats are computed over the full filtered set.
             </p>
             <div className="flex items-start gap-2">
-              <Warning weight="light" className="h-4 w-4 text-primary mt-1 shrink-0" />
+              <AlertTriangle className="h-4 w-4 text-primary mt-1 shrink-0" />
               <p>
                 <strong className="text-foreground">Gap:</strong> returning thousands of trades in one JSON response for “All time”
                 can create multi‑MB payloads.

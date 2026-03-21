@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from 'sonner'
-import { CircleNotch, Plus, Trash, PencilSimple, Check, X, Tag } from '@phosphor-icons/react'
+import { Loader2, Plus, Trash2, PenLine, Check, X, Tag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTags } from '@/hooks/use-tags'
 
@@ -114,7 +114,7 @@ export function TagManager({ isOpen, onClose, onRefresh }: TagManagerProps) {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <Tag className="h-5 w-5 text-primary" weight="light" />
+            <Tag className="h-5 w-5 text-primary" />
             <DialogTitle>Manage Tags</DialogTitle>
           </div>
           <DialogDescription>
@@ -142,9 +142,9 @@ export function TagManager({ isOpen, onClose, onRefresh }: TagManagerProps) {
                 size="sm"
               >
                 {isCreating ? (
-                  <CircleNotch className="h-6 w-6 animate-spin text-muted-foreground" weight="light" />
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 ) : (
-                  <Plus className="h-4 w-4" weight="light" />
+                  <Plus className="h-4 w-4" />
                 )}
               </Button>
             </div>
@@ -176,7 +176,7 @@ export function TagManager({ isOpen, onClose, onRefresh }: TagManagerProps) {
             <ScrollArea className="h-[300px] border rounded-lg p-2">
               {isLoading ? (
                 <div className="flex items-center justify-center h-full">
-                  <CircleNotch className="h-6 w-6 animate-spin text-muted-foreground" weight="light" />
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               ) : tags.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
@@ -223,7 +223,7 @@ export function TagManager({ isOpen, onClose, onRefresh }: TagManagerProps) {
                             variant="ghost"
                             className="h-8 px-2"
                           >
-                            <Check className="h-4 w-4 text-profit" weight="light" />
+                            <Check className="h-4 w-4 text-profit" />
                           </Button>
                           <Button
                             onClick={handleCancelEdit}
@@ -231,7 +231,7 @@ export function TagManager({ isOpen, onClose, onRefresh }: TagManagerProps) {
                             variant="ghost"
                             className="h-8 px-2"
                           >
-                            <X className="h-4 w-4 text-muted-foreground" weight="light" />
+                            <X className="h-4 w-4 text-muted-foreground" />
                           </Button>
                         </>
                       ) : (
@@ -252,7 +252,7 @@ export function TagManager({ isOpen, onClose, onRefresh }: TagManagerProps) {
                             variant="ghost"
                             className="h-8 px-2"
                           >
-                            <PencilSimple className="h-4 w-4 text-muted-foreground" weight="light" />
+                            <PenLine className="h-4 w-4 text-muted-foreground" />
                           </Button>
                           <Button
                             onClick={() => handleDeleteTag(tag.id)}
@@ -260,7 +260,7 @@ export function TagManager({ isOpen, onClose, onRefresh }: TagManagerProps) {
                             variant="ghost"
                             className="h-8 px-2"
                           >
-                            <Trash className="h-4 w-4 text-destructive" weight="light" />
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </>
                       )}

@@ -14,11 +14,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
-  CaretRight,
-  CircleNotch,
-  Sparkle,
+  ChevronRight,
+  Loader2,
+  Sparkles,
   Trophy
-} from "@phosphor-icons/react"
+} from "lucide-react"
 import { toast } from "sonner"
 import { Notification } from '@prisma/client'
 import { clearAccountsCache } from '@/hooks/use-accounts'
@@ -169,9 +169,9 @@ export function PhaseTransitionApprovalDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isTransitioningToFunded ? (
-              <Trophy className="h-5 w-5 text-primary" weight="light" />
+              <Trophy className="h-5 w-5 text-primary" />
             ) : (
-              <CaretRight className="h-5 w-5 text-muted-foreground" weight="light" />
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
             )}
             {isTransitioningToFunded ? 'Ready for Funded Account!' : `Advance to ${nextPhaseName}`}
           </DialogTitle>
@@ -185,7 +185,7 @@ export function PhaseTransitionApprovalDialog({
 
         <div className="space-y-4">
           <Alert className={isTransitioningToFunded ? "border-primary/50 bg-primary/10" : "border-muted"}>
-            <Sparkle className={`h-4 w-4 ${isTransitioningToFunded ? 'text-primary' : 'text-muted-foreground'}`} weight="light" />
+            <Sparkles className={`h-4 w-4 ${isTransitioningToFunded ? 'text-primary' : 'text-muted-foreground'}`} />
             <AlertDescription>
               {isTransitioningToFunded
                 ? "You've completed the evaluation! Enter your funded account ID."
@@ -229,13 +229,13 @@ export function PhaseTransitionApprovalDialog({
             >
               {isSubmitting ? (
                 <>
-                  <CircleNotch className="h-4 w-4 mr-2 animate-spin" weight="light" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Processing...
                 </>
               ) : (
                 <>
                   Activate {nextPhaseName}
-                  <CaretRight className="h-4 w-4 ml-2" weight="light" />
+                  <ChevronRight className="h-4 w-4 ml-2" />
                 </>
               )}
             </Button>

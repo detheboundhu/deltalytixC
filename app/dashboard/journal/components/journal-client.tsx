@@ -4,21 +4,21 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TradeCard } from './trade-card'
 import {
-  MagnifyingGlass,
-  Funnel,
-  WarningCircle,
-  ArrowsClockwise,
-  CaretLeft,
-  CaretRight,
+  Search,
+  Filter,
+  AlertCircle,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
   X,
-  Sparkle,
+  Sparkles,
   Tag,
-  TrendUp,
-  TrendDown,
-  ChartBar,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
   Clock,
   BookOpen
-} from '@phosphor-icons/react'
+} from "lucide-react"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -91,7 +91,7 @@ function JournalStats({ trades }: { trades: Trade[] }) {
             <span className="text-[11px] uppercase tracking-wide font-bold text-muted-foreground/80">
               Total Trades
             </span>
-            <ChartBar className="h-3.5 w-3.5 text-muted-foreground/50" weight="light" />
+            <BarChart3 className="h-3.5 w-3.5 text-muted-foreground/50" />
           </div>
           <p className="text-2xl font-bold tracking-tight">{stats.totalTrades}</p>
         </CardContent>
@@ -104,9 +104,9 @@ function JournalStats({ trades }: { trades: Trade[] }) {
               Win Rate
             </span>
             {stats.winRate >= 50 ? (
-              <TrendUp className="h-3.5 w-3.5 text-long/50" weight="light" />
+              <TrendingUp className="h-3.5 w-3.5 text-long/50" />
             ) : (
-              <TrendDown className="h-3.5 w-3.5 text-short/50" weight="light" />
+              <TrendingDown className="h-3.5 w-3.5 text-short/50" />
             )}
           </div>
           <p className="text-2xl font-bold tracking-tight">{stats.winRate.toFixed(1)}%</p>
@@ -120,9 +120,9 @@ function JournalStats({ trades }: { trades: Trade[] }) {
               Total P&L
             </span>
             {stats.totalPnl >= 0 ? (
-              <TrendUp className="h-3.5 w-3.5 text-long/50" weight="light" />
+              <TrendingUp className="h-3.5 w-3.5 text-long/50" />
             ) : (
-              <TrendDown className="h-3.5 w-3.5 text-short/50" weight="light" />
+              <TrendingDown className="h-3.5 w-3.5 text-short/50" />
             )}
           </div>
           <p className={cn("text-2xl font-bold tracking-tight", stats.totalPnl >= 0 ? "text-long" : "text-short")}>
@@ -137,7 +137,7 @@ function JournalStats({ trades }: { trades: Trade[] }) {
             <span className="text-[11px] uppercase tracking-wide font-bold text-muted-foreground/80">
               Avg Duration
             </span>
-            <Clock className="h-3.5 w-3.5 text-muted-foreground/50" weight="light" />
+            <Clock className="h-3.5 w-3.5 text-muted-foreground/50" />
           </div>
           <p className="text-2xl font-bold tracking-tight">{stats.avgDuration}m</p>
         </CardContent>
@@ -229,7 +229,7 @@ function EmptyState({
     <Card className="border-dashed">
       <CardContent className="flex flex-col items-center justify-center py-16">
         <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
-          <BookOpen className="h-8 w-8 text-muted-foreground" weight="light" />
+          <BookOpen className="h-8 w-8 text-muted-foreground" />
         </div>
         <h3 className="text-lg font-semibold mb-2">No trades found</h3>
         <p className="text-sm text-muted-foreground text-center max-w-sm">
@@ -504,7 +504,7 @@ export function JournalClient() {
             onClick={() => setShowAIAnalysis(true)}
             className="gap-2"
           >
-            <Sparkle className="h-4 w-4" weight="light" />
+            <Sparkles className="h-4 w-4" />
             <span className="hidden sm:inline">AI Analysis</span>
             <span className="sm:hidden">AI</span>
           </Button>
@@ -515,7 +515,7 @@ export function JournalClient() {
             disabled={isRefreshing}
             className="gap-2"
           >
-            <ArrowsClockwise className={cn("h-4 w-4", isRefreshing && "animate-spin")} weight="light" />
+            <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
         </div>
@@ -538,7 +538,7 @@ export function JournalClient() {
         className="flex flex-col sm:flex-row gap-3"
       >
         <div className="relative flex-1 max-w-md">
-          <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" weight="light" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             ref={searchInputRef}
             placeholder="Search by symbol, alias, or notes..."
@@ -553,7 +553,7 @@ export function JournalClient() {
               onClick={() => setSearchTerm('')}
               className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
             >
-              <X className="h-3.5 w-3.5" weight="light" />
+              <X className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
@@ -561,7 +561,7 @@ export function JournalClient() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2 h-9 whitespace-nowrap">
-              <Funnel className="h-4 w-4" weight="light" />
+              <Filter className="h-4 w-4" />
               <span>
                 {filterBy === 'all' ? 'All' : filterBy === 'wins' ? 'Wins' : filterBy === 'losses' ? 'Losses' : filterBy === 'buys' ? 'Buys' : 'Sells'}
               </span>
@@ -590,7 +590,7 @@ export function JournalClient() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2 h-9 whitespace-nowrap">
-              <Tag className="h-4 w-4" weight="light" />
+              <Tag className="h-4 w-4" />
               <span>
                 {selectedTagIds.length === 0 ? 'Tags' : `${selectedTagIds.length} Selected`}
               </span>
@@ -664,7 +664,7 @@ export function JournalClient() {
                 onClick={() => setSelectedTagIds(prev => prev.filter(id => id !== tagId))}
               >
                 {tag.name}
-                <X className="h-3 w-3" weight="light" />
+                <X className="h-3 w-3" />
               </Badge>
             ) : null
           })}
@@ -731,7 +731,7 @@ export function JournalClient() {
                     disabled={currentPage === 1}
                     className="gap-1"
                   >
-                    <CaretLeft className="h-4 w-4" weight="light" />
+                    <ChevronLeft className="h-4 w-4" />
                     <span className="hidden sm:inline">Previous</span>
                   </Button>
                   <div className="flex items-center gap-1">
@@ -767,7 +767,7 @@ export function JournalClient() {
                     className="gap-1"
                   >
                     <span className="hidden sm:inline">Next</span>
-                    <CaretRight className="h-4 w-4" weight="light" />
+                    <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
               </motion.div>
@@ -784,7 +784,7 @@ export function JournalClient() {
         <AlertDialogContent className="z-[10002]">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <WarningCircle className="w-5 h-5 text-destructive" weight="light" />
+              <AlertCircle className="w-5 h-5 text-destructive" />
               Delete Trade?
             </AlertDialogTitle>
             <AlertDialogDescription>

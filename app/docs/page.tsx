@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { CaretRight, ArrowRight, ChartBar, Building, BookOpen, Lightning, Shield, TrendUp, Database, Lock, FileCode, Funnel, GitBranch, Rocket, CheckCircle, Sparkle, Code, Globe, UploadSimple } from '@phosphor-icons/react'
+import { ChevronRight, ArrowRight, BarChart3, Building, BookOpen, Zap, Shield, TrendingUp, Database, Lock, FileCode, Filter, GitBranch, Rocket, CheckCircle2, Sparkles, Code, Globe, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
@@ -14,7 +14,7 @@ export default function DocsHome() {
         <div className="relative space-y-6">
           <div className="flex items-center gap-3">
             <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-              <Sparkle weight="light" className="h-3 w-3 mr-1" />
+              <Sparkles className="h-3 w-3 mr-1" />
               v2.0 Release
             </Badge>
           </div>
@@ -34,7 +34,7 @@ export default function DocsHome() {
             <Button asChild size="lg" className="h-12 px-8 font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
               <Link href="/docs/getting-started">
                 Get Started
-                <ArrowRight weight="light" className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-12 px-6">
@@ -44,10 +44,52 @@ export default function DocsHome() {
             </Button>
             <Button asChild variant="ghost" size="lg" className="h-12 px-6">
               <Link href="/docs/for-developers/architecture">
-                <Code weight="light" className="mr-2 h-4 w-4" />
+                <Code className="mr-2 h-4 w-4" />
                 Developer Docs
               </Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Product Vision (from PRD) */}
+      <section className="space-y-8 bg-accent/30 rounded-2xl p-8 border">
+        <div className="space-y-4 text-center">
+          <Badge variant="outline" className="mb-2">The Mission</Badge>
+          <h2 className="text-3xl font-bold">Product Vision</h2>
+          <p className="text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            Deltalytix is a comprehensive Trading Journal & Analytics platform designed for professional traders.
+            Our mission is to improve trading psychology and performance through data-driven insights and AI-assisted analysis.
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="p-6 rounded-xl border bg-card/50 space-y-3">
+            <h3 className="font-semibold text-primary flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Multi-Asset Journaling
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Capture every detail of your trades across Forex, Crypto, Stocks, and Options with our Lexical-powered rich text editor.
+            </p>
+          </div>
+          <div className="p-6 rounded-xl border bg-card/50 space-y-3">
+            <h3 className="font-semibold text-primary flex items-center gap-2">
+              <Building className="h-4 w-4" />
+              Prop Firm Performance
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Advanced tracking for evaluation phases with real-time drawdown monitoring and breach detection.
+            </p>
+          </div>
+          <div className="p-6 rounded-xl border bg-card/50 space-y-3">
+            <h3 className="font-semibold text-primary flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              AI Psychology Analysis
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Identify emotional patterns and performance bottlenecks using our integrated GPT-4o analysis engine.
+            </p>
           </div>
         </div>
       </section>
@@ -57,7 +99,7 @@ export default function DocsHome() {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Core Features</h2>
           <Link href="/docs/features/importing" className="text-sm text-primary hover:underline flex items-center gap-1">
-            View all <CaretRight weight="light" className="h-4 w-4" />
+            View all <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
 
@@ -66,7 +108,7 @@ export default function DocsHome() {
             <Card className="h-full border-2 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
               <CardHeader className="space-y-4">
                 <div className="p-3 bg-primary/10 rounded-xl w-fit group-hover:scale-110 transition-transform duration-300">
-                  <UploadSimple weight="light" className="h-6 w-6 text-primary" />
+                  <Upload className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <CardTitle className="text-xl group-hover:text-primary transition-colors">Trade Import</CardTitle>
@@ -84,7 +126,7 @@ export default function DocsHome() {
                     'Manual entry with validation'
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle weight="light" className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -97,7 +139,7 @@ export default function DocsHome() {
             <Card className="h-full border-2 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
               <CardHeader className="space-y-4">
                 <div className="p-3 bg-primary/10 rounded-xl w-fit group-hover:scale-110 transition-transform duration-300">
-                  <ChartBar weight="light" className="h-6 w-6 text-primary" />
+                  <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <CardTitle className="text-xl group-hover:text-primary transition-colors">Dashboard Analytics</CardTitle>
@@ -115,7 +157,7 @@ export default function DocsHome() {
                     'Equity curve and P&L charts'
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle weight="light" className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -128,7 +170,7 @@ export default function DocsHome() {
             <Card className="h-full border-2 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
               <CardHeader className="space-y-4">
                 <div className="p-3 bg-primary/10 rounded-xl w-fit group-hover:scale-110 transition-transform duration-300">
-                  <Building weight="light" className="h-6 w-6 text-primary" />
+                  <Building className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <CardTitle className="text-xl group-hover:text-primary transition-colors">Prop Firm Tracking</CardTitle>
@@ -146,7 +188,7 @@ export default function DocsHome() {
                     'Multi-phase evaluation support'
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle weight="light" className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -170,7 +212,7 @@ export default function DocsHome() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[
             {
-              icon: Lightning,
+              icon: Zap,
               title: 'High Performance',
               description: 'Built on Next.js 15 with React Server Components. Optimized queries handle 100,000+ trades with sub-second response times.'
             },
@@ -180,7 +222,7 @@ export default function DocsHome() {
               description: 'Supabase authentication with Row Level Security. Rate limiting on all sensitive endpoints. Zod validation on all inputs.'
             },
             {
-              icon: TrendUp,
+              icon: TrendingUp,
               title: 'Precision Analytics',
               description: 'Decimal(20,10) precision for accurate calculations. Win rate excludes break-even trades for realistic metrics.'
             },
@@ -190,12 +232,12 @@ export default function DocsHome() {
               description: 'Document trades with screenshots and emotions. AI analysis identifies patterns and correlates with P&L.'
             },
             {
-              icon: Lightning,
+              icon: Zap,
               title: 'Real-Time Monitoring',
               description: 'Live P&L tracking with instant updates. Automated breach alerts for prop firm accounts.'
             },
             {
-              icon: Funnel,
+              icon: Filter,
               title: 'Advanced Filtering',
               description: 'Filter by date, instruments, accounts, P&L range, time in position, weekday, and hour. Save custom presets.'
             }
@@ -203,7 +245,7 @@ export default function DocsHome() {
             <div key={i} className="group p-6 rounded-xl border bg-card hover:border-primary/50 hover:bg-accent/50 transition-all duration-300">
               <div className="flex items-start gap-4">
                 <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <feature.icon weight="light" className="h-5 w-5 text-primary" />
+                  <feature.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg">{feature.title}</h3>
@@ -231,15 +273,15 @@ export default function DocsHome() {
             { icon: FileCode, title: 'Frontend', primary: 'Next.js 15, React 19', secondary: 'TypeScript 5.7, Tailwind CSS' },
             { icon: Database, title: 'Database', primary: 'PostgreSQL 16', secondary: 'Prisma ORM 6.2' },
             { icon: Lock, title: 'Authentication', primary: 'Supabase Auth', secondary: 'OAuth, OTP' },
-            { icon: ChartBar, title: 'Charts', primary: 'Recharts', secondary: 'Lightweight Charts' },
+            { icon: BarChart3, title: 'Charts', primary: 'Recharts', secondary: 'Lightweight Charts' },
             { icon: GitBranch, title: 'State', primary: 'Zustand', secondary: 'React Query (TanStack)' },
-            { icon: Sparkle, title: 'Monitoring', primary: 'Sentry', secondary: 'Error tracking' },
+            { icon: Sparkles, title: 'Monitoring', primary: 'Sentry', secondary: 'Error tracking' },
             { icon: Code, title: 'Testing', primary: 'Vitest, Playwright', secondary: 'E2E, Unit, Integration' },
             { icon: Globe, title: 'Deployment', primary: 'Vercel', secondary: 'Edge Functions, CDN' }
           ].map((tech, i) => (
             <div key={i} className="p-4 rounded-xl border bg-card hover:border-primary/50 transition-colors space-y-3">
               <div className="flex items-center gap-2">
-                <tech.icon weight="light" className="h-4 w-4 text-primary" />
+                <tech.icon className="h-4 w-4 text-primary" />
                 <span className="font-semibold text-sm">{tech.title}</span>
               </div>
               <div>
@@ -262,13 +304,13 @@ export default function DocsHome() {
           ].map((link, i) => (
             <Link key={i} href={link.href} className="group flex items-center gap-4 p-5 rounded-xl border bg-card hover:border-primary/50 hover:bg-accent/50 transition-all">
               <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                <link.icon weight="light" className="h-5 w-5 text-primary" />
+                <link.icon className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="font-semibold group-hover:text-primary transition-colors">{link.title}</p>
                 <p className="text-sm text-muted-foreground">{link.description}</p>
               </div>
-              <CaretRight weight="light" className="h-5 w-5 text-muted-foreground group-hover:text-primary ml-auto transition-colors" />
+              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary ml-auto transition-colors" />
             </Link>
           ))}
         </div>

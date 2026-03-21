@@ -9,8 +9,8 @@ import {
     Globe,
     Moon,
     Sun,
-    SunHorizon
-} from "@phosphor-icons/react"
+    Sunrise
+} from "lucide-react"
 import { useMemo } from 'react'
 
 interface SessionAnalysisProps {
@@ -20,7 +20,7 @@ interface SessionAnalysisProps {
 // Market sessions in NY time (for display metadata)
 const SESSION_META: Record<MarketSession, { name: string; icon: any; color: string }> = {
     'New York': { name: 'New York', icon: Sun, color: 'text-amber-500' },
-    'London': { name: 'London', icon: SunHorizon, color: 'text-blue-500' },
+    'London': { name: 'London', icon: Sunrise, color: 'text-blue-500' },
     'Asia': { name: 'Asia', icon: Moon, color: 'text-purple-500' },
     'Outside Session': { name: 'Outside Session', icon: Globe, color: 'text-muted-foreground' }
 }
@@ -103,7 +103,7 @@ export default function SessionAnalysis({ size }: SessionAnalysisProps) {
                             )}
                         >
                             <div className="flex items-center gap-3">
-                                <Icon weight="light" className={cn("h-5 w-5", session.color)} />
+                                <Icon className={cn("h-5 w-5", session.color)} />
                                 <div>
                                     <p className="font-bold text-sm">{session.name}</p>
                                     <p className="text-[10px] text-muted-foreground/50 font-medium">

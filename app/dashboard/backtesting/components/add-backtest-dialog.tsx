@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { AddBacktestForm } from './add-backtest-form'
-import { Plus } from "@phosphor-icons/react"
+import { Plus } from "lucide-react"
 
 interface AddBacktestDialogProps {
   isOpen: boolean

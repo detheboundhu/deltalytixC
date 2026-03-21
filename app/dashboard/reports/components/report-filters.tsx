@@ -4,13 +4,13 @@ import { useState } from 'react'
 import { 
     Calendar as CalendarIcon, 
     Wallet,
-    CaretDown,
+    ChevronDown,
     Hash,
     Clock,
-    CheckCircle,
+    CheckCircle2,
     Target,
-    WarningCircle
-} from '@phosphor-icons/react'
+    AlertCircle
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -72,7 +72,7 @@ export function ReportFilters({
             <div className="flex flex-wrap items-center gap-2 bg-muted/10 p-2 rounded-2xl border border-border/40">
                 {/* Account Selector */}
                 <div className="flex items-center gap-2 px-3 py-1.5 border-r border-border/40 max-sm:border-r-0">
-                    <Wallet weight="light" className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Wallet className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div className="flex flex-col">
                         <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-0.5">Account</span>
                         <Select
@@ -128,7 +128,7 @@ export function ReportFilters({
                             )}
                         >
                             <div className="flex items-center gap-1.5">
-                                <CalendarIcon weight="light" className="h-3 w-3" />
+                                <CalendarIcon className="h-3 w-3" />
                                 <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Duration</span>
                             </div>
                             <div className="flex items-center gap-2 w-full justify-between">
@@ -145,7 +145,7 @@ export function ReportFilters({
                                         "Custom Range"
                                     )}
                                 </span>
-                                <CaretDown weight="bold" className="h-2 w-2 opacity-30" />
+                                <ChevronDown className="h-2 w-2 opacity-30" />
                             </div>
                         </Button>
                     </PopoverTrigger>
@@ -169,7 +169,7 @@ export function ReportFilters({
                 {/* Symbol */}
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
-                        <Hash weight="light" className="h-3 w-3 text-muted-foreground" />
+                        <Hash className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Symbol</span>
                     </div>
                     <Select value={filters.symbol} onValueChange={(v) => onFilterChange('symbol', v)}>
@@ -188,7 +188,7 @@ export function ReportFilters({
                 {/* Session */}
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
-                        <Clock weight="light" className="h-3 w-3 text-muted-foreground" />
+                         <Clock className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Session</span>
                     </div>
                     <Select value={filters.session} onValueChange={(v) => onFilterChange('session', v)}>
@@ -207,7 +207,7 @@ export function ReportFilters({
                 {/* Outcome */}
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
-                        <CheckCircle weight="light" className="h-3 w-3 text-muted-foreground" />
+                        <CheckCircle2 className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Outcome</span>
                     </div>
                     <Select value={filters.outcome} onValueChange={(v) => onFilterChange('outcome', v)}>
@@ -226,7 +226,7 @@ export function ReportFilters({
                 {/* Strategy */}
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
-                        <Target weight="light" className="h-3 w-3 text-muted-foreground" />
+                        <Target className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Strategy</span>
                     </div>
                     <Select value={filters.strategy} onValueChange={(v) => onFilterChange('strategy', v)}>
@@ -245,7 +245,7 @@ export function ReportFilters({
                 {/* Rule Broken */}
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-1 px-1">
-                        <WarningCircle weight="light" className="h-3 w-3 text-muted-foreground" />
+                        <AlertCircle className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em]">Rule Status</span>
                     </div>
                     <Select value={filters.ruleBroken} onValueChange={(v) => onFilterChange('ruleBroken', v)}>

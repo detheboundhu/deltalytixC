@@ -17,16 +17,19 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   ArrowLeft,
-  TrendUp, Target,
-  Warning,
+  TrendingUp,
+  Target,
+  AlertTriangle,
   Shield,
-  CurrencyDollar,
-  Gear as SettingsIcon,
-  ArrowsClockwise, CreditCard,
-  CaretRight, PencilSimple,
+  DollarSign,
+  Settings as SettingsIcon,
+  RefreshCw,
+  CreditCard,
+  ChevronRight,
+  PenLine,
   Check,
   X
-} from "@phosphor-icons/react"
+} from "lucide-react"
 import { cn, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { AccountStatus } from "@/types/prop-firm"
 import { AccountNotFoundError, ConnectionError } from "@/components/prop-firm/account-error-boundary"
@@ -346,7 +349,7 @@ export default function AccountDetailPage() {
                       className="h-6 w-6"
                       onClick={() => setIsEditingName(true)}
                     >
-                      <PencilSimple className="h-3 w-3" />
+                      <PenLine className="h-3 w-3" />
                     </Button>
                   </h1>
                 )}
@@ -372,7 +375,7 @@ export default function AccountDetailPage() {
               disabled={isLoading}
               className="gap-2"
             >
-              <ArrowsClockwise className={cn("h-4 w-4", isLoading && "animate-spin")} />
+              <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
               Refresh
             </Button>
           </div>
@@ -387,7 +390,7 @@ export default function AccountDetailPage() {
               exit={{ opacity: 0, height: 0 }}
             >
               <Alert variant="destructive">
-                <Warning className="h-4 w-4" />
+                <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
                   Account breached {drawdown.breachType === 'daily_drawdown' ? 'daily' : 'max'} drawdown limit.
                 </AlertDescription>
@@ -407,7 +410,7 @@ export default function AccountDetailPage() {
             label="Current Balance"
             value={formatCurrency(account.currentBalance)}
             subtext={`Started: ${formatCurrency(account.startingBalance)}`}
-            icon={<CurrencyDollar className="h-5 w-5" />}
+            icon={<DollarSign className="h-5 w-5" />}
             trend={(account.currentBalance - account.startingBalance) >= 0 ? 'positive' : 'negative'}
           />
           <MetricCard
@@ -422,7 +425,7 @@ export default function AccountDetailPage() {
             label="Max Drawdown"
             value={formatCurrency(drawdown.maxDrawdownRemaining)}
             subtext={`Limit: ${account.maxDrawdownPercent}%`}
-            icon={<Warning className="h-5 w-5" />}
+            icon={<AlertTriangle className="h-5 w-5" />}
             trend={drawdown.maxDrawdownRemaining < 1000 ? 'negative' : 'positive'}
             warning={drawdown.maxDrawdownRemaining < 1000}
           />
@@ -578,7 +581,7 @@ export default function AccountDetailPage() {
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-base">Recent Trades</CardTitle>
                     <Button variant="ghost" size="sm" onClick={() => setActiveTab('trades')}>
-                      View All <CaretRight className="h-4 w-4 ml-1" />
+                      View All <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </CardHeader>
                   <CardContent>
@@ -643,7 +646,7 @@ export default function AccountDetailPage() {
                     </div>
                   ) : tradesData.length === 0 ? (
                     <div className="text-center py-12">
-                      <TrendUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                       <p className="text-muted-foreground">No trades yet</p>
                     </div>
                   ) : (
@@ -706,7 +709,7 @@ export default function AccountDetailPage() {
                             <p className="text-sm text-muted-foreground">Blockers:</p>
                             {payoutEligibility.blockers.map((blocker: string, i: number) => (
                               <p key={i} className="text-sm text-destructive flex items-center gap-1">
-                                <Warning className="h-3 w-3" />
+                                <AlertTriangle className="h-3 w-3" />
                                 {blocker}
                               </p>
                             ))}
@@ -799,7 +802,7 @@ export default function AccountDetailPage() {
               <Card>
                 <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2">
-                      <SettingsIcon className="h-5 w-5" weight="light" />
+                      <SettingsIcon className="h-5 w-5" />
                       Account Details
                     </CardTitle>
                 </CardHeader>

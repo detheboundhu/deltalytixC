@@ -3,11 +3,11 @@
 import { cn } from "@/lib/utils"
 import {
   BookOpen,
-  ChartBar,
-  SquaresFour,
-  Table,
+  BarChart3,
+  LayoutGrid,
+  Table2,
   Users
-} from "@phosphor-icons/react"
+} from "lucide-react"
 import { usePathname, useRouter } from 'next/navigation'
 
 interface MobileNavItem {
@@ -21,19 +21,19 @@ const mobileNavItems: MobileNavItem[] = [
   {
     id: 'widgets',
     label: 'Dashboard',
-    icon: SquaresFour,
+    icon: LayoutGrid,
     href: '/dashboard'
   },
   {
     id: 'reports',
     label: 'Reports',
-    icon: ChartBar,
+    icon: BarChart3,
     href: '/dashboard/reports'
   },
   {
     id: 'table',
     label: 'Trades',
-    icon: Table,
+    icon: Table2,
     href: '/dashboard/table'
   },
   {
@@ -88,8 +88,7 @@ export function MobileBottomNav() {
                 "p-1.5 rounded-lg transition-all duration-200",
                 isActive && "bg-primary/10"
               )}>
-                <Icon 
-                  weight={isActive ? "fill" : "light"}
+                <Icon
                   className={cn(
                   "h-5 w-5 transition-transform duration-200",
                   isActive && "scale-110"

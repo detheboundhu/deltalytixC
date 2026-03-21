@@ -12,8 +12,8 @@ const config: Config = {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans: ['var(--font-inter)', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', 'sans-serif'],
-				inter: ['var(--font-inter)', 'Inter', 'sans-serif'],
+				sans: ['var(--font-satoshi)', 'Satoshi', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+				satoshi: ['var(--font-satoshi)', 'Satoshi', 'sans-serif'],
 			},
 			fontSize: {
 				'xxs': ['0.625rem', { lineHeight: '1rem' }], // 10px
@@ -247,6 +247,25 @@ const config: Config = {
 					'100%': {
 						transform: 'translateX(100%)'
 					}
+				},
+				'shimmer': {
+					'0%': {
+						transform: 'translateX(-100%)'
+					},
+					'100%': {
+						transform: 'translateX(100%)'
+					}
+				},
+				'luma-spin': {
+					'0%': { inset: '0 35px 35px 0' },
+					'12.5%': { inset: '0 35px 0 0' },
+					'25%': { inset: '35px 35px 0 0' },
+					'37.5%': { inset: '35px 0 0 0' },
+					'50%': { inset: '35px 0 0 35px' },
+					'62.5%': { inset: '0 0 0 35px' },
+					'75%': { inset: '0 0 35px 35px' },
+					'87.5%': { inset: '0 0 35px 0' },
+					'100%': { inset: '0 35px 35px 0' }
 				}
 			},
 			animation: {
@@ -257,6 +276,7 @@ const config: Config = {
 				'glow-success': 'glow-success 2s ease-in-out infinite',
 				'success-pulse': 'success-pulse 3s ease-in-out infinite',
 				'success-sweep': 'success-sweep 1.5s ease-in-out forwards',
+				'shimmer': 'shimmer 2s ease-in-out infinite',
 				'in': 'in 0.2s ease-out',
 				'out': 'out 0.2s ease-out',
 				'fade-in': 'fade-in 0.2s ease-out',
@@ -264,7 +284,8 @@ const config: Config = {
 				'slide-in-from-top': 'slide-in-from-top 0.2s ease-out',
 				'slide-in-from-bottom': 'slide-in-from-bottom 0.2s ease-out',
 				'slide-in-from-left': 'slide-in-from-left 0.2s ease-out',
-				'slide-in-from-right': 'slide-in-from-right 0.2s ease-out'
+				'slide-in-from-right': 'slide-in-from-right 0.2s ease-out',
+				'luma-spin': 'luma-spin 2.5s infinite'
 			},
 			typography: {
 				DEFAULT: {

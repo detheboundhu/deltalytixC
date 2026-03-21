@@ -1,5 +1,5 @@
 import { Column } from "@tanstack/react-table"
-import { CaretDown, CaretUp, CaretUpDown, EyeSlash, Funnel, X } from "@phosphor-icons/react"
+import { ChevronDown, ChevronUp, ChevronsUpDown, EyeOff, Filter, X } from "lucide-react"
 import { useState, useEffect } from "react"
 
 import { cn } from "@/lib/utils"
@@ -104,18 +104,18 @@ export function DataTableColumnHeader<TData, TValue>({
           >
             <span>{title}</span>
             {column.getIsSorted() === "desc" ? (
-              <CaretDown weight="light" className="ml-1 h-3.5 w-3.5" />
+              <ChevronDown className="ml-1 h-3.5 w-3.5" />
             ) : column.getIsSorted() === "asc" ? (
-              <CaretUp weight="light" className="ml-1 h-3.5 w-3.5" />
+              <ChevronUp className="ml-1 h-3.5 w-3.5" />
             ) : (
-              <CaretUpDown weight="light" className="ml-1 h-3.5 w-3.5 text-muted-foreground/70" />
+              <ChevronsUpDown className="ml-1 h-3.5 w-3.5 text-muted-foreground/70" />
             )}
-              <Funnel weight="light" className="ml-1 h-3.5 w-3.5 text-muted-foreground/70" />
+              <Filter className="ml-1 h-3.5 w-3.5 text-muted-foreground/70" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
-            <CaretUp weight="light" className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            <CaretDown weight="light" className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+            <ChevronUp className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+            <ChevronDown className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
           {showToggle && (
             <>
               <DropdownMenuSeparator />
@@ -136,7 +136,7 @@ export function DataTableColumnHeader<TData, TValue>({
               <DropdownMenuSeparator />
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
-                  <Funnel weight="light" className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+                  <Filter className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                   Filter Options
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="w-80">
@@ -195,7 +195,7 @@ export function DataTableColumnHeader<TData, TValue>({
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleHideColumn}>
-            <EyeSlash weight="light" className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+            <EyeOff className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Hide Column
           </DropdownMenuItem>
         </DropdownMenuContent>

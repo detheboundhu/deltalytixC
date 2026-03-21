@@ -10,19 +10,19 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { 
   ArrowLeft,
-  ArrowsClockwise,
+  RefreshCcw,
   Plus,
-  MagnifyingGlass,
-  Funnel,
-  CurrencyDollar,
+  Search,
+  Filter,
+  DollarSign,
   Calendar,
   CreditCard,
-  Warning,
-  CheckCircle,
+  AlertTriangle,
+  CheckCircle2,
   Clock,
-  DownloadSimple,
-  Trash
-} from "@phosphor-icons/react"
+  Download,
+  Trash2
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { AccountStatus, PhaseType } from "@/types/prop-firm"
 
@@ -182,9 +182,9 @@ export default function AccountPayoutsPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return <Clock className="h-4 w-4" />
-      case 'approved': return <CheckCircle className="h-4 w-4" />
+      case 'approved': return <CheckCircle2 className="h-4 w-4" />
       case 'paid': return <CreditCard className="h-4 w-4" />
-      case 'rejected': return <Warning className="h-4 w-4" />
+      case 'rejected': return <AlertTriangle className="h-4 w-4" />
       default: return <Clock className="h-4 w-4" />
     }
   }
@@ -216,7 +216,7 @@ export default function AccountPayoutsPage() {
             onClick={fetchPayouts}
             disabled={isLoading}
           >
-            <ArrowsClockwise className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
+            <RefreshCcw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
             Refresh
           </Button>
           {account.isEligibleForPayout && (
@@ -261,7 +261,7 @@ export default function AccountPayoutsPage() {
             <CardTitle>Payout History</CardTitle>
             <div className="flex items-center gap-2">
               <div className="relative">
-                <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search payouts..."
                   value={searchTerm}
@@ -275,11 +275,11 @@ export default function AccountPayoutsPage() {
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <ArrowsClockwise className="h-8 w-8 animate-spin text-muted-foreground" />
+              <RefreshCcw className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : payouts.length === 0 ? (
             <div className="text-center py-8">
-              <CurrencyDollar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No Payouts Yet</h3>
               <p className="text-muted-foreground mb-4">
                 This account hasn&apos;t had any payout requests yet.
@@ -329,9 +329,9 @@ export default function AccountPayoutsPage() {
                           disabled={deletingPayoutId === payout.id}
                         >
                           {deletingPayoutId === payout.id ? (
-                            <ArrowsClockwise className="h-4 w-4 animate-spin" />
+                            <RefreshCcw className="h-4 w-4 animate-spin" />
                           ) : (
-                            <Trash className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           )}
                         </Button>
                       )}

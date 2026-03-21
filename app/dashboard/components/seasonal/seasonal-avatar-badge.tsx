@@ -3,7 +3,7 @@
 import { useSeasonalTheme } from '@/hooks/use-seasonal-theme'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import { Sparkle, TreeEvergreen, Ghost, Heart } from "@phosphor-icons/react"
+import { Sparkles, TreePine, Ghost, Heart } from "lucide-react"
 
 interface SeasonalAvatarBadgeProps {
     children: React.ReactNode
@@ -21,25 +21,25 @@ export function SeasonalAvatarBadge({ children, className }: SeasonalAvatarBadge
     const config = {
         NEW_YEAR: {
             gradient: "bg-chart-4",
-            badge: <Sparkle size={12} weight="fill" />,
+            badge: <Sparkles size={12} />,
             shadow: "shadow-amber-500/20",
             animationDuration: 3
         },
         CHRISTMAS: {
             gradient: "bg-long",
-            badge: <TreeEvergreen size={12} weight="fill" />,
+            badge: <TreePine size={12} />,
             shadow: "shadow-green-500/20",
             animationDuration: 4
         },
         HALLOWEEN: {
             gradient: "bg-chart-2",
-            badge: <Ghost size={12} weight="fill" />,
+            badge: <Ghost size={12} />,
             shadow: "shadow-orange-500/20",
             animationDuration: 3
         },
         VALENTINES: {
             gradient: "bg-chart-3",
-            badge: <Heart size={12} weight="fill" />,
+            badge: <Heart size={12} />,
             shadow: "shadow-pink-500/20",
             animationDuration: 3
         },

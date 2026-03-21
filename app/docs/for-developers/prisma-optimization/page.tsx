@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Database, Lightning, Wrench, Warning } from '@phosphor-icons/react'
+import { Database, Zap, Wrench, AlertTriangle } from 'lucide-react'
 
 export default function PrismaOptimizationDocs() {
   return (
@@ -19,7 +19,7 @@ export default function PrismaOptimizationDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Database weight="light" className="h-5 w-5 text-primary" />
+              <Database className="h-5 w-5 text-primary" />
               Index coverage (verified)
             </CardTitle>
           </CardHeader>
@@ -55,7 +55,7 @@ export default function PrismaOptimizationDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lightning weight="light" className="h-5 w-5 text-primary" />
+              <Zap className="h-5 w-5 text-primary" />
               N+1 patterns (status)
             </CardTitle>
           </CardHeader>
@@ -72,7 +72,7 @@ export default function PrismaOptimizationDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Warning weight="light" className="h-5 w-5 text-primary" />
+              <AlertTriangle className="h-5 w-5 text-primary" />
               Known lower-traffic N+1
             </CardTitle>
           </CardHeader>
@@ -87,7 +87,7 @@ export default function PrismaOptimizationDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wrench weight="light" className="h-5 w-5 text-primary" />
+              <Wrench className="h-5 w-5 text-primary" />
               Rollback & validation
             </CardTitle>
           </CardHeader>

@@ -5,8 +5,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Plus, X, Warning } from '@phosphor-icons/react'
+import { LexicalEditor } from '@/components/ui/editor/lexical-editor'
+import { Plus, X, AlertTriangle as Warning } from 'lucide-react'
 import { toast } from 'sonner'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -194,7 +194,7 @@ export function AddEditModelModal({ isOpen, onClose, onSave, model, mode }: AddE
                   onClick={handleAddRule}
                   className="h-8 px-3 font-black uppercase tracking-tighter text-[10px]"
                 >
-                  <Plus weight="light" className="h-3 w-3 mr-1.5" />
+                  <Plus className="h-3 w-3 mr-1.5" />
                   Append Rule
                 </Button>
               </div>
@@ -226,7 +226,7 @@ export function AddEditModelModal({ isOpen, onClose, onSave, model, mode }: AddE
                       onClick={() => handleRemoveRule(index)}
                       className="h-10 w-10 shrink-0 opacity-40 hover:opacity-100 transition-opacity"
                     >
-                      <X weight="light" className="h-4 w-4" />
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
@@ -236,18 +236,15 @@ export function AddEditModelModal({ isOpen, onClose, onSave, model, mode }: AddE
               </p>
             </div>
 
-            {/* Notes */}
             <div className="space-y-2">
               <Label htmlFor="notes" className="text-sm font-medium">
                 Notes (Optional)
               </Label>
-              <Textarea
-                id="notes"
+              <LexicalEditor
                 placeholder="Add any additional notes about this model..."
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={4}
-                maxLength={1000}
+                onChange={setNotes}
+                minHeight="150px"
               />
               <p className="text-xs text-muted-foreground">
                 {notes.length}/1000 characters
@@ -271,7 +268,7 @@ export function AddEditModelModal({ isOpen, onClose, onSave, model, mode }: AddE
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Warning weight="light" className="h-5 w-5 text-warning" />
+              <Warning className="h-5 w-5 text-warning" />
               Unsaved Changes
             </AlertDialogTitle>
             <AlertDialogDescription>

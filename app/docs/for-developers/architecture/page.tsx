@@ -1,7 +1,7 @@
 'use client'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle, Code, Database, FileCode, GitBranch, HardDrive, Lightning, Lock, Stack } from '@phosphor-icons/react'
+import { CheckCircle2, Code, Database, FileCode, GitBranch, HardDrive, Zap, Lock, Layers } from 'lucide-react'
 
 export default function ArchitectureDocs() {
   return (
@@ -18,7 +18,7 @@ export default function ArchitectureDocs() {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Stack weight="light" className="h-5 w-5 text-primary" />
+              <Layers className="h-5 w-5 text-primary" />
             </div>
             <h2>Technology Stack</h2>
           </div>
@@ -27,7 +27,7 @@ export default function ArchitectureDocs() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2 mb-2">
-                  <FileCode weight="light" className="h-5 w-5 text-primary" />
+                  <FileCode className="h-5 w-5 text-primary" />
                   <CardTitle className="text-base">Frontend</CardTitle>
                 </div>
               </CardHeader>
@@ -82,7 +82,7 @@ export default function ArchitectureDocs() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2 mb-2">
-                  <HardDrive weight="light" className="h-5 w-5 text-primary" />
+                  <HardDrive className="h-5 w-5 text-primary" />
                   <CardTitle className="text-base">Backend</CardTitle>
                 </div>
               </CardHeader>
@@ -130,7 +130,7 @@ export default function ArchitectureDocs() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2 mb-2">
-                  <GitBranch weight="light" className="h-5 w-5 text-primary" />
+                  <GitBranch className="h-5 w-5 text-primary" />
                   <CardTitle className="text-base">State Management</CardTitle>
                 </div>
               </CardHeader>
@@ -171,7 +171,7 @@ export default function ArchitectureDocs() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2 mb-2">
-                  <Lightning weight="light" className="h-5 w-5 text-primary" />
+                  <Zap className="h-5 w-5 text-primary" />
                   <CardTitle className="text-base">Infrastructure</CardTitle>
                 </div>
               </CardHeader>
@@ -207,7 +207,7 @@ export default function ArchitectureDocs() {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <GitBranch weight="light" className="h-5 w-5 text-primary" />
+              <GitBranch className="h-5 w-5 text-primary" />
             </div>
             <h2>Data Flow Architecture</h2>
           </div>
@@ -359,7 +359,7 @@ export async function deleteTrade(tradeId: string) {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <FileCode weight="light" className="h-5 w-5 text-primary" />
+              <FileCode className="h-5 w-5 text-primary" />
             </div>
             <h2>Project Structure</h2>
           </div>
@@ -444,7 +444,7 @@ export async function deleteTrade(tradeId: string) {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Code weight="light" className="h-5 w-5 text-primary" />
+              <Code className="h-5 w-5 text-primary" />
             </div>
             <h2>Key Design Decisions</h2>
           </div>
@@ -589,7 +589,7 @@ export function groupTradesByExecution(trades: Trade[]) {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Lightning weight="light" className="h-5 w-5 text-primary" />
+              <Zap className="h-5 w-5 text-primary" />
             </div>
             <h2>Performance Optimizations</h2>
           </div>
@@ -598,7 +598,7 @@ export function groupTradesByExecution(trades: Trade[]) {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex gap-3">
-                    <HardDrive weight="light" className="h-5 w-5 text-primary" />
+                    <HardDrive className="h-5 w-5 text-primary" />
                   <div className="space-y-2">
                     <h4 className="font-semibold text-foreground">Server Components</h4>
                     <p className="text-sm text-muted-foreground">
@@ -614,7 +614,7 @@ export function groupTradesByExecution(trades: Trade[]) {
               <CardContent className="pt-6">
                 <div className="flex gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg h-fit">
-                    <Code weight="light" className="h-5 w-5 text-primary" />
+                    <Code className="h-5 w-5 text-primary" />
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold text-foreground">Dynamic Imports</h4>
@@ -631,7 +631,7 @@ export function groupTradesByExecution(trades: Trade[]) {
               <CardContent className="pt-6">
                 <div className="flex gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg h-fit">
-                    <Lock weight="light" className="h-5 w-5 text-primary" />
+                    <Lock className="h-5 w-5 text-primary" />
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold text-foreground">Rate Limiting</h4>
@@ -648,7 +648,7 @@ export function groupTradesByExecution(trades: Trade[]) {
               <CardContent className="pt-6">
                 <div className="flex gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg h-fit">
-                    <Database weight="light" className="h-5 w-5 text-primary" />
+                    <Database className="h-5 w-5 text-primary" />
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold text-foreground">Database Indexes</h4>
@@ -665,7 +665,7 @@ export function groupTradesByExecution(trades: Trade[]) {
               <CardContent className="pt-6">
                 <div className="flex gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg h-fit">
-                    <FileCode weight="light" className="h-5 w-5 text-primary" />
+                    <FileCode className="h-5 w-5 text-primary" />
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold text-foreground">ISR Caching</h4>
@@ -681,7 +681,7 @@ export function groupTradesByExecution(trades: Trade[]) {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex gap-3">
-                    <Stack weight="light" className="h-5 w-5 text-primary" />
+                    <Layers className="h-5 w-5 text-primary" />
                   <div className="space-y-2">
                     <h4 className="font-semibold text-foreground">Structured Logging</h4>
                     <p className="text-sm text-muted-foreground">
@@ -698,7 +698,7 @@ export function groupTradesByExecution(trades: Trade[]) {
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <Lock weight="light" className="h-5 w-5 text-primary" />
+              <Lock className="h-5 w-5 text-primary" />
             </div>
             <h2>Security Measures</h2>
           </div>
@@ -769,7 +769,7 @@ export function groupTradesByExecution(trades: Trade[]) {
         <Card className="border-primary bg-primary/5">
           <CardContent className="pt-6">
             <div className="flex gap-4">
-              <FileCode weight="light" className="h-6 w-6 text-primary shrink-0 mt-1" />
+              <FileCode className="h-6 w-6 text-primary shrink-0 mt-1" />
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-foreground">Testing Strategy</h3>
                 <p className="text-sm text-muted-foreground">
@@ -777,19 +777,19 @@ export function groupTradesByExecution(trades: Trade[]) {
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
-                    <CheckCircle weight="light" className="h-4 w-4 text-primary mt-1 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <div>
                       <strong className="text-foreground">Vitest</strong> for unit tests (financial calculations, utility functions)
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle weight="light" className="h-4 w-4 text-primary mt-1 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <div>
                       <strong className="text-foreground">Playwright</strong> for E2E tests (user flows, critical paths)
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle weight="light" className="h-4 w-4 text-primary mt-1 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
                     <div>
                       <strong className="text-foreground">100% coverage target</strong> for financial logic (win rate, profit factor, drawdown)
                     </div>

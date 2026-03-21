@@ -18,7 +18,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { EnvelopeSimple, Hash, Shield, Copy, Check, ArrowLeft, ArrowsClockwise } from "@phosphor-icons/react"
+import { Mail, ArrowLeft, RefreshCw } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
@@ -291,7 +291,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         <div className={cn("space-y-6", className)} {...props}>
             <div className="space-y-2 text-center">
                 <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                    <EnvelopeSimple weight="light" className="h-6 w-6 text-primary" />
+                    <Mail className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold tracking-tight">Check your email</h3>
                 <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">
@@ -348,7 +348,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                 onClick={handleBack}
                                 className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
                             >
-                                <ArrowLeft weight="light" className="h-3 w-3 mr-1" />
+                                <ArrowLeft className="h-3 w-3 mr-1" />
                                 Change Email
                             </button>
 
@@ -365,7 +365,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                                     <>Resend in {countdown}s</>
                                 ) : (
                                     <>
-                                        <ArrowsClockwise weight="light" className="h-3 w-3 mr-1" />
+                                        <RefreshCw className="h-3 w-3 mr-1" />
                                         Resend Code
                                     </>
                                 )}

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { LexicalEditor } from '@/components/ui/editor/lexical-editor'
 import {
   Select,
   SelectContent,
@@ -18,21 +19,21 @@ import {
 import { toast } from 'sonner'
 import {
   Calculator,
-  TrendUp,
-  TrendDown,
-  WarningCircle,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
-  CheckCircle,
-  CircleNotch,
+  CheckCircle2,
+  Loader2,
   Wallet,
-  ChartBar,
+  BarChart3,
   Clock,
   Shield,
-  CurrencyDollar,
+  DollarSign,
   Brain,
-  SealCheck
-} from '@phosphor-icons/react'
+  ShieldCheck
+} from 'lucide-react'
 import { Trade } from '@prisma/client'
 import { generateTradeHash } from '@/lib/utils'
 import { calculatePnL, calculateDuration } from '@/lib/utils/trade-calculations'
@@ -143,10 +144,10 @@ const TOTAL_STEPS = 5
 
 const stepInfo = [
   { step: 1, title: 'Account & Instrument', icon: Wallet },
-  { step: 2, title: 'Execution', icon: ChartBar },
+  { step: 2, title: 'Execution', icon: BarChart3 },
   { step: 3, title: 'Timing', icon: Clock },
   { step: 4, title: 'Risk & Cost', icon: Shield },
-  { step: 5, title: 'Review', icon: SealCheck },
+  { step: 5, title: 'Review', icon: ShieldCheck },
 ]
 
 export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormProps) {
@@ -430,7 +431,7 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
                         className="w-full justify-between h-11 font-normal"
                       >
                         {field.value || "Select or type instrument"}
-                        <ChartBar weight="light" className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <BarChart3 className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-full p-0" align="start">
@@ -473,8 +474,7 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
                                   setInstrumentSearch('')
                                 }}
                               >
-                                <CheckCircle
-                                  weight="light"
+                                <CheckCircle2
                                   className={cn(
                                     "mr-2 h-4 w-4",
                                     field.value === instr.value ? "opacity-100" : "opacity-0"
@@ -510,7 +510,7 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
                 control={control}
                 render={({ field }) => (
                   <div className="grid grid-cols-2 gap-2">
-                    <Button
+                      <Button
                       type="button"
                       variant={field.value === 'LONG' ? 'default' : 'outline'}
                       className={cn(
@@ -519,7 +519,7 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
                       )}
                       onClick={() => field.onChange('LONG')}
                     >
-                      <TrendUp weight="light" className="h-4 w-4 mr-2" />
+                      <TrendingUp className="h-4 w-4 mr-2" />
                       Long
                     </Button>
                     <Button
@@ -531,7 +531,7 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
                       )}
                       onClick={() => field.onChange('SHORT')}
                     >
-                      <TrendDown weight="light" className="h-4 w-4 mr-2" />
+                      <TrendingDown className="h-4 w-4 mr-2" />
                       Short
                     </Button>
                   </div>
@@ -708,10 +708,17 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
 
             <div className="space-y-2">
               <Label>Notes</Label>
-              <Textarea
-                placeholder="Trade analysis, lessons learned..."
-                className="min-h-[100px] resize-none"
-                {...register('comment')}
+              <Controller
+                name="comment"
+                control={control}
+                render={({ field }) => (
+                  <LexicalEditor
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    placeholder="Trade analysis, lessons learned..."
+                    minHeight="100px"
+                  />
+                )}
               />
             </div>
           </div>
@@ -723,7 +730,7 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
             {phaseValidationError && (
               <div className="p-4 rounded-lg border border-destructive/50 bg-destructive/10">
                 <div className="flex items-center gap-2 text-destructive">
-                  <WarningCircle weight="light" className="h-4 w-4" />
+                  <AlertCircle className="h-4 w-4" />
                   <p className="text-sm">{phaseValidationError}</p>
                 </div>
               </div>
@@ -831,9 +838,9 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
                   )}
                 >
                   {currentStep > s.step ? (
-                    <CheckCircle weight="light" className="h-3 w-3" />
+                    <CheckCircle2 className="h-3 w-3" />
                   ) : (
-                    <StepIcon weight="light" className="h-3 w-3" />
+                    <StepIcon className="h-3 w-3" />
                   )}
                   <span className="hidden sm:inline">{s.title}</span>
                 </div>
@@ -875,7 +882,7 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
                 onClick={handleBack}
                 className="gap-2"
               >
-                <ArrowLeft weight="light" className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
             )}
@@ -888,7 +895,7 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
                 className="gap-2"
               >
                 Next
-                <ArrowRight weight="light" className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" />
               </Button>
             ) : (
               <Button
@@ -899,12 +906,12 @@ export default function ManualTradeForm({ setIsOpen, onClose }: ManualTradeFormP
               >
                 {isSubmitting ? (
                   <>
-                    <CircleNotch weight="light" className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Adding...
                   </>
                 ) : (
                   <>
-                    <CheckCircle weight="light" className="h-4 w-4" />
+                    <CheckCircle2 className="h-4 w-4" />
                     Add Trade
                   </>
                 )}

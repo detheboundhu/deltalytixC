@@ -20,7 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useTableConfigStore } from '@/store/table-config-store'
-import { ArrowCounterClockwise, Gear as SettingsIcon } from "@phosphor-icons/react"
+import { RotateCcw as ArrowCounterClockwise, Settings as SettingsIcon } from "lucide-react"
 import React from 'react'
 import { toast } from "sonner"
 
@@ -53,7 +53,7 @@ export function ColumnConfigDialog({ tableId, trigger }: ColumnConfigDialogProps
 
   const defaultTrigger = (
     <Button variant="outline" className="w-[180px] h-10 font-normal">
-      <SettingsIcon weight="light" className="h-4 w-4 mr-2" />
+      <SettingsIcon className="h-4 w-4 mr-2" />
       Configuration
     </Button>
   )
@@ -95,7 +95,7 @@ export function ColumnConfigDialog({ tableId, trigger }: ColumnConfigDialogProps
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="w-[180px] h-10">
-                <ArrowCounterClockwise weight="light" className="h-4 w-4 mr-2" />
+                <ArrowCounterClockwise className="h-4 w-4 mr-2" />
                                                                    {"Reset to Default" as any}
               </Button>
             </AlertDialogTrigger>

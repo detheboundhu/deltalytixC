@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChartLineUp, Gauge, ShieldCheck } from '@phosphor-icons/react'
+import { TrendingUp, Gauge, ShieldCheck } from 'lucide-react'
 
 export default function PerformanceBaselineDocs() {
   return (
@@ -19,7 +19,7 @@ export default function PerformanceBaselineDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ChartLineUp weight="light" className="h-5 w-5 text-primary" />
+              <TrendingUp className="h-5 w-5 text-primary" />
               Before vs after
             </CardTitle>
           </CardHeader>
@@ -48,7 +48,7 @@ export default function PerformanceBaselineDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Gauge weight="light" className="h-5 w-5 text-primary" />
+              <Gauge className="h-5 w-5 text-primary" />
               Targets (p95)
             </CardTitle>
           </CardHeader>
@@ -87,7 +87,7 @@ export default function PerformanceBaselineDocs() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ShieldCheck weight="light" className="h-5 w-5 text-primary" />
+              <ShieldCheck className="h-5 w-5 text-primary" />
               Cache, rate limiting, logging
             </CardTitle>
           </CardHeader>

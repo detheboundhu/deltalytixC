@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { Eye, TrendUp as TrendUp, Clock, Target, DownloadSimple as Download } from "@phosphor-icons/react"
+import { Eye, TrendingUp as TrendUp, Clock, Target, Download } from "lucide-react"
 import { cn, formatPrice } from '@/lib/utils'
 import { BacktestTrade } from '@/types/backtesting-types'
 
@@ -57,7 +57,7 @@ export function ViewBacktestDialog({ isOpen, onClose, backtest }: ViewBacktestDi
         <DialogContent className="w-full max-w-[95vw] sm:max-w-5xl h-[90vh] max-h-[90vh] overflow-y-auto p-4 sm:p-6 bg-background border-border shadow-lg duration-200 flex flex-col gap-0">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Eye className="w-4 h-4 sm:w-5 sm:h-5" weight="light" />
+              <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
               Backtest Details - {backtest.pair} {backtest.direction}
             </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm">
@@ -72,7 +72,7 @@ export function ViewBacktestDialog({ isOpen, onClose, backtest }: ViewBacktestDi
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <TrendUp className="w-5 h-5" weight="light" />
+                    <TrendUp className="w-5 h-5" />
                     Execution Summary
                   </CardTitle>
                 </CardHeader>
@@ -121,7 +121,7 @@ export function ViewBacktestDialog({ isOpen, onClose, backtest }: ViewBacktestDi
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Target className="w-5 h-5" weight="light" />
+                    <Target className="w-5 h-5" />
                     Risk Management
                   </CardTitle>
                 </CardHeader>
@@ -151,7 +151,7 @@ export function ViewBacktestDialog({ isOpen, onClose, backtest }: ViewBacktestDi
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Clock className="w-5 h-5" weight="light" />
+                    <Clock className="w-5 h-5" />
                     Strategy & Session Details
                   </CardTitle>
                 </CardHeader>
@@ -252,7 +252,7 @@ export function ViewBacktestDialog({ isOpen, onClose, backtest }: ViewBacktestDi
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <TrendUp className="w-5 h-5" weight="light" />
+                    <TrendUp className="w-5 h-5" />
                     Key Metrics
                   </CardTitle>
                 </CardHeader>
@@ -326,7 +326,7 @@ export function ViewBacktestDialog({ isOpen, onClose, backtest }: ViewBacktestDi
                   link.click()
                 }}
               >
-                <Download className="w-4 h-4 mr-2" weight="light" />
+                <Download className="w-4 h-4 mr-2" />
                 Download
               </Button>
             </DialogHeader>

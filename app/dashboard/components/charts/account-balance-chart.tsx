@@ -14,7 +14,7 @@ import {
 } from "recharts"
 
 const AnyLineChart = LineChart as any
-import { Info } from '@phosphor-icons/react'
+import { Info } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,

@@ -14,15 +14,15 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   ArrowLeft,
-  ArrowsClockwise,
-  FloppyDisk,
-  CaretLeft, Gear as SettingsIcon, Info, User, Envelope, Calendar, IdentificationCard, ShieldCheck, MapPin, Globe, CreditCard, SketchLogo, Clock, Users, Tag, Warning, CheckCircle, XCircle,
+  RefreshCcw,
+  Save,
+  ChevronLeft, Settings as SettingsIcon, Info, User, Mail, Calendar, Contact, ShieldCheck, MapPin, Globe, CreditCard, Diamond, Clock, Users, Tag, AlertTriangle, CheckCircle2, XCircle,
   Target,
   Shield,
-  Trash,
-  UploadSimple,
-  DownloadSimple
-} from "@phosphor-icons/react"
+  Trash2,
+  Upload,
+  Download
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { AccountStatus, PhaseType } from "@/types/prop-firm"
 
@@ -224,7 +224,7 @@ export default function AccountSettingsPage() {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
-          <ArrowsClockwise className="h-8 w-8 animate-spin" />
+          <RefreshCcw className="h-8 w-8 animate-spin" />
         </div>
       </div>
     )
@@ -275,7 +275,7 @@ export default function AccountSettingsPage() {
             onClick={fetchAccount}
             disabled={isLoading}
           >
-            <ArrowsClockwise className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
+            <RefreshCcw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
             Refresh
           </Button>
           <Button
@@ -283,7 +283,7 @@ export default function AccountSettingsPage() {
             size="sm"
             disabled={isSaving}
           >
-            <FloppyDisk className="h-4 w-4 mr-2" />
+            <Save className="h-4 w-4 mr-2" />
             {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
@@ -302,7 +302,7 @@ export default function AccountSettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <SettingsIcon weight="fill" className="h-4 w-4" />
+                  <SettingsIcon className="h-4 w-4" />
                   Account Information
                 </CardTitle>
               </CardHeader>
@@ -525,7 +525,7 @@ export default function AccountSettingsPage() {
                   size="sm"
                   onClick={handleDeleteAccount}
                 >
-                  <Trash className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-4 w-4 mr-2" />
                   Delete Account
                 </Button>
               </CardContent>
@@ -545,12 +545,12 @@ export default function AccountSettingsPage() {
                 
                 <div className="flex flex-wrap gap-2">
                   <Button variant="outline" size="sm">
-                    <DownloadSimple className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4 mr-2" />
                     Export as CSV
                   </Button>
                   
                   <Button variant="outline" size="sm">
-                    <DownloadSimple className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4 mr-2" />
                     Export as JSON
                   </Button>
                 </div>

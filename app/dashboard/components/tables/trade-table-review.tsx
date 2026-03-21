@@ -5,6 +5,15 @@ import { ColumnConfigDialog } from '@/components/ui/column-config-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useData } from '@/context/data-provider'
 import { useFilteredTrades } from '@/hooks/use-filtered-trades'
@@ -12,7 +21,7 @@ import { useMediaQuery } from '@/hooks/use-media-query'
 import { cn, formatCurrency, formatQuantity, parsePositionTime } from '@/lib/utils'
 import { useTableConfigStore } from '@/store/table-config-store'
 import { useUserStore } from '@/store/user-store'
-import { ArrowRight, CaretDown, CaretLeft, CaretRight, ChartBar, Info } from '@phosphor-icons/react'
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, BarChart3, Info } from 'lucide-react'
 import { Trade } from '@prisma/client'
 import {
   ColumnDef,
@@ -230,7 +239,7 @@ const useTradeTableColumns = ({
         if ((row.original.trades?.length || 0) <= 1) return null
         return (
           <Button variant="ghost" size="sm" onClick={row.getToggleExpandedHandler()} className="hover:bg-transparent">
-            {row.getIsExpanded() ? <CaretDown className="h-4 w-4" weight="light" /> : <CaretRight className="h-4 w-4" weight="light" />}
+            {row.getIsExpanded() ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
         )
       },
@@ -625,7 +634,7 @@ export function TradeTableReview() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help" weight="light" />
+                  <Info className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent side="top">
                   <p>Review every execution, grouping, and adjustment in one view.</p>
@@ -675,7 +684,7 @@ export function TradeTableReview() {
             ) : (
               <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
                 <div className="p-4 bg-muted/30 rounded-full">
-                  <ChartBar className="h-8 w-8 opacity-40" weight="light" />
+                  <BarChart3 className="h-8 w-8 opacity-40" />
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-semibold">No trades found</p>
@@ -687,13 +696,13 @@ export function TradeTableReview() {
             )}
           </div>
         ) : (
-          <div className="relative w-full overflow-x-auto rounded-3xl">
-            <table className="w-full min-w-[1100px] lg:min-w-full text-sm">
-              <thead className="sticky top-0 z-20 bg-background border-b border-border">
+          <div className="relative w-full overflow-x-auto rounded-3xl max-h-[800px] overflow-y-auto">
+            <Table className="w-full min-w-[1100px] lg:min-w-full text-sm">
+              <TableHeader className="sticky top-0 z-20 bg-background border-b shadow-sm">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => (
-                      <th
+                      <TableHead
                         key={header.id}
                         className={cn(
                           'h-11 px-2.5 text-left align-middle font-medium text-muted-foreground text-[11px] uppercase tracking-wide',
@@ -701,21 +710,21 @@ export function TradeTableReview() {
                         )}
                       >
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                      </th>
+                      </TableHead>
                     ))}
-                  </tr>
+                  </TableRow>
                 ))}
-              </thead>
-              <tbody>
+              </TableHeader>
+              <TableBody>
                 {table.getRowModel().rows.length ? (
                   table.getRowModel().rows.map((row) => (
                     <React.Fragment key={row.id}>
-                      <tr
+                      <TableRow
                         data-state={row.getIsSelected() && 'selected'}
-                        className="border-b border-border/40 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                        className="transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                       >
                         {row.getVisibleCells().map((cell) => (
-                          <td
+                          <TableCell
                             key={cell.id}
                             className={cn(
                               'px-2.5 py-2.5 align-middle text-xs whitespace-nowrap',
@@ -723,12 +732,12 @@ export function TradeTableReview() {
                             )}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </td>
+                          </TableCell>
                         ))}
-                      </tr>
+                      </TableRow>
                       {row.getIsExpanded() && (row.original.trades?.length || 0) > 1 && (
-                        <tr className="bg-muted/20">
-                          <td colSpan={columns.length} className="px-10 py-4">
+                        <TableRow className="bg-muted/20">
+                          <TableCell colSpan={columns.length} className="px-10 py-4">
                             <div className="space-y-2 text-xs text-muted-foreground">
                               {row.original.trades?.map((trade) => (
                                 <div
@@ -744,20 +753,39 @@ export function TradeTableReview() {
                                 </div>
                               ))}
                             </div>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       )}
                     </React.Fragment>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan={columns.length} className="h-24 text-center px-4 py-3 align-middle">
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center px-4 py-3 align-middle">
                       No results.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+              <TableFooter className="sticky bottom-0 bg-background z-20 shadow-inner">
+                <TableRow className="hover:bg-transparent border-t">
+                  <TableCell colSpan={6} className="font-medium text-xs border-r">
+                    Total Trades: {totalTrades}
+                  </TableCell>
+                  <TableCell colSpan={3} className="text-right font-medium text-xs">
+                    Page P&L:
+                  </TableCell>
+                  <TableCell className="text-right font-bold font-mono">
+                    <span className={cn(table.getCoreRowModel().rows.reduce((sum, row) => sum + (row.original.pnl || 0), 0) >= 0 ? "text-profit" : "text-loss")}>
+                      {table.getCoreRowModel().rows.reduce((sum, row) => sum + (row.original.pnl || 0), 0) >= 0 ? '+' : ''}{formatCurrency(table.getCoreRowModel().rows.reduce((sum, row) => sum + (row.original.pnl || 0), 0))}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-muted-foreground">
+                    {formatCurrency(table.getCoreRowModel().rows.reduce((sum, row) => sum + (row.original.commission || 0), 0))}
+                  </TableCell>
+                  <TableCell colSpan={2}></TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
           </div>
         )}
       </div>
@@ -795,7 +823,7 @@ export function TradeTableReview() {
               disabled={!table.getCanPreviousPage()}
               className="h-7 px-2 sm:px-3 text-xs"
             >
-              <CaretLeft className="h-3.5 w-3.5 sm:mr-1" weight="light" />
+              <ChevronLeft className="h-3.5 w-3.5 sm:mr-1" />
               <span className="hidden sm:inline">Previous</span>
             </Button>
             <span className="text-xs sm:text-sm px-1 sm:px-2 whitespace-nowrap">
@@ -809,7 +837,7 @@ export function TradeTableReview() {
               className="h-7 px-2 sm:px-3 text-xs"
             >
               <span className="hidden sm:inline">Next</span>
-              <ArrowRight className="h-3.5 w-3.5 sm:ml-1" weight="light" />
+              <ArrowRight className="h-3.5 w-3.5 sm:ml-1" />
             </Button>
           </div>
         </div>

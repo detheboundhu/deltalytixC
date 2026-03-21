@@ -20,10 +20,10 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Textarea } from "@/components/ui/textarea"
+import { LexicalEditor } from "@/components/ui/editor/lexical-editor"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { ChartBar, BookOpen, PencilSimple, FloppyDisk, X } from "@phosphor-icons/react"
+import { BarChart3, BookOpen, PenLine, Save, X } from "lucide-react"
 import { cn, parsePositionTime, formatCurrency } from "@/lib/utils"
 import { Trade } from "@prisma/client"
 import { CalendarEntry } from "@/app/dashboard/types/calendar"
@@ -218,11 +218,11 @@ export function CalendarModal({
             <div className="px-4 border-b">
               <TabsList className="h-10 bg-transparent border-0 p-0 gap-1">
                 <TabsTrigger value="trades" className="data-[state=active]:bg-muted rounded-md px-3 py-1.5 text-sm gap-2">
-                  <ChartBar className="h-4 w-4" weight="light" />
+                  <BarChart3 className="h-4 w-4" />
                   Trades & Stats
                 </TabsTrigger>
                 <TabsTrigger value="journal" className="data-[state=active]:bg-muted rounded-md px-3 py-1.5 text-sm gap-2">
-                  <BookOpen className="h-4 w-4" weight="light" />
+                  <BookOpen className="h-4 w-4" />
                   Journal
                 </TabsTrigger>
               </TabsList>
@@ -276,7 +276,7 @@ export function CalendarModal({
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center space-y-3 border rounded-lg border-dashed bg-muted/5">
                       <div className="p-3 bg-muted rounded-full">
-                        <ChartBar className="w-6 h-6 text-muted-foreground" weight="light" />
+                        <BarChart3 className="w-6 h-6 text-muted-foreground" />
                       </div>
                       <div className="space-y-1">
                         <p className="font-medium">No trades recorded</p>
@@ -318,7 +318,7 @@ export function CalendarModal({
                             size="sm"
                             className="gap-2"
                           >
-                            <PencilSimple className="h-3.5 w-3.5" weight="light" />
+                            <PenLine className="h-3.5 w-3.5" />
                             Edit
                           </Button>
                         </CardHeader>
@@ -375,7 +375,7 @@ export function CalendarModal({
                               size="sm"
                               className="gap-2"
                             >
-                              <X className="h-3.5 w-3.5" weight="light" />
+                              <X className="h-3.5 w-3.5" />
                               Cancel
                             </Button>
                           )}
@@ -391,11 +391,11 @@ export function CalendarModal({
 
                           <div>
                             <label className="text-sm font-medium mb-2 block">Your Notes</label>
-                            <Textarea
+                            <LexicalEditor
                               value={note}
-                              onChange={(e) => setNote(e.target.value)}
+                              onChange={setNote}
                               placeholder="Reflect on today's trading..."
-                              className="min-h-[120px] resize-none"
+                              minHeight="120px"
                             />
                           </div>
 
@@ -411,7 +411,7 @@ export function CalendarModal({
                               </>
                             ) : (
                               <>
-                                <FloppyDisk className="h-4 w-4" weight="light" />
+                                <Save className="h-4 w-4" />
                                 Save Journal
                               </>
                             )}

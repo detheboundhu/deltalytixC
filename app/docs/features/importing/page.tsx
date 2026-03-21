@@ -1,4 +1,4 @@
-import { Lock } from "@phosphor-icons/react/dist/ssr"
+import { Lock } from "lucide-react"
 
 export default function ImportingDocs() {
   return (

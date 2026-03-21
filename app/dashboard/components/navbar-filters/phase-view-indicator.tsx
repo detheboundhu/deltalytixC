@@ -1,6 +1,6 @@
 "use client"
 
-import { X, Eye } from "@phosphor-icons/react"
+import { X, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useData } from "@/context/data-provider"
@@ -50,7 +50,7 @@ export function PhaseViewIndicator() {
       "bg-muted/50 border border-border",
       "text-foreground"
     )}>
-      <Eye weight="light" className="h-3.5 w-3.5" />
+      <Eye className="h-3.5 w-3.5" />
       <span className="text-xs font-medium">Viewing:</span>
       {getStatusBadge()}
       <Button
@@ -59,9 +59,8 @@ export function PhaseViewIndicator() {
         onClick={handleClearView}
         className="h-5 w-5 p-0 hover:bg-muted/80"
       >
-        <X weight="light" className="h-3 w-3" />
+        <X className="h-3 w-3" />
       </Button>
     </div>
   )
 }
-

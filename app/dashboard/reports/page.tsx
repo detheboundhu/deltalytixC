@@ -13,16 +13,16 @@ import { useData } from '@/context/data-provider'
 import { formatTimeInZone } from '@/lib/time-utils'
 import { classifyTrade, cn } from '@/lib/utils'
 import {
-    ChartBar,
-    Lightning,
-    ShareNetwork,
+    BarChart2,
+    Zap,
+    Share2,
     Target,
-    TrendUp,
-    Buildings,
+    TrendingUp,
+    Building2,
     Clock,
-    Rows,
+    List,
     Table as TableIcon
-} from '@phosphor-icons/react'
+} from 'lucide-react'
 import {
     format,
     startOfYear,
@@ -335,7 +335,7 @@ export default function ReportsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 pb-6 border-b border-border/50">
                     <div className="flex items-center gap-4">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                            <ChartBar weight="light" className="h-6 w-6" />
+                            <BarChart2 className="h-6 w-6" />
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight">Systematic Reports</h1>
@@ -347,14 +347,14 @@ export default function ReportsPage() {
 
                     <div className="no-export flex items-center gap-2">
                         <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={isExporting} className="h-9 font-black uppercase tracking-tighter text-[10px] border-border/40 hover:bg-muted/10 transition-all">
-                            <TrendUp weight="light" className="h-3.5 w-3.5 mr-2 opacity-60" />
+                            <TrendingUp className="h-3.5 w-3.5 mr-2 opacity-60" />
                             Render Report
                         </Button>
 
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button variant="outline" size="sm" className="h-9 font-black uppercase tracking-tighter text-[10px] border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-colors duration-200">
-                                    <ShareNetwork weight="light" className="h-3.5 w-3.5 mr-2" />
+                                    <Share2 className="h-3.5 w-3.5 mr-2" />
                                     Share Intelligence
                                 </Button>
                             </DialogTrigger>
@@ -411,7 +411,7 @@ export default function ReportsPage() {
                     </div>
                 ) : !tradingActivity || !psychMetrics || filteredTrades.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border/60 rounded-2xl bg-muted/5">
-                        <Lightning weight="light" className="h-10 w-10 text-muted-foreground/30 mb-4" />
+                        <Zap className="h-10 w-10 text-muted-foreground/30 mb-4" />
                         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/50 mb-4">Journal is empty for this period</h3>
                         <Button
                             variant="outline"
@@ -426,19 +426,19 @@ export default function ReportsPage() {
                     <Tabs defaultValue="overview" className="w-full" onValueChange={setSelectedTab}>
                         <TabsList className="mb-8 p-1 bg-muted/20 border border-border/40 rounded-xl no-export overflow-x-auto w-full justify-start sm:justify-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                             <TabsTrigger value="overview" className="px-3 sm:px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 whitespace-nowrap">
-                                <TrendUp weight="light" className="h-3.5 w-3.5 shrink-0" />
+                                <TrendingUp className="h-3.5 w-3.5 shrink-0" />
                                 Overview
                             </TabsTrigger>
                             <TabsTrigger value="sessions" className="px-3 sm:px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 whitespace-nowrap">
-                                <Clock weight="light" className="h-3.5 w-3.5 shrink-0" />
+                                <Clock className="h-3.5 w-3.5 shrink-0" />
                                 Sessions
                             </TabsTrigger>
                             <TabsTrigger value="spreadsheet" className="px-3 sm:px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 whitespace-nowrap">
-                                <Rows weight="light" className="h-3.5 w-3.5 shrink-0" />
+                                <List className="h-3.5 w-3.5 shrink-0" />
                                 Spreadsheet
                             </TabsTrigger>
                             <TabsTrigger value="propfirm" className="px-3 sm:px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 whitespace-nowrap">
-                                <Buildings weight="light" className="h-3.5 w-3.5 shrink-0" />
+                                <Building2 className="h-3.5 w-3.5 shrink-0" />
                                 Funded
                             </TabsTrigger>
                         </TabsList>
@@ -474,7 +474,7 @@ export default function ReportsPage() {
                                     {/* Detailed Metrics Table */}
                                     <div className="lg:col-span-7 space-y-6">
                                         <div className="flex items-center gap-2">
-                                            <TrendUp weight="light" className="h-4 w-4 text-primary" />
+                                            <TrendingUp className="h-4 w-4 text-primary" />
                                             <h2 className="text-[11px] uppercase tracking-[0.2em] font-black text-muted-foreground">Detailed Performance Audit</h2>
                                         </div>
                                         <div className="border border-border/40 rounded-2xl overflow-hidden bg-muted/5 h-full">

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useState, useMemo, useEffect, useCallback } from "react"
-import { MagnifyingGlass, CaretDown, CaretRight } from "@phosphor-icons/react"
+import { Search, ChevronDown, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -341,9 +341,8 @@ export function AccountSelector({ onSave }: AccountSelectorProps) {
         </p>
       </div>
 
-      {/* Search */}
       <div className="relative">
-        <MagnifyingGlass weight="light" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search accounts..."
           value={searchQuery}
@@ -425,9 +424,9 @@ export function AccountSelector({ onSave }: AccountSelectorProps) {
                         >
                           <div className="flex items-center gap-2">
                             {expandedAccounts.has(accountName) ? (
-                              <CaretDown weight="light" className="h-4 w-4" />
+                              <ChevronDown className="h-4 w-4" />
                             ) : (
-                              <CaretRight weight="light" className="h-4 w-4" />
+                              <ChevronRight className="h-4 w-4" />
                             )}
                             <div>
                               <div className="font-medium text-sm">{accountName}</div>

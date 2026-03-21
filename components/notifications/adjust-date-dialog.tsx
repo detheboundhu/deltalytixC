@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Calendar, CircleNotch, Info } from '@phosphor-icons/react'
+import { Calendar, Loader2 as CircleNotch, Info } from 'lucide-react'
 import { toast } from 'sonner'
 import { Notification } from '@prisma/client'
 
@@ -72,7 +72,7 @@ export function AdjustDateDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Calendar weight="light" className="h-5 w-5 text-primary" />
+            <Calendar className="h-5 w-5 text-primary" />
             Adjust Account Creation Date
           </DialogTitle>
           <DialogDescription>
@@ -82,7 +82,7 @@ export function AdjustDateDialog({
 
         <div className="py-4">
           <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
-            <Info weight="light" className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div className="space-y-1">
               <p className="text-sm font-medium">Recommended Adjustment</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -105,7 +105,7 @@ export function AdjustDateDialog({
             disabled={isUpdating}
             className="gap-2"
           >
-            {isUpdating && <CircleNotch weight="light" className="h-4 w-4 animate-spin" />}
+            {isUpdating && <CircleNotch className="h-4 w-4 animate-spin" />}
             Accept Adjustment
           </Button>
         </DialogFooter>

@@ -4,14 +4,14 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
-  Smiley,
-  SmileySad,
-  SmileyMeh,
-  Lightning,
+  Smile,
+  Frown,
+  Meh,
+  Zap,
   Brain,
-  Warning,
-  TrendUp,
-  TrendDown,
+  AlertTriangle,
+  TrendingUp,
+  TrendingDown,
   Target,
   Heart,
   ThumbsUp,
@@ -20,7 +20,7 @@ import {
   Flame,
   CloudRain,
   Sun
-} from "@phosphor-icons/react"
+} from "lucide-react"
 
 export type EmotionType =
   | 'confident'
@@ -49,22 +49,22 @@ export interface Emotion {
 }
 
 export const emotions: Emotion[] = [
-  { id: 'confident', label: 'Confident', icon: TrendUp, color: 'text-long' },
-  { id: 'anxious', label: 'Anxious', icon: Warning, color: 'text-chart-4' },
+  { id: 'confident', label: 'Confident', icon: TrendingUp, color: 'text-long' },
+  { id: 'anxious', label: 'Anxious', icon: AlertTriangle, color: 'text-chart-4' },
   { id: 'focused', label: 'Focused', icon: Brain, color: 'text-chart-1' },
-  { id: 'energetic', label: 'Energetic', icon: Lightning, color: 'text-warning' },
+  { id: 'energetic', label: 'Energetic', icon: Zap, color: 'text-warning' },
   { id: 'calm', label: 'Calm', icon: Sun, color: 'text-sky-400' },
   { id: 'frustrated', label: 'Frustrated', icon: CloudRain, color: 'text-muted-foreground' },
   { id: 'optimistic', label: 'Optimistic', icon: ThumbsUp, color: 'text-long' },
   { id: 'pessimistic', label: 'Pessimistic', icon: ThumbsDown, color: 'text-short' },
   { id: 'disciplined', label: 'Disciplined', icon: Target, color: 'text-chart-2' },
   { id: 'impulsive', label: 'Impulsive', icon: Flame, color: 'text-rose-400' },
-  { id: 'happy', label: 'Happy', icon: Smiley, color: 'text-long' },
-  { id: 'sad', label: 'Sad', icon: SmileySad, color: 'text-chart-1' },
-  { id: 'neutral', label: 'Neutral', icon: SmileyMeh, color: 'text-muted-foreground' },
+  { id: 'happy', label: 'Happy', icon: Smile, color: 'text-long' },
+  { id: 'sad', label: 'Sad', icon: Frown, color: 'text-chart-1' },
+  { id: 'neutral', label: 'Neutral', icon: Meh, color: 'text-muted-foreground' },
   { id: 'tired', label: 'Tired', icon: Coffee, color: 'text-warning' },
   { id: 'excited', label: 'Excited', icon: Heart, color: 'text-chart-3' },
-  { id: 'stressed', label: 'Stressed', icon: TrendDown, color: 'text-short' },
+  { id: 'stressed', label: 'Stressed', icon: TrendingDown, color: 'text-short' },
   { id: 'relaxed', label: 'Relaxed', icon: Heart, color: 'text-chart-5' },
 ]
 
@@ -116,7 +116,7 @@ export function EmotionPicker({ selectedEmotion, onChange, className }: EmotionP
               )}
               onClick={() => onChange(emotion.id)}
             >
-              <Icon className={cn("h-5 w-5", !isSelected && emotion.color)} weight="light" />
+              <Icon className={cn("h-5 w-5", !isSelected && emotion.color)} />
               <span className="text-[10px] font-medium leading-none">
                 {emotion.label}
               </span>
@@ -139,7 +139,7 @@ export function EmotionPicker({ selectedEmotion, onChange, className }: EmotionP
 
       {selectedEmotionData && (
         <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-          <selectedEmotionData.icon className={cn("h-4 w-4", selectedEmotionData.color)} weight="light" />
+          <selectedEmotionData.icon className={cn("h-4 w-4", selectedEmotionData.color)} />
           <span className="text-sm font-medium">
             Feeling {selectedEmotionData.label.toLowerCase()}
           </span>

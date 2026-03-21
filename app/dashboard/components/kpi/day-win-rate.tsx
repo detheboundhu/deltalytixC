@@ -5,7 +5,7 @@ import { WidgetCard } from '../widget-card'
 import { CircularProgress } from '@/components/ui/circular-progress'
 import { useData } from '@/context/data-provider'
 import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
-import { Info } from '@phosphor-icons/react'
+import { Info } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,

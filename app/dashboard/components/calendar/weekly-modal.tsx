@@ -20,13 +20,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
+import { LexicalEditor } from "@/components/ui/editor/lexical-editor"
 import { useAuth } from "@/context/auth-provider"
 import { useSupabaseUpload } from "@/hooks/use-supabase-upload"
 import { getTradingSession } from '@/lib/time-utils'
 import { BREAK_EVEN_THRESHOLD, cn, groupTradesByExecution, type GroupedTrade } from '@/lib/utils'
 import { getWeeklyReview, saveWeeklyReview } from "@/server/weekly-review"
-import { Calendar as CalendarIcon, ChartBar, CheckCircle, CircleNotch, Clock, Image as ImageIcon, Percent, Pulse, Target, Trash, TrendDown, TrendUp, UploadSimple, XCircle } from "@phosphor-icons/react"
+import { Calendar, BarChart3, CheckCircle2, Loader2, Clock, Image, Percent, Activity, Target, Trash2, TrendingDown, TrendingUp, Upload, XCircle } from "lucide-react"
 import { type Trade } from '@prisma/client'
 import imageCompression from 'browser-image-compression'
 import { endOfWeek, format, parseISO, startOfWeek } from "date-fns"
@@ -67,7 +67,7 @@ function MetricCard({
     <div className={cn("p-4 rounded-xl border bg-card", className)}>
       <div className="flex items-center gap-2 mb-2">
         <div className="p-1.5 rounded-lg bg-primary/10">
-          <Icon className="h-4 w-4 text-primary" weight="light" />
+          <Icon className="h-4 w-4 text-primary" />
         </div>
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
       </div>
@@ -506,7 +506,7 @@ export function WeeklyModal({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
-                  <CalendarIcon className="h-5 w-5 text-primary" weight="light" />
+                  <Calendar className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold">{dateRange}</h2>
@@ -514,7 +514,7 @@ export function WeeklyModal({
                 </div>
               </div>
               <Button onClick={handleSave} disabled={isSaving || isUploading}>
-                {isSaving || isUploading ? <CircleNotch className="mr-2 h-4 w-4 animate-spin" weight="light" /> : null}
+                {isSaving || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Save Review
               </Button>
             </div>
@@ -557,7 +557,7 @@ export function WeeklyModal({
                 {/* Key Metrics Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   <MetricCard
-                    icon={ChartBar}
+                    icon={BarChart3}
                     label="Total P&L"
                     value={`$${weeklyData.pnl.toFixed(2)}`}
                     trend={weeklyData.pnl > 0 ? 'up' : weeklyData.pnl < 0 ? 'down' : 'neutral'}
@@ -576,19 +576,19 @@ export function WeeklyModal({
                     trend={weeklyData.winRate >= 50 ? 'up' : 'down'}
                   />
                   <MetricCard
-                    icon={TrendUp}
+                    icon={TrendingUp}
                     label="Avg Win"
                     value={`$${weeklyData.avgWin.toFixed(2)}`}
                     trend="up"
                   />
                   <MetricCard
-                    icon={TrendDown}
+                    icon={TrendingDown}
                     label="Avg Loss"
                     value={`$${weeklyData.avgLoss.toFixed(2)}`}
                     trend="down"
                   />
                   <MetricCard
-                    icon={Pulse}
+                    icon={Activity}
                     label="Profit Factor"
                     value={stats?.profitFactor === Infinity ? '∞' : stats?.profitFactor?.toFixed(2) || '0.00'}
                     trend={stats && stats.profitFactor >= 1 ? 'up' : 'down'}
@@ -599,7 +599,7 @@ export function WeeklyModal({
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <ChartBar className="h-4 w-4 text-primary" weight="light" />
+                      <BarChart3 className="h-4 w-4 text-primary" />
                       Cumulative P&L
                     </CardTitle>
                   </CardHeader>
@@ -675,7 +675,7 @@ export function WeeklyModal({
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card className="p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <TrendUp className="h-4 w-4 text-long" weight="light" />
+                        <TrendingUp className="h-4 w-4 text-long" />
                         <span className="text-sm font-medium">Best Day</span>
                       </div>
                       <div className="text-lg font-bold">{stats.bestDay ? stats.bestDay[0] : 'N/A'}</div>
@@ -686,7 +686,7 @@ export function WeeklyModal({
 
                     <Card className="p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <TrendDown className="h-4 w-4 text-short" weight="light" />
+                        <TrendingDown className="h-4 w-4 text-short" />
                         <span className="text-sm font-medium">Worst Day</span>
                       </div>
                       <div className="text-lg font-bold">{stats.worstDay ? stats.worstDay[0] : 'N/A'}</div>
@@ -727,7 +727,7 @@ export function WeeklyModal({
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <Pulse className="h-4 w-4 text-primary" weight="light" />
+                        <Activity className="h-4 w-4 text-primary" />
                         Weekly Expectation
                       </CardTitle>
                     </CardHeader>
@@ -821,14 +821,14 @@ export function WeeklyModal({
                               ? "bg-long/20"
                               : "bg-long/10"
                           )}>
-                            <TrendUp weight="light" className="h-4 w-4 text-long" />
+                            <TrendingUp className="h-4 w-4 text-long" />
                           </div>
                           <div className="flex-1">
                             <div className="font-medium">Bullish Expansion</div>
                             <div className="text-xs text-muted-foreground">Expecting upward price movement</div>
                           </div>
                           {reviewData?.expectation === 'BULLISH_EXPANSION' && (
-                            <CheckCircle className="h-5 w-5 text-long" weight="light" />
+                            <CheckCircle2 className="h-5 w-5 text-long" />
                           )}
                         </label>
 
@@ -845,14 +845,14 @@ export function WeeklyModal({
                               ? "bg-short/20"
                               : "bg-short/10"
                           )}>
-                            <TrendDown weight="light" className="h-4 w-4 text-short" />
+                            <TrendingDown className="h-4 w-4 text-short" />
                           </div>
                           <div className="flex-1">
                             <div className="font-medium">Bearish Expansion</div>
                             <div className="text-xs text-muted-foreground">Expecting downward price movement</div>
                           </div>
                           {reviewData?.expectation === 'BEARISH_EXPANSION' && (
-                            <CheckCircle weight="light" className="h-5 w-5 text-short" />
+                            <CheckCircle2 className="h-5 w-5 text-short" />
                           )}
                         </label>
 
@@ -869,14 +869,14 @@ export function WeeklyModal({
                               ? "bg-primary/20"
                               : "bg-primary/10"
                           )}>
-                            <Pulse weight="light" className="h-4 w-4 text-primary" />
+                            <Activity className="h-4 w-4 text-primary" />
                           </div>
                           <div className="flex-1">
                             <div className="font-medium">Consolidation</div>
                             <div className="text-xs text-muted-foreground">Expecting range-bound movement</div>
                           </div>
                           {reviewData?.expectation === 'CONSOLIDATION' && (
-                            <CheckCircle weight="light" className="h-5 w-5 text-primary" />
+                            <CheckCircle2 className="h-5 w-5 text-primary" />
                           )}
                         </label>
                       </RadioGroup>
@@ -904,7 +904,7 @@ export function WeeklyModal({
                             )}
                             onClick={() => setReviewData({ ...reviewData, isCorrect: true })}
                           >
-                            <CheckCircle weight="light" className="mr-2 h-4 w-4" />
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
                             Correct
                           </Button>
                           <Button
@@ -913,7 +913,7 @@ export function WeeklyModal({
                             className="flex-1 h-12"
                             onClick={() => setReviewData({ ...reviewData, isCorrect: false })}
                           >
-                            <XCircle className="mr-2 h-4 w-4" weight="light" />
+                            <XCircle className="mr-2 h-4 w-4" />
                             Incorrect
                           </Button>
                         </div>
@@ -933,19 +933,19 @@ export function WeeklyModal({
                           <SelectContent>
                             <SelectItem value="BULLISH_EXPANSION">
                               <div className="flex items-center gap-2">
-                                <TrendUp weight="light" className="h-4 w-4 text-long" />
+                                <TrendingUp className="h-4 w-4 text-long" />
                                 Bullish Expansion
                               </div>
                             </SelectItem>
                             <SelectItem value="BEARISH_EXPANSION">
                               <div className="flex items-center gap-2">
-                                <TrendDown weight="light" className="h-4 w-4 text-short" />
+                                <TrendingDown className="h-4 w-4 text-short" />
                                 Bearish Expansion
                               </div>
                             </SelectItem>
                             <SelectItem value="CONSOLIDATION">
                               <div className="flex items-center gap-2">
-                                <Pulse weight="light" className="h-4 w-4 text-primary" />
+                                <Activity className="h-4 w-4 text-primary" />
                                 Consolidation
                               </div>
                             </SelectItem>
@@ -997,7 +997,7 @@ export function WeeklyModal({
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center justify-between">
                       <span className="flex items-center gap-2">
-                        <ImageIcon className="h-4 w-4 text-primary" weight="light" />
+                        <Image className="h-4 w-4 text-primary" />
                         Economic Calendar Screenshot
                       </span>
                       <div className="flex items-center gap-2">
@@ -1009,7 +1009,7 @@ export function WeeklyModal({
                               className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                               onClick={handleRemoveImage}
                             >
-                              <Trash weight="light" className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -1017,7 +1017,7 @@ export function WeeklyModal({
                               className="h-8 px-3"
                               onClick={handleReplaceImage}
                             >
-                              <UploadSimple weight="light" className="h-4 w-4 mr-1" />
+                              <Upload className="h-4 w-4 mr-1" />
                               Replace
                             </Button>
                           </>
@@ -1049,7 +1049,7 @@ export function WeeklyModal({
                         </div>
                       ) : imageLoadError ? (
                         <div className="flex flex-col items-center justify-center text-muted-foreground py-12">
-                          <XCircle className="h-12 w-12 text-destructive mb-4" weight="light" />
+                          <XCircle className="h-12 w-12 text-destructive mb-4" />
                           <p className="text-sm font-medium mb-2">Failed to load saved image</p>
                           <Button
                             variant="outline"
@@ -1060,7 +1060,7 @@ export function WeeklyModal({
                               document.getElementById('weekly-calendar-upload')?.click()
                             }}
                           >
-                            <UploadSimple weight="light" className="h-4 w-4 mr-2" />
+                            <Upload className="h-4 w-4 mr-2" />
                             Upload New Image
                           </Button>
                         </div>
@@ -1070,7 +1070,7 @@ export function WeeklyModal({
                           className="flex flex-col items-center justify-center text-muted-foreground py-16 cursor-pointer hover:bg-muted/50 transition-colors w-full h-full"
                         >
                           <div className="p-4 rounded-full bg-muted mb-4">
-                            <ImageIcon className="h-8 w-8 opacity-50" weight="light" />
+                            <Image className="h-8 w-8 opacity-50" />
                           </div>
                           <span className="text-sm font-medium mb-1">Upload weekly calendar screenshot</span>
                           <span className="text-xs opacity-70">Click to browse or drag and drop</span>
@@ -1092,11 +1092,11 @@ export function WeeklyModal({
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Textarea
+                    <LexicalEditor
                       placeholder="Write your weekly notes, observations, lessons learned..."
-                      className="min-h-[300px] resize-none"
+                      minHeight="300px"
                       value={reviewData?.notes || ''}
-                      onChange={(e) => setReviewData({ ...reviewData, notes: e.target.value })}
+                      onChange={(val) => setReviewData({ ...reviewData, notes: val })}
                     />
                     <p className="text-xs text-muted-foreground mt-2">
                       Document key takeaways, mistakes to avoid, and strategies that worked well this week.

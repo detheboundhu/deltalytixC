@@ -10,15 +10,15 @@ import { Label } from '@/components/ui/label'
 import { useData } from '@/context/data-provider'
 import {
     Target,
-    TrendUp,
-    TrendDown,
+    TrendingUp,
+    TrendingDown,
     Calendar,
     Trophy,
-    Gear as SettingsIcon,
+    Settings as SettingsIcon,
     Shield,
-    Warning,
-    CurrencyDollar
-} from "@phosphor-icons/react"
+    AlertTriangle,
+    DollarSign
+} from "lucide-react"
 import { cn } from '@/lib/utils'
 import { startOfMonth, endOfMonth, parseISO, isWithinInterval, startOfWeek, endOfWeek } from 'date-fns'
 import {
@@ -157,7 +157,7 @@ function StatCard({ metric }: { metric: RiskMetric }) {
             statusStyles[metric.status]
         )}>
             <div className="flex items-center gap-2 mb-1">
-                <Icon weight="light" className={cn("h-3.5 w-3.5", iconStyles[metric.status])} />
+                <Icon className={cn("h-3.5 w-3.5", iconStyles[metric.status])} />
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                     {metric.label}
                 </span>
@@ -270,7 +270,7 @@ export default function GoalsRiskCommandCenter({ size = 'large' }: GoalsRiskComm
             current: currentStats.monthWinRate,
             type: 'winrate' as const,
             period: 'monthly' as const,
-            icon: TrendUp,
+            icon: TrendingUp,
             color: 'hsl(var(--chart-profit))' // Green
         },
         {
@@ -341,19 +341,19 @@ export default function GoalsRiskCommandCenter({ size = 'large' }: GoalsRiskComm
         {
             label: 'Max Drawdown',
             value: `$${riskStats.maxDrawdown.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-            icon: TrendDown,
+            icon: TrendingDown,
             status: (riskStats.maxDrawdown > 1000 ? 'danger' : riskStats.maxDrawdown > 500 ? 'warning' : 'safe') as 'danger' | 'warning' | 'safe'
         },
         {
             label: 'Largest Loss',
             value: `$${riskStats.largestLoss.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-            icon: Warning,
+            icon: AlertTriangle,
             status: (riskStats.largestLoss > 500 ? 'danger' : riskStats.largestLoss > 200 ? 'warning' : 'safe') as 'danger' | 'warning' | 'safe'
         },
         {
             label: 'Avg Loss',
             value: `$${riskStats.avgLoss.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-            icon: CurrencyDollar,
+            icon: DollarSign,
             status: 'neutral' as const
         },
         {
@@ -373,7 +373,7 @@ export default function GoalsRiskCommandCenter({ size = 'large' }: GoalsRiskComm
         <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <SettingsIcon weight="light" className="h-3.5 w-3.5" />
+                    <SettingsIcon className="h-3.5 w-3.5" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
@@ -429,7 +429,7 @@ export default function GoalsRiskCommandCenter({ size = 'large' }: GoalsRiskComm
                         {/* Goals Section */}
                         <div className="space-y-4">
                             <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
-                                <Target weight="light" className="h-3.5 w-3.5" />
+                                <Target className="h-3.5 w-3.5" />
                                 Goals Progress
                             </h3>
                             <div className="grid grid-cols-3 gap-4">
@@ -469,7 +469,7 @@ export default function GoalsRiskCommandCenter({ size = 'large' }: GoalsRiskComm
                         {/* Risk Metrics Section */}
                         <div className="space-y-4">
                             <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
-                                <Shield weight="light" className="h-3.5 w-3.5" />
+                                <Shield className="h-3.5 w-3.5" />
                                 Risk Metrics
                             </h3>
                             <div className="grid grid-cols-2 gap-3">
@@ -481,7 +481,7 @@ export default function GoalsRiskCommandCenter({ size = 'large' }: GoalsRiskComm
                             {/* Warning Alert */}
                             {riskStats.lossStreak >= 3 && (
                                 <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/30">
-                                    <Warning weight="light" className="h-4 w-4 text-warning shrink-0" />
+                                    <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
                                     <p className="text-xs text-warning">
                                         Consider taking a break - {riskStats.lossStreak} losses in a row
                                     </p>
@@ -493,7 +493,7 @@ export default function GoalsRiskCommandCenter({ size = 'large' }: GoalsRiskComm
                     /* Empty State */
                     <div className="flex-1 flex items-center justify-center h-full">
                         <div className="text-center space-y-2">
-                            <Trophy weight="light" className="h-12 w-12 text-muted-foreground/30 mx-auto" />
+                            <Trophy className="h-12 w-12 text-muted-foreground/30 mx-auto" />
                             <p className="text-sm text-muted-foreground">No trading data available</p>
                             <p className="text-xs text-muted-foreground">Import trades to see your goals and risk metrics</p>
                         </div>

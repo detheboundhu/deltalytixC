@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
-  Link,
-  LinkBreak,
-  Envelope,
-  Chats,
+  Link2,
+  Unlink,
+  Mail,
+  MessageSquare,
   Globe,
-  WarningCircle
-} from "@phosphor-icons/react"
+  AlertCircle
+} from "lucide-react"
 import {
   linkDiscordAccount,
   linkGoogleAccount,
@@ -105,20 +105,20 @@ export function LinkedAccounts() {
       toast.success("Account unlinked successfully")
       await loadIdentities() // Reload the list
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to LinkBreak account")
+      toast.error(error instanceof Error ? error.message : "Failed to unlink account")
     }
   }
 
   const getProviderIcon = (provider: string) => {
     switch (provider) {
       case 'discord':
-        return <Chats className="h-4 w-4" weight="light" />
+        return <MessageSquare className="h-4 w-4" />
       case 'google':
-        return <Globe className="h-4 w-4" weight="light" />
+        return <Globe className="h-4 w-4" />
       case 'email':
-        return <Envelope className="h-4 w-4" weight="light" />
+        return <Mail className="h-4 w-4" />
       default:
-        return <WarningCircle className="h-4 w-4" weight="light" />
+        return <AlertCircle className="h-4 w-4" />
     }
   }
 
@@ -143,7 +143,7 @@ export function LinkedAccounts() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Link weight="light" className="h-5 w-5" />
+            <Link2 className="h-5 w-5" />
             Linked Accounts
           </CardTitle>
           <CardDescription>
@@ -163,7 +163,7 @@ export function LinkedAccounts() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Link weight="light" className="h-5 w-5" />
+          <Link2 className="h-5 w-5" />
           Linked Accounts
         </CardTitle>
         <CardDescription>
@@ -202,16 +202,16 @@ export function LinkedAccounts() {
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                            <LinkBreak className="h-4 w-4 sm:mr-2" weight="light" />
-                            <span className="hidden sm:inline">LinkBreak</span>
-                            <span className="sm:hidden">LinkBreak Account</span>
+                            <Unlink className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Unlink</span>
+                            <span className="sm:hidden">Unlink Account</span>
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>LinkBreak Account?</AlertDialogTitle>
+                            <AlertDialogTitle>Unlink Account?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to LinkBreak this account? You will need to use another linked account to sign in.
+                              Are you sure you want to unlink this account? You will need to use another linked account to sign in.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -220,7 +220,7 @@ export function LinkedAccounts() {
                               onClick={() => handleUnlink(identity)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
-                              LinkBreak Account
+                              Unlink Account
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -249,7 +249,7 @@ export function LinkedAccounts() {
                 onClick={handleLinkDiscord}
                 disabled={linking}
               >
-                <Chats className="mr-2 h-4 w-4" weight="light" />
+                <MessageSquare className="mr-2 h-4 w-4" />
                 Link Discord
               </Button>
             )}
@@ -260,7 +260,7 @@ export function LinkedAccounts() {
                 onClick={handleLinkGoogle}
                 disabled={linking}
               >
-                <Globe className="mr-2 h-4 w-4" weight="light" />
+                <Globe className="mr-2 h-4 w-4" />
                 Link Google
               </Button>
             )}

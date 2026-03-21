@@ -9,16 +9,16 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   ArrowLeft,
-  ArrowsClockwise,
-  CurrencyDollar,
+  RefreshCcw,
+  DollarSign,
   Calendar,
   CreditCard,
-  Warning,
-  CheckCircle,
+  AlertCircle,
+  CheckCircle2,
   Clock,
-  PencilSimple,
-  Trash
-} from "@phosphor-icons/react"
+  Pencil,
+  Trash2
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface PayoutData {
@@ -107,11 +107,11 @@ export default function PayoutDetailPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return <Clock weight="light" className="h-4 w-4" />
-      case 'approved': return <CheckCircle weight="light" className="h-4 w-4" />
-      case 'paid': return <CheckCircle weight="light" className="h-4 w-4" />
-      case 'rejected': return <Warning weight="light" className="h-4 w-4" />
-      default: return <Clock weight="light" className="h-4 w-4" />
+      case 'pending': return <Clock className="h-4 w-4" />
+      case 'approved': return <CheckCircle2 className="h-4 w-4" />
+      case 'paid': return <CheckCircle2 className="h-4 w-4" />
+      case 'rejected': return <AlertCircle className="h-4 w-4" />
+      default: return <Clock className="h-4 w-4" />
     }
   }
 
@@ -127,7 +127,7 @@ export default function PayoutDetailPage() {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
-          <ArrowsClockwise weight="light" className="h-8 w-8 animate-spin" />
+          <RefreshCcw className="h-8 w-8 animate-spin" />
         </div>
       </div>
     )
@@ -138,11 +138,11 @@ export default function PayoutDetailPage() {
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <Warning weight="light" className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Payout Not Found</h3>
             <p className="text-muted-foreground">The requested payout could not be found.</p>
             <Button onClick={() => router.back()} className="mt-4">
-              <ArrowLeft weight="light" className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Go Back
             </Button>
           </div>
@@ -161,7 +161,7 @@ export default function PayoutDetailPage() {
             size="sm"
             onClick={() => router.push('/dashboard/prop-firm/payouts')}
           >
-            <ArrowLeft weight="light" className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
           <div>
@@ -176,15 +176,15 @@ export default function PayoutDetailPage() {
             onClick={fetchPayout}
             disabled={isLoading}
           >
-            <ArrowsClockwise weight="light" className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
+            <RefreshCcw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
             Refresh
           </Button>
           <Button variant="outline" size="sm">
-            <PencilSimple weight="light" className="h-4 w-4 mr-2" />
+            <Pencil className="h-4 w-4 mr-2" />
             Edit
           </Button>
           <Button variant="outline" size="sm" className="text-short hover:text-short/80">
-            <Trash weight="light" className="h-4 w-4 mr-2" />
+            <Trash2 className="h-4 w-4 mr-2" />
             Delete
           </Button>
         </div>
@@ -195,7 +195,7 @@ export default function PayoutDetailPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CreditCard weight="light" className="h-5 w-5" />
+              <CreditCard className="h-5 w-5" />
               Payout Information
             </CardTitle>
           </CardHeader>
@@ -218,7 +218,7 @@ export default function PayoutDetailPage() {
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Requested Amount</span>
               <div className="flex items-center gap-1">
-                <CurrencyDollar weight="light" className="h-4 w-4 text-muted-foreground" />
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">{formatCurrency(payout.amountRequested)}</span>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function PayoutDetailPage() {
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Paid Amount</span>
               <div className="flex items-center gap-1">
-                <CurrencyDollar weight="light" className="h-4 w-4 text-muted-foreground" />
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">{formatCurrency(payout.amountPaid)}</span>
               </div>
             </div>
@@ -234,7 +234,7 @@ export default function PayoutDetailPage() {
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Requested Date</span>
               <div className="flex items-center gap-1">
-                <Calendar weight="light" className="h-4 w-4 text-muted-foreground" />
+                <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">{formatDate(payout.requestedAt)}</span>
               </div>
             </div>
@@ -243,7 +243,7 @@ export default function PayoutDetailPage() {
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Paid Date</span>
                 <div className="flex items-center gap-1">
-                  <Calendar weight="light" className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="font-medium">{formatDate(payout.paidAt)}</span>
                 </div>
               </div>

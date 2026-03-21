@@ -18,13 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { LexicalEditor } from '@/components/ui/editor/lexical-editor'
 import { BacktestDirection, BacktestModel, BacktestOutcome, BacktestSession } from '@/types/backtesting-types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Camera, Gear as SettingsIcon, TrendUp, X } from "@phosphor-icons/react"
+import { Camera, Settings as SettingsIcon, TrendingUp as TrendUp, X } from "lucide-react"
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -124,6 +124,7 @@ export function AddBacktestForm({ onAdd, onDirtyChange }: AddBacktestFormProps) 
     watch,
     setValue,
     reset,
+    control,
     formState: { errors, isDirty }
   } = useForm<any>({
     resolver: zodResolver(inputMode === 'manual' ? manualBacktestSchema : simpleBacktestSchema),
@@ -447,7 +448,7 @@ export function AddBacktestForm({ onAdd, onDirtyChange }: AddBacktestFormProps) 
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <TrendUp className="w-5 h-5" weight="light" />
+            <TrendUp className="w-5 h-5" />
             Backtest Setup
           </CardTitle>
         </CardHeader>
@@ -604,7 +605,7 @@ export function AddBacktestForm({ onAdd, onDirtyChange }: AddBacktestFormProps) 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" type="button">
-                  <SettingsIcon className="w-4 h-4 mr-2" weight="light" />
+                  <SettingsIcon className="w-4 h-4 mr-2" />
                   {inputMode === 'manual' ? 'Full Manual' : 'Simple R:R'}
                 </Button>
               </DropdownMenuTrigger>
@@ -795,11 +796,17 @@ export function AddBacktestForm({ onAdd, onDirtyChange }: AddBacktestFormProps) 
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="notes">Backtest Notes</Label>
-            <Textarea
-              id="notes"
-              {...register('notes')}
-              placeholder="Add your analysis, observations, and lessons learned from this backtest..."
-              className="min-h-[150px] resize-none"
+            <Controller
+              control={control}
+              name="notes"
+              render={({ field }) => (
+                <LexicalEditor
+                  placeholder="Add your analysis, observations, and lessons learned from this backtest..."
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  minHeight="150px"
+                />
+              )}
             />
           </div>
 

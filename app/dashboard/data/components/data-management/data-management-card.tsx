@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { 
-  Trash, 
-  WarningCircle, 
-  PencilSimple, 
-  CircleNotch,
-  CaretDown, 
-  CaretRight, 
-  UploadSimple,
-  DownloadSimple,
-  Buildings,
+  Trash2, 
+  AlertCircle, 
+  Pencil, 
+  Loader2,
+  ChevronDown, 
+  ChevronRight, 
+  Upload,
+  Download,
+  Building2,
   User,
-  ChartBar
-} from "@phosphor-icons/react"
+  BarChart2
+} from "lucide-react"
 import { 
   removeAccountsFromTradesAction, 
   renameAccountAction
@@ -333,7 +333,7 @@ export function DataManagementCard() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <WarningCircle className="h-4 w-4" weight="light" />
+        <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>
@@ -363,10 +363,10 @@ export function DataManagementCard() {
                   disabled={deleteLoading}
                 >
                   {deleteLoading ? (
-                    <CircleNotch className="h-4 w-4 animate-spin" weight="light" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      <Trash className="h-4 w-4 mr-2" weight="light" />
+                      <Trash2 className="h-4 w-4 mr-2" />
                       Delete ({selectedAccounts.length})
                     </>
                   )}
@@ -400,7 +400,7 @@ export function DataManagementCard() {
         className="text-destructive hover:text-destructive hover:bg-destructive/10"
         onClick={() => setDeleteAllDataDialogOpen(true)}
       >
-        <Trash className="mr-2 h-4 w-4" weight="light" />
+        <Trash2 className="mr-2 h-4 w-4" />
         Delete All Data
       </Button>
       <DeleteAllDataDialog 
@@ -458,9 +458,9 @@ export function DataManagementCard() {
                     {hasMultiplePhases && (
                       <div className="text-muted-foreground">
                         {isExpanded ? (
-                          <CaretDown className="h-4 w-4" weight="light" />
+                          <ChevronDown className="h-4 w-4" />
                         ) : (
-                          <CaretRight className="h-4 w-4" weight="light" />
+                          <ChevronRight className="h-4 w-4" />
                         )}
                       </div>
                     )}
@@ -470,9 +470,9 @@ export function DataManagementCard() {
                       isPropFirm ? "bg-primary/10" : "bg-long/10"
                     )}>
                       {isPropFirm ? (
-                        <Buildings className="h-4 w-4 text-primary" weight="light" />
+                        <Building2 className="h-4 w-4 text-primary" />
                       ) : (
-                        <User className="h-4 w-4 text-long" weight="light" />
+                        <User className="h-4 w-4 text-long" />
                       )}
                     </div>
                     
@@ -485,7 +485,7 @@ export function DataManagementCard() {
                       </div>
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <ChartBar className="h-3 w-3" weight="light" />
+                          <BarChart2 className="h-3 w-3" />
                           {group.totalTrades} trades
                         </span>
                         {hasMultiplePhases && (
@@ -540,7 +540,7 @@ export function DataManagementCard() {
                             setRenameAccountDialogOpen(true)
                           }}
                         >
-                          <PencilSimple className="h-4 w-4" weight="light" />
+                          <Pencil className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
@@ -555,7 +555,7 @@ export function DataManagementCard() {
       {/* Empty State */}
       {!accountsLoading && accountsWithTrades.length === 0 && (
         <div className="text-center py-16 border rounded-lg bg-muted/20">
-          <ChartBar className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" weight="light" />
+          <BarChart2 className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
           <h3 className="text-lg font-medium mb-2">No accounts yet</h3>
           <p className="text-sm text-muted-foreground mb-4">
             Create your first account from the Accounts page
@@ -604,7 +604,7 @@ export function DataManagementCard() {
               <Button type="submit" disabled={renameLoading || !newAccountNumber || newAccountNumber === accountToRename}>
                 {renameLoading ? (
                   <>
-                    <CircleNotch className="mr-2 h-4 w-4 animate-spin" weight="light" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Renaming...
                   </>
                 ) : (

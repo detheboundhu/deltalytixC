@@ -3,9 +3,9 @@ import React from 'react'
 import Image from 'next/image'
 import { Control, Controller } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
-import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { LexicalEditor } from '@/components/ui/editor/lexical-editor'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash, Plus, X, CircleNotch } from '@phosphor-icons/react'
+import { Pencil, Trash2, Plus, X, Loader2 } from 'lucide-react'
 import { FileDropzone } from '@/components/ui/file-dropzone'
 import { TradeImagesGallery, ImageField } from './trade-images-gallery'
 
@@ -54,20 +54,29 @@ export function TradeNotesTab({
                                     size="sm"
                                     className="h-7 text-[10px] uppercase font-bold tracking-tight bg-muted/20 shrink-0"
                                     onClick={() => {
-                                        if (!field.value || field.value.trim() === '' || field.value === '<p></p>') {
-                                            field.onChange(`
-                                                <h3>Trade Thesis</h3>
-                                                <p>Why did I take this trade? What was the higher timeframe context?</p>
-                                                
-                                                <h3>Execution & Logic</h3>
-                                                <p>Specific entry trigger, stop loss placement logic, and initial target reasoning.</p>
-                                                
-                                                <h3>Results & Management</h3>
-                                                <p>How did the trade play out? Did I manage it according to plan?</p>
-                                                
-                                                <h3>Key Takeaways</h3>
-                                                <p>One thing I did well and one thing I could improve for next time.</p>
-                                            `)
+                                        // Simple check for "empty" state (raw string or empty Lexical JSON)
+                                        const isEmpty = !field.value || 
+                                                       field.value.trim() === '' || 
+                                                       field.value === '<p></p>' ||
+                                                       field.value.includes('"children":[]') ||
+                                                       field.value.includes('"text":""');
+
+                                        if (isEmpty) {
+                                            field.onChange(JSON.stringify({
+                                                "root": {
+                                                    "children": [
+                                                        {"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Trade Thesis","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"heading","tag":"h3","version":1},
+                                                        {"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Why did I take this trade? What was the higher timeframe context?","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},
+                                                        {"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Execution & Logic","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"heading","tag":"h3","version":1},
+                                                        {"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Specific entry trigger, stop loss placement logic, and initial target reasoning.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},
+                                                        {"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Results & Management","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"heading","tag":"h3","version":1},
+                                                        {"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"How did the trade play out? Did I manage it according to plan?","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},
+                                                        {"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Key Takeaways","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"heading","tag":"h3","version":1},
+                                                        {"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"One thing I did well and one thing I could improve for next time.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}
+                                                    ],
+                                                    "direction":"ltr","format":"","indent":0,"type":"root","version":1
+                                                }
+                                            }))
                                         }
                                     }}
                                 >
@@ -79,13 +88,19 @@ export function TradeNotesTab({
                                     size="sm"
                                     className="h-7 text-[10px] uppercase font-bold tracking-tight bg-muted/20 shrink-0"
                                     onClick={() => {
-                                        if (!field.value || field.value.trim() === '' || field.value === '<p></p>') {
-                                            field.onChange(`
-                                                <p><strong>Emotional State:</strong> Calm / Anxious / Greedy / FOMO</p>
-                                                <p><strong>⚡ Focus Level (1-10):</strong> </p>
-                                                <p><strong>Self-Discipline:</strong> Did I follow my routine? Did I wait for my setup?</p>
-                                                <p><strong>Mental Notes:</strong> Any external factors affecting my trading today?</p>
-                                            `)
+                                        const isEmpty = !field.value || field.value.trim() === '' || field.value === '<p></p>' || field.value.includes('"children":[]');
+                                        if (isEmpty) {
+                                            field.onChange(JSON.stringify({
+                                                "root": {
+                                                    "children": [
+                                                        {"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Emotional State:","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" Calm / Anxious / Greedy / FOMO","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},
+                                                        {"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"⚡ Focus Level (1-10): ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},
+                                                        {"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Self-Discipline:","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" Did I follow my routine? Did I wait for my setup?","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},
+                                                        {"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Mental Notes:","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" Any external factors affecting my trading today?","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}
+                                                    ],
+                                                    "direction":"ltr","format":"","indent":0,"type":"root","version":1
+                                                }
+                                            }))
                                         }
                                     }}
                                 >
@@ -97,13 +112,19 @@ export function TradeNotesTab({
                                     size="sm"
                                     className="h-7 text-[10px] uppercase font-bold tracking-tight bg-muted/20 shrink-0"
                                     onClick={() => {
-                                        if (!field.value || field.value.trim() === '' || field.value === '<p></p>') {
-                                            field.onChange(`
-                                                <p><strong>HTF Bias:</strong> Monthly/Weekly/Daily directional bias.</p>
-                                                <p><strong>Entry Framework:</strong> (e.g., MSS + FVG, Turtle Soup, etc.)</p>
-                                                <p><strong>Risk Management:</strong> RR ratio, position sizing logic.</p>
-                                                <p><strong>Correlation Check:</strong> USDX, ES/NQ correlation at time of entry.</p>
-                                            `)
+                                        const isEmpty = !field.value || field.value.trim() === '' || field.value === '<p></p>' || field.value.includes('"children":[]');
+                                        if (isEmpty) {
+                                            field.onChange(JSON.stringify({
+                                                "root": {
+                                                    "children": [
+                                                        {"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"HTF Bias:","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" Monthly/Weekly/Daily directional bias.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},
+                                                        {"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Entry Framework:","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" (e.g., MSS + FVG, Turtle Soup, etc.)","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},
+                                                        {"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Risk Management:","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" RR ratio, position sizing logic.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1},
+                                                        {"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Correlation Check:","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":" USDX, ES/NQ correlation at time of entry.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}
+                                                    ],
+                                                    "direction":"ltr","format":"","indent":0,"type":"root","version":1
+                                                }
+                                            }))
                                         }
                                     }}
                                 >
@@ -117,7 +138,7 @@ export function TradeNotesTab({
                     name="comment"
                     control={control}
                     render={({ field }) => (
-                        <RichTextEditor
+                        <LexicalEditor
                             value={field.value || ''}
                             onChange={field.onChange}
                             placeholder="What did you see? What did you learn?"
@@ -148,7 +169,7 @@ export function TradeNotesTab({
                                     />
                                 ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                                        <X className="h-8 w-8 text-destructive/50 mb-2" weight="light" />
+                                        <X className="h-8 w-8 text-destructive/50 mb-2" />
                                         <p className="text-xs text-muted-foreground">Image link broken</p>
                                     </div>
                                 )}
@@ -169,7 +190,7 @@ export function TradeNotesTab({
                                             input.click()
                                         }}
                                     >
-                                        <Pencil className="h-3.5 w-3.5 mr-2" weight="light" />
+                                        <Pencil className="h-3.5 w-3.5 mr-2" />
                                         Replace
                                     </Button>
                                     <Button
@@ -179,7 +200,7 @@ export function TradeNotesTab({
                                         className="h-9 px-4 text-xs font-semibold hover:bg-destructive/90 transition-all"
                                         onClick={() => onRemove('cardPreviewImage')}
                                     >
-                                        <Trash className="h-3.5 w-3.5 mr-2" weight="light" />
+                                        <Trash2 className="h-3.5 w-3.5 mr-2" />
                                         Remove
                                     </Button>
                                 </div>
@@ -194,13 +215,13 @@ export function TradeNotesTab({
                                 accept={{ 'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'] }}
                                 className="h-full border-none bg-muted/50 hover:bg-muted/80"
                                 description="Drag & drop or click to upload preview"
-                                icon={<Plus className="h-8 w-8 text-muted-foreground/40 mb-2" weight="light" />}
+                                icon={<Plus className="h-8 w-8 text-muted-foreground/40 mb-2" />}
                                 disabled={uploadingField === 'cardPreviewImage'}
                             />
                         )}
                         {uploadingField === 'cardPreviewImage' && (
                             <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                                <CircleNotch className="h-5 w-5 animate-spin text-primary" weight="light" />
+                                <Loader2 className="h-5 w-5 animate-spin text-primary" />
                             </div>
                         )}
                     </div>
@@ -250,7 +271,7 @@ export function TradeNotesTab({
                                         setChartLinks(newLinks)
                                     }}
                                 >
-                                    <X className="h-4 w-4" weight="light" />
+                                    <X className="h-4 w-4" />
                                 </Button>
                             )}
                         </div>
@@ -263,7 +284,7 @@ export function TradeNotesTab({
                             onClick={() => setChartLinks([...chartLinks, ''])}
                             className="w-full h-9 border-dashed border-border/60 hover:border-primary/50 text-muted-foreground hover:text-primary transition-all"
                         >
-                            <Plus className="h-4 w-4 mr-2" weight="light" />
+                            <Plus className="h-4 w-4 mr-2" />
                             Add Analysis Link ({chartLinks.length}/8)
                         </Button>
                     )}

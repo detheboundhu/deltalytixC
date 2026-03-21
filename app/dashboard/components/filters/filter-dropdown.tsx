@@ -11,7 +11,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Funnel } from "@phosphor-icons/react"
+import { Filter } from "lucide-react"
 import { forwardRef } from "react"
 import { InstrumentFilter } from "./instrument-filter"
 import { PnlFilter } from "./pnl-filter"
@@ -36,7 +36,7 @@ export const FilterDropdown = forwardRef<HTMLButtonElement>((props, ref) => {
               isMobile ? "w-8 p-0" : "min-w-[100px] gap-2 px-3"
             )}
           >
-            <Funnel weight="light" className="h-4 w-4 shrink-0" />
+            <Filter className="h-4 w-4 shrink-0" />
             {!isMobile && (
               <span className="text-sm font-medium">
                 {"Filters"}

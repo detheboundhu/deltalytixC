@@ -33,22 +33,22 @@ import { cn } from "@/lib/utils"
 import { signOut } from "@/server/auth"
 import { useUserStore } from '@/store/user-store'
 import {
-  CaretRight,
+  ChevronRight as CaretRight,
   Check,
   Clock,
   Database,
   Laptop,
   Moon,
   Palette,
-  Gear as SettingsIcon,
+  Settings as SettingsIcon,
   Shield,
-  SignOut,
+  LogOut as SignOut,
   Sun,
-  Trash,
+  Trash2 as Trash,
   User,
-  WarningCircle,
+  AlertCircle as WarningCircle,
   Calendar
-} from "@phosphor-icons/react"
+} from "lucide-react"
 import { motion } from "framer-motion"
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -83,7 +83,7 @@ function SettingRow({
     <div className={cn("flex items-center justify-between gap-4 py-3", className)}>
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-          <Icon weight="light" className="h-4 w-4 text-muted-foreground" />
+          <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium">{label}</p>
@@ -282,7 +282,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                <User className="h-5 w-5 text-muted-foreground" weight="light" />
+                <User className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
                 <CardTitle className="text-base">Profile</CardTitle>
@@ -361,7 +361,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                <SettingsIcon className="h-5 w-5 text-muted-foreground" weight="light" />
+                <SettingsIcon className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
                 <CardTitle className="text-base">Preferences</CardTitle>
@@ -379,25 +379,25 @@ export default function SettingsPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-2 min-w-[100px]">
-                      <themeInfo.icon weight="light" className="h-3.5 w-3.5" />
+                      <themeInfo.icon className="h-3.5 w-3.5" />
                       {themeInfo.label}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
-                      <Moon className="mr-2 h-4 w-4" weight="light" />
+                      <Moon className="mr-2 h-4 w-4" />
                       Dark
-                      {theme === 'dark' && <Check weight="light" className="ml-auto h-4 w-4" />}
+                      {theme === 'dark' && <Check className="ml-auto h-4 w-4" />}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleThemeChange("light")}>
-                      <Sun className="mr-2 h-4 w-4" weight="light" />
+                      <Sun className="mr-2 h-4 w-4" />
                       Light
-                      {theme === 'light' && <Check weight="light" className="ml-auto h-4 w-4" />}
+                      {theme === 'light' && <Check className="ml-auto h-4 w-4" />}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleThemeChange("system")}>
-                      <Laptop className="mr-2 h-4 w-4" weight="light" />
+                      <Laptop className="mr-2 h-4 w-4" />
                       System
-                      {theme === 'system' && <Check weight="light" className="ml-auto h-4 w-4" />}
+                      {theme === 'system' && <Check className="ml-auto h-4 w-4" />}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -427,7 +427,7 @@ export default function SettingsPage() {
                         </div>
                         Classic
                       </div>
-                      {accentPack === 'classic' && <Check weight="light" className="ml-auto h-4 w-4" />}
+                      {accentPack === 'classic' && <Check className="ml-auto h-4 w-4" />}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleAccentChange('reports')}>
                       <div className="flex items-center gap-2">
@@ -437,7 +437,7 @@ export default function SettingsPage() {
                         </div>
                         Sage & Amber
                       </div>
-                      {accentPack === 'reports' && <Check weight="light" className="ml-auto h-4 w-4" />}
+                      {accentPack === 'reports' && <Check className="ml-auto h-4 w-4" />}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -456,7 +456,7 @@ export default function SettingsPage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-2">
                       Change
-                      <CaretRight className="h-3.5 w-3.5" weight="light" />
+                      <CaretRight className="h-3.5 w-3.5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -486,7 +486,7 @@ export default function SettingsPage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-2">
                       Change
-                      <CaretRight className="h-3.5 w-3.5" weight="light" />
+                      <CaretRight className="h-3.5 w-3.5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -538,7 +538,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                <Shield className="h-5 w-5 text-muted-foreground" weight="light" />
+                <Shield className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
                 <CardTitle className="text-base">Account</CardTitle>
@@ -550,7 +550,7 @@ export default function SettingsPage() {
             <div className="flex flex-wrap gap-3">
               <Link href="/dashboard/data">
                 <Button variant="outline" className="gap-2">
-                  <Database weight="light" className="h-4 w-4" />
+                  <Database className="h-4 w-4" />
                   Data Management
                 </Button>
               </Link>
@@ -563,7 +563,7 @@ export default function SettingsPage() {
                   signOut()
                 }}
               >
-                <SignOut weight="light" className="h-4 w-4" />
+                <SignOut className="h-4 w-4" />
                 Sign Out
               </Button>
 
@@ -572,7 +572,7 @@ export default function SettingsPage() {
                 className="gap-2"
                 onClick={() => setIsDeleteModalOpen(true)}
               >
-                <Trash weight="light" className="h-4 w-4" />
+                <Trash className="h-4 w-4" />
                 Delete Account
               </DestructiveButton>
             </div>
@@ -588,7 +588,7 @@ export default function SettingsPage() {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
-              <WarningCircle className="h-5 w-5" weight="light" />
+              <WarningCircle className="h-5 w-5" />
               Delete Account
             </DialogTitle>
             <DialogDescription asChild>
@@ -605,7 +605,7 @@ export default function SettingsPage() {
                 </ul>
                 <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
                   <p className="text-sm font-medium text-destructive flex items-center gap-2">
-                    <WarningCircle weight="light" className="h-4 w-4" />
+                    <WarningCircle className="h-4 w-4" />
                     This data cannot be recovered.
                   </p>
                 </div>
@@ -644,7 +644,7 @@ export default function SettingsPage() {
               loading={isDeleting}
               loadingText="Deleting..."
             >
-              <Trash weight="light" className="mr-2 h-4 w-4" />
+              <Trash className="mr-2 h-4 w-4" />
               Delete Account
             </DestructiveButton>
           </DialogFooter>

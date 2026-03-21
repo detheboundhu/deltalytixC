@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { House, MagnifyingGlass, List, CaretRight, BookOpenText, Rocket, Code, FileText, Terminal, Database as DatabaseIcon, Lightning } from '@phosphor-icons/react'
+import { Home, Search, List, ChevronRight, BookOpenText, Rocket, Code, FileText, Terminal, Database as DatabaseIcon, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
@@ -18,6 +18,7 @@ const navigation = [
     items: [
       { title: 'Introduction', href: '/docs' },
       { title: 'Quick Start', href: '/docs/getting-started' },
+      { title: 'Application Flow', href: '/docs/features/app-flow' },
     ],
   },
   {
@@ -33,6 +34,9 @@ const navigation = [
     title: 'For Developers',
     icon: Code,
     items: [
+      { title: 'Tech Stack', href: '/docs/for-developers/tech-stack' },
+      { title: 'Frontend Guidelines', href: '/docs/for-developers/frontend' },
+      { title: 'Backend Structure', href: '/docs/for-developers/backend' },
       { title: 'Architecture', href: '/docs/for-developers/architecture' },
       { title: 'Database Schema', href: '/docs/for-developers/database' },
       { title: 'Prisma Optimization', href: '/docs/for-developers/prisma-optimization' },
@@ -51,7 +55,7 @@ function Sidebar({ className }: { className?: string }) {
       {navigation.map((section) => (
         <div key={section.title}>
           <h4 className="mb-3 px-3 text-sm font-semibold flex items-center gap-2 text-foreground">
-            <section.icon className="h-4 w-4 text-primary" weight="light" />
+            <section.icon className="h-4 w-4 text-primary" />
             {section.title}
           </h4>
           <div className="space-y-1">
@@ -69,7 +73,7 @@ function Sidebar({ className }: { className?: string }) {
                   )}
                 >
                   {item.title}
-                  {isActive && <CaretRight className="ml-auto h-4 w-4" weight="light" />}
+                  {isActive && <ChevronRight className="ml-auto h-4 w-4" />}
                 </Link>
               )
             })}
@@ -92,7 +96,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
-                <List className="h-5 w-5" weight="light" />
+                <List className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-80 pr-0">
@@ -114,7 +118,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
 
           <div className="flex-1 max-w-md ml-auto">
             <div className="relative">
-              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" weight="light" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search documentation..."
                 className="pl-10 h-10"
@@ -126,7 +130,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
 
           <Button asChild variant="ghost" size="sm" className="h-9">
             <Link href="/dashboard">
-              <House className="h-4 w-4 mr-2" weight="light" />
+              <Home className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Dashboard</span>
             </Link>
           </Button>

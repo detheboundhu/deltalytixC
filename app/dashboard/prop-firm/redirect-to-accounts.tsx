@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { WarningCircle, ArrowLeft } from '@phosphor-icons/react'
+import { AlertCircle, ArrowLeft } from 'lucide-react'
 
 export function RedirectToAccounts() {
   const router = useRouter()
@@ -23,7 +23,7 @@ export function RedirectToAccounts() {
       <Card className="max-w-md w-full">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 p-3 rounded-full bg-warning/10 w-fit">
-            <WarningCircle className="h-6 w-6 text-warning" weight="light" />
+            <AlertCircle className="h-6 w-6 text-warning" />
           </div>
           <CardTitle>Account Not Found</CardTitle>
         </CardHeader>

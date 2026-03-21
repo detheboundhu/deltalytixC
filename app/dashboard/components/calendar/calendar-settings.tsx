@@ -1,7 +1,7 @@
 
 'use client'
 
-import { Check, Gear as SettingsIcon } from "@phosphor-icons/react"
+import { Check, Settings as SettingsIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Command, CommandGroup, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command"
@@ -26,7 +26,7 @@ export function CalendarSettings() {
                     className="h-8 w-8 p-0 sm:w-auto sm:px-2.5 text-[11px] font-bold gap-1.5 border-dashed bg-transparent hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all"
                     title="Calendar Settings"
                 >
-                    <SettingsIcon className="h-4 w-4" weight="light" />
+                    <SettingsIcon className="h-4 w-4" />
                     <span className="hidden sm:inline">Settings</span>
                 </Button>
             </PopoverTrigger>
@@ -40,7 +40,7 @@ export function CalendarSettings() {
                             >
                                 <span className="text-sm">Week Numbers</span>
                                 {showWeekNumbers && (
-                                    <Check className="h-4 w-4 text-primary" weight="light" />
+                                    <Check className="h-4 w-4 text-primary" />
                                 )}
                             </CommandItem>
                         </CommandGroup>
@@ -56,7 +56,7 @@ export function CalendarSettings() {
                                 >
                                     <span className="text-sm">{stat.label}</span>
                                     {visibleStats[stat.key] && (
-                                        <Check className="h-4 w-4 text-primary" weight="light" />
+                                        <Check className="h-4 w-4 text-primary" />
                                     )}
                                 </CommandItem>
                             ))}

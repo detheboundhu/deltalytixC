@@ -12,21 +12,20 @@ import {
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { Input } from '@/components/ui/input'
 import {
-    MagnifyingGlass,
-    SquaresFour,
+    Search as MagnifyingGlass,
+    LayoutGrid as SquaresFour,
     FileText,
     BookOpen,
     Users,
     Table,
-    Flask,
-    ChartBar,
-    Gear as SettingsIcon,
-    CalendarBlank,
-    TrendUp,
+    FlaskConical as Flask,
+    BarChart3 as ChartBar,
+    Settings as SettingsIcon,
+    Calendar as CalendarBlank,
     Plus,
     Sun,
     Moon
-} from '@phosphor-icons/react'
+} from 'lucide-react'
 import { useTheme } from '@/context/theme-provider'
 import { cn } from '@/lib/utils'
 
@@ -221,7 +220,7 @@ export function CommandPalette() {
                     </DialogHeader>
                 </VisuallyHidden>
                 <div className="flex items-center border-b px-3">
-                    <MagnifyingGlass className="h-4 w-4 text-muted-foreground shrink-0" weight="light" />
+                    <MagnifyingGlass className="h-4 w-4 text-muted-foreground shrink-0" />
                     <Input
                         placeholder="Search pages, actions..."
                         value={search}
@@ -252,7 +251,7 @@ export function CommandPalette() {
                                             : "hover:bg-muted"
                                     )}
                                 >
-                                    <Icon weight="light" className="h-4 w-4 text-muted-foreground shrink-0" />
+                                    <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium truncate">{cmd.title}</p>
                                         <p className="text-xs text-muted-foreground truncate">{cmd.description}</p>
