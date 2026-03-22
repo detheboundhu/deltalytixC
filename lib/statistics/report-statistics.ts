@@ -294,28 +294,6 @@ function buildFilterOptions(symbols: string[], strategies: Array<{ id: string; n
   }
 }
 
-/**
- * Calculates R-Squared for an equity curve to measure consistency.
- */
-function calculateRSquared(data: number[]): number {
-  if (data.length < 2) return 0
-  const n = data.length
-  const x = Array.from({ length: n }, (_, i) => i)
-  const y = data
-
-  const sumX = x.reduce((a, b) => a + b, 0)
-  const sumY = y.reduce((a, b) => a + b, 0)
-  const sumXY = x.reduce((a, b, i) => a + b * y[i], 0)
-  const sumX2 = x.reduce((a, b) => a + b * b, 0)
-  const sumY2 = y.reduce((a, b) => a + b * b, 0)
-
-  const numerator = n * sumXY - sumX * sumY
-  const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY))
-
-  if (denominator === 0) return 0
-  const r = numerator / denominator
-  return Math.pow(r, 2)
-}
 
 // ===========================================
 // ALL METRICS IN OPTIMIZED PASSES
