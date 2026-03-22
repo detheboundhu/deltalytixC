@@ -21,7 +21,7 @@ import { WidgetCard } from "../widget-card"
 // New Components
 import MonthlyView from "./monthly-view"
 import YearlyView from "./yearly-view"
-import { LogoText } from "@/components/logo"
+import { Logo } from "@/components/logo"
 
 const formatCompact = (value: number) => {
   if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}k`
@@ -339,7 +339,8 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
 
       {/* Hidden watermark/logo for screenshots */}
       <div id="calendar-watermark" className="hidden flex-col items-center justify-center pb-6">
-        <LogoText />
+        <Logo className="w-12 h-12" />
+        <span className="text-xl font-bold mt-2 font-mono tracking-widest text-[var(--foreground)] watermark-text">DELTA</span>
       </div>
 
       <WeeklyModal

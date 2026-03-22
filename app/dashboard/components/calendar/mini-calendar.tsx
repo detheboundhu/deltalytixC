@@ -11,7 +11,7 @@ import { CalendarData } from "@/app/dashboard/types/calendar"
 import { useData } from "@/context/data-provider"
 import MonthlyView from "./monthly-view"
 import { BREAK_EVEN_THRESHOLD } from "@/lib/utils"
-import { LogoText } from "@/components/logo"
+import { Logo } from "@/components/logo"
 
 const formatCompact = (value: number) => {
   if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}k`
@@ -200,7 +200,8 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
       
       {/* Hidden watermark/logo for screenshots */}
       <div id="mini-calendar-watermark" className="hidden flex-col items-center justify-center pb-6">
-        <LogoText />
+        <Logo className="w-12 h-12" />
+        <span className="text-xl font-bold mt-2 font-mono tracking-widest text-[#ffffff] watermark-text">DELTA</span>
       </div>
     </div>
   )
