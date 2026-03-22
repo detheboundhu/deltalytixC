@@ -169,7 +169,14 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
         w: Math.min(l.w, 6),
         x: l.x >= 6 ? 0 : l.x,
       })),
-      sm: desktopLayout.map(l => ({ ...l, w: 1, minW: 1, x: 0 })), // Stack strictly on mobile
+      sm: desktopLayout.map(l => ({ 
+        ...l, 
+        w: 1, 
+        minW: 1, 
+        x: 0,
+        // On mobile, enforce minH to ensure contents (like the mini calendar) don't get crushed vertically
+        h: Math.max(l.h, l.minH || 4) 
+      })), // Stack strictly on mobile
     }
   }, [gridWidgets, isEditMode])
 

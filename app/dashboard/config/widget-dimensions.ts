@@ -220,7 +220,7 @@ export const WIDGET_GRID_DEFAULTS: Record<string, WidgetGridDefault> = {
 
   // Calendars — wider, taller
   calendarAdvanced: { defaultW: 12, defaultH: 8, minW: 6, minH: 5 },
-  calendarMini:     { defaultW: 8, defaultH: 5, minW: 5, minH: 3 },
+  calendarMini:     { defaultW: 8, defaultH: 5, minW: 5, minH: 5 },
 
   // New charts
   equityCurve:            { defaultW: 8, defaultH: 4, minW: 4, minH: 3 },
