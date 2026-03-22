@@ -71,10 +71,9 @@ export async function POST(request: NextRequest) {
       tradeWhere['instrument'] = { in: filters.instruments }
     }
 
-    // Fetch primary data (fast)
-    // We export ALL metadata (Accounts, Models, Tags) to ensure referential integrity for imported trades.
-    // We only filter the transactional data (Trades, Notes, etc).
+    // Fetch absolutely everything for this user
     const [
+      dbUser,
       accounts,
       masterAccounts,
       tradingModels,
@@ -82,8 +81,30 @@ export async function POST(request: NextRequest) {
       dailyNotes,
       weeklyReviews,
       trades,
-      backtestTrades
+      backtestTrades,
+      dashboards,
+      transactions,
+      breachRecords,
+      dailyAnchors,
+      payouts
     ] = await Promise.all([
+      prisma.user.findUnique({ 
+        where: { id: internalUserId },
+        select: {
+          timezone: true,
+          timeFormat: true,
+          theme: true,
+          firstName: true,
+          lastName: true,
+          accountFilterSettings: true,
+          goalSettings: true,
+          backtestInputMode: true,
+          accentPack: true,
+          autoAdjustAccountDate: true,
+          calendarDisplayStats: true,
+          showWeeklySummary: true
+        }
+      }),
       prisma.account.findMany({ where: { userId: internalUserId } }),
       prisma.masterAccount.findMany({
         where: { userId: internalUserId },
@@ -91,26 +112,20 @@ export async function POST(request: NextRequest) {
       }),
       prisma.tradingModel.findMany({ where: { userId: internalUserId } }),
       prisma.tradeTag.findMany({ where: { userId: internalUserId } }),
-      prisma.dailyNote.findMany({
-        where: {
-          userId: internalUserId,
-          ...dateFilter('date')
-        }
+      prisma.dailyNote.findMany({ where: { userId: internalUserId } }),
+      prisma.weeklyReview.findMany({ where: { userId: internalUserId } }),
+      prisma.trade.findMany({ where: { userId: internalUserId } }),
+      prisma.backtestTrade.findMany({ where: { userId: internalUserId } }),
+      prisma.dashboardTemplate.findMany({ where: { userId: internalUserId } }),
+      prisma.liveAccountTransaction.findMany({ where: { userId: internalUserId } }),
+      prisma.breachRecord.findMany({
+        where: { PhaseAccount: { MasterAccount: { userId: internalUserId } } }
       }),
-      prisma.weeklyReview.findMany({
-        where: {
-          userId: internalUserId,
-          ...dateFilter('startDate') // Approximate
-        }
+      prisma.dailyAnchor.findMany({
+        where: { PhaseAccount: { MasterAccount: { userId: internalUserId } } }
       }),
-      prisma.trade.findMany({
-        where: tradeWhere,
-      }),
-      prisma.backtestTrade.findMany({
-        where: {
-          userId: internalUserId,
-          ...dateFilter('dateExecuted')
-        }
+      prisma.payout.findMany({
+        where: { MasterAccount: { userId: internalUserId } }
       })
     ])
 
@@ -119,13 +134,13 @@ export async function POST(request: NextRequest) {
     )
 
     const manifest = {
-      version: '2.0',
+      version: '3.0',
       exportedAt: new Date().toISOString(),
-      filters: filters, // Include metadata about what was filtered
+      user: dbUser,
       accounts: accounts.map(sanitizeUser),
-      masterAccounts: masterAccounts.map((ma: typeof masterAccounts[number]) => ({
+      masterAccounts: masterAccounts.map((ma: any) => ({
         ...sanitizeUser(ma),
-        PhaseAccount: ma.PhaseAccount.map((p: typeof ma.PhaseAccount[number]) => {
+        PhaseAccount: ma.PhaseAccount.map((p: any) => {
           const { id, masterAccountId, ...rest } = p
           return rest
         }),
@@ -134,7 +149,7 @@ export async function POST(request: NextRequest) {
       tradeTags: tradeTags.map(sanitizeUser),
       dailyNotes: dailyNotes.map(sanitizeUser),
       weeklyReviews: weeklyReviews.map(sanitizeUser),
-      trades: trades.map((t: typeof trades[number]) => {
+      trades: trades.map((t: any) => {
         const { id, userId, accountId, phaseAccountId, modelId, ...rest } = t
         return {
           ...rest,
@@ -142,7 +157,21 @@ export async function POST(request: NextRequest) {
           modelName: modelId ? modelMap.get(modelId) : null,
         }
       }),
-      backtestTrades: backtestTrades.map(sanitizeUser)
+      backtestTrades: backtestTrades.map(sanitizeUser),
+      dashboardTemplates: dashboards.map(sanitizeUser),
+      liveAccountTransactions: transactions.map(sanitizeUser),
+      breachRecords: breachRecords.map((br: any) => {
+        const { id, phaseAccountId, ...rest } = br
+        return rest
+      }),
+      dailyAnchors: dailyAnchors.map((da: any) => {
+        const { id, phaseAccountId, ...rest } = da
+        return rest
+      }),
+      payouts: payouts.map((p: any) => {
+        const { id, masterAccountId, phaseAccountId, ...rest } = p
+        return rest
+      })
     }
 
     // Set up Archive Stream

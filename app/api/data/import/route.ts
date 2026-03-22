@@ -59,195 +59,277 @@ export async function POST(request: NextRequest) {
 
     // --- RECONSTRUCTION PHASE ---
 
-    // 1. Trade Tags
-    // Strategy: Upsert by Name
-    const tagMap = new Map<string, string>() // Name -> NewID (not strictly needed if we just use name, but tags are usually strings in Trade array? No, relation?)
-    // Schema: Trade has `tags String[]` (primitive array). TradeTag table exists for color management.
-    // So we just ensure Tag definitions exist.
+    // 0. Update User Settings
+    if (data.user) {
+      await prisma.user.update({
+        where: { id: internalUserId },
+        data: {
+          timezone: data.user.timezone,
+          timeFormat: data.user.timeFormat,
+          theme: data.user.theme,
+          firstName: data.user.firstName,
+          lastName: data.user.lastName,
+          accountFilterSettings: data.user.accountFilterSettings,
+          goalSettings: data.user.goalSettings,
+          backtestInputMode: data.user.backtestInputMode,
+          accentPack: data.user.accentPack,
+          autoAdjustAccountDate: data.user.autoAdjustAccountDate,
+          calendarDisplayStats: data.user.calendarDisplayStats,
+          showWeeklySummary: data.user.showWeeklySummary
+        }
+      })
+    }
 
+    // 1. Trade Tags
     if (data.tradeTags) {
       for (const tag of data.tradeTags) {
-        // Find or Create
-        const existing = await prisma.tradeTag.findFirst({
-          where: { userId: internalUserId, name: tag.name }
+        await prisma.tradeTag.upsert({
+          where: { name_userId: { name: tag.name, userId: internalUserId } },
+          update: { color: tag.color },
+          create: {
+            id: crypto.randomUUID(),
+            userId: internalUserId,
+            name: tag.name,
+            color: tag.color,
+            updatedAt: new Date()
+          }
         })
-        if (!existing) {
-          await prisma.tradeTag.create({
-            data: {
-              id: crypto.randomUUID(),
-              userId: internalUserId,
-              name: tag.name,
-              color: tag.color || '#3b82f6',
-              updatedAt: new Date()
-            }
-          })
-        }
       }
     }
 
-    // 2. Trading Models (Critical)
-    // Map: OldName/OldID -> NewID
-    const modelIdMap = new Map<string, string>() // OldID or Name? 
-    // Export data.trades has `modelName`. We don't rely on `modelId` from JSON.
-    // But we need to ensure Models exist.
-
+    // 2. Trading Models
+    const modelNameMap = new Map<string, string>()
     if (data.tradingModels) {
       for (const model of data.tradingModels) {
-        let targetModel = await prisma.tradingModel.findFirst({
-          where: { userId: internalUserId, name: model.name }
+        const target = await prisma.tradingModel.upsert({
+          where: { userId_name: { userId: internalUserId, name: model.name } },
+          update: { rules: model.rules, notes: model.notes },
+          create: {
+            id: crypto.randomUUID(),
+            userId: internalUserId,
+            name: model.name,
+            rules: model.rules ?? [],
+            notes: model.notes
+          }
         })
-
-        if (!targetModel) {
-          targetModel = await prisma.tradingModel.create({
-            data: {
-              id: crypto.randomUUID(),
-              userId: internalUserId,
-              name: model.name,
-              rules: model.rules ?? [],
-              notes: model.notes
-            }
-          })
-        }
-        // We verify by name in trade loop
+        modelNameMap.set(model.name, target.id)
       }
     }
 
-    // Refresh Model Map (Name -> ID)
-    const currentModels = await prisma.tradingModel.findMany({ where: { userId: internalUserId } })
-    const modelNameMap = new Map(
-      currentModels.map((m: typeof currentModels[number]) => [m.name, m.id])
-    )
+    // 3. Dashboard Templates
+    if (data.dashboardTemplates) {
+      for (const dash of data.dashboardTemplates) {
+        await prisma.dashboardTemplate.upsert({
+          where: { userId_name: { userId: internalUserId, name: dash.name } },
+          update: { layout: dash.layout, isActive: dash.isActive, isDefault: dash.isDefault },
+          create: {
+            id: crypto.randomUUID(),
+            userId: internalUserId,
+            name: dash.name,
+            layout: dash.layout,
+            isActive: dash.isActive,
+            isDefault: dash.isDefault,
+            updatedAt: new Date()
+          }
+        })
+      }
+    }
 
-    // 3. Accounts (Live)
-    // Map: AccountNumber -> AccountId
+    // 4. Accounts (Live)
     const accountMap = new Map<string, string>()
-
     if (data.accounts) {
       for (const acc of data.accounts) {
-        let target = await prisma.account.findFirst({
-          where: { userId: internalUserId, number: acc.number }
+        const target = await prisma.account.upsert({
+          where: { number_userId: { number: acc.number, userId: internalUserId } },
+          update: { name: acc.name, broker: acc.broker, startingBalance: acc.startingBalance, isArchived: acc.isArchived },
+          create: {
+            id: crypto.randomUUID(),
+            userId: internalUserId,
+            number: acc.number,
+            name: acc.name,
+            broker: acc.broker,
+            startingBalance: acc.startingBalance || 0,
+            isArchived: acc.isArchived || false
+          }
         })
-
-        if (!target) {
-          target = await prisma.account.create({
-            data: {
-              id: crypto.randomUUID(),
-              userId: internalUserId,
-              number: acc.number,
-              name: acc.name,
-              broker: acc.broker,
-              startingBalance: acc.startingBalance || 0,
-              isArchived: acc.isArchived || false
-            }
-          })
-        }
         accountMap.set(acc.number, target.id)
       }
     }
 
-    // 4. Master Accounts & Phases (Prop)
-    // Map: MasterName -> MasterID
-    // Map: PhaseKey (MasterName_PhaseNum) -> PhaseID
-    const phaseMap = new Map<string, string>()
-
+    // 5. Master Accounts & Phases
+    const phaseMap = new Map<string, string>() // phaseId String -> InternalID
+    const masterMap = new Map<string, string>() // Name -> InternalID
     if (data.masterAccounts) {
       for (const ma of data.masterAccounts) {
-        let targetMa = await prisma.masterAccount.findFirst({
-          where: { userId: internalUserId, accountName: ma.accountName }
+        const targetMa = await prisma.masterAccount.upsert({
+          where: { userId_accountName: { userId: internalUserId, accountName: ma.accountName } },
+          update: { 
+            propFirmName: ma.propFirmName, 
+            accountSize: ma.accountSize, 
+            evaluationType: ma.evaluationType, 
+            currentPhase: ma.currentPhase, 
+            status: ma.status, 
+            isArchived: ma.isArchived 
+          },
+          create: {
+            id: crypto.randomUUID(),
+            userId: internalUserId,
+            accountName: ma.accountName,
+            propFirmName: ma.propFirmName,
+            accountSize: ma.accountSize,
+            evaluationType: ma.evaluationType,
+            currentPhase: ma.currentPhase,
+            status: ma.status,
+            isArchived: ma.isArchived
+          }
         })
+        masterMap.set(ma.accountName, targetMa.id)
 
-        if (!targetMa) {
-          targetMa = await prisma.masterAccount.create({
-            data: {
-              id: crypto.randomUUID(),
-              userId: internalUserId,
-              accountName: ma.accountName,
-              propFirmName: ma.propFirmName,
-              accountSize: ma.accountSize,
-              evaluationType: ma.evaluationType,
-              currentPhase: ma.currentPhase,
-              status: ma.status,
-              isArchived: ma.isArchived
-            }
-          })
-        }
-
-        // Process Phases
         if (ma.PhaseAccount) {
           for (const phase of ma.PhaseAccount) {
-            let targetPhase = await prisma.phaseAccount.findFirst({
-              where: { masterAccountId: targetMa.id, phaseNumber: phase.phaseNumber }
+            const targetPhase = await prisma.phaseAccount.upsert({
+              where: { masterAccountId_phaseNumber: { masterAccountId: targetMa.id, phaseNumber: phase.phaseNumber } },
+              update: { 
+                phaseId: phase.phaseId, 
+                status: phase.status, 
+                profitTargetPercent: phase.profitTargetPercent,
+                dailyDrawdownPercent: phase.dailyDrawdownPercent,
+                maxDrawdownPercent: phase.maxDrawdownPercent,
+                startDate: phase.startDate ? new Date(phase.startDate) : undefined
+              },
+              create: {
+                id: crypto.randomUUID(),
+                masterAccountId: targetMa.id,
+                phaseNumber: phase.phaseNumber,
+                phaseId: phase.phaseId,
+                profitTargetPercent: phase.profitTargetPercent,
+                dailyDrawdownPercent: phase.dailyDrawdownPercent,
+                maxDrawdownPercent: phase.maxDrawdownPercent,
+                status: phase.status,
+                startDate: phase.startDate ? new Date(phase.startDate) : undefined
+              }
             })
-
-            if (!targetPhase) {
-              targetPhase = await prisma.phaseAccount.create({
-                data: {
-                  id: crypto.randomUUID(),
-                  masterAccountId: targetMa.id,
-                  phaseNumber: phase.phaseNumber,
-                  phaseId: phase.phaseId, // This is the "Account Number" for trades
-                  profitTargetPercent: phase.profitTargetPercent,
-                  dailyDrawdownPercent: phase.dailyDrawdownPercent,
-                  maxDrawdownPercent: phase.maxDrawdownPercent,
-                  status: phase.status,
-                  startDate: phase.startDate ? new Date(phase.startDate) : undefined
-                }
-              })
-            }
-            // Map by Phase Account Number (phaseId in DB, usually string)
-            // Wait, Trade links via `phaseAccountId` (internal ID). 
-            // But in Export, we didn't save internal ID. 
-            // We saved raw trade. 
-            // In `data.json`, `phaseAccountId` is present but meaningless (old ID).
-            // WE NEED TO MAP via `Account Number` logic.
-            // For Prop Trades, `accountNumber` usually holds the `phaseId` string (e.g., "123456").
-            // AND `phaseAccountId` is the internal relation.
-            // So we map PhaseId String -> InternalPhaseID.
-            if (phase.phaseId) {
-              phaseMap.set(phase.phaseId, targetPhase.id)
-            }
-            // Also maintain a map for internal phase lookups if needed? No, trades use accountNumber primarily?
-            // Actually, schema says Trade has `phaseAccountId` relation.
-            // If we relied loosely on `accountNumber` matching `phase.phaseId`, we can find it.
+            if (phase.phaseId) phaseMap.set(phase.phaseId, targetPhase.id)
           }
         }
       }
     }
 
-    // 5. Daily Notes & Reviews (Simple Upsert)
-    if (data.dailyNotes) {
-      for (const note of data.dailyNotes) {
-        // Check collision
-        const date = new Date(note.date)
-        const existing = await prisma.dailyNote.findFirst({
-          where: { userId: internalUserId, date: date, accountId: null } // Assuming global notes for now
-        })
-        if (!existing) {
-          await prisma.dailyNote.create({
-            data: {
+    // --- TRANSITIONAL DATA ---
+
+    // 6. Transactions
+    if (data.liveAccountTransactions) {
+      for (const tx of data.liveAccountTransactions) {
+        // Linking by match (simplistic for history)
+        const targetAccountId = accountMap.get(tx.accountNumber)
+        if (targetAccountId) {
+          const existing = await prisma.liveAccountTransaction.findFirst({
+            where: { accountId: targetAccountId, amount: tx.amount, createdAt: new Date(tx.createdAt) }
+          })
+          if (!existing) {
+            await prisma.liveAccountTransaction.create({
+              data: {
+                id: crypto.randomUUID(),
+                accountId: targetAccountId,
+                userId: internalUserId,
+                type: tx.type,
+                amount: tx.amount,
+                description: tx.description,
+                createdAt: new Date(tx.createdAt)
+              }
+            })
+          }
+        }
+      }
+    }
+
+    // 7. Breach Records, Daily Anchors, Payouts
+    if (data.breachRecords) {
+      for (const br of data.breachRecords) {
+        const targetPhaseId = phaseMap.get(br.phaseId) // br.phaseId in export was the PhaseAccount.phaseId string
+        if (targetPhaseId) {
+          const existing = await prisma.breachRecord.findFirst({
+            where: { phaseAccountId: targetPhaseId, breachType: br.breachType, breachTime: new Date(br.breachTime) }
+          })
+          if (!existing) {
+            await prisma.breachRecord.create({
+              data: {
+                id: crypto.randomUUID(),
+                phaseAccountId: targetPhaseId,
+                breachType: br.breachType,
+                breachAmount: br.breachAmount,
+                breachTime: new Date(br.breachTime),
+                currentEquity: br.currentEquity,
+                accountSize: br.accountSize,
+                dailyStartBalance: br.dailyStartBalance,
+                highWaterMark: br.highWaterMark,
+                notes: br.notes
+              }
+            })
+          }
+        }
+      }
+    }
+
+    if (data.dailyAnchors) {
+      for (const da of data.dailyAnchors) {
+        const targetPhaseId = phaseMap.get(da.phaseId)
+        if (targetPhaseId) {
+          await prisma.dailyAnchor.upsert({
+            where: { phaseAccountId_date: { phaseAccountId: targetPhaseId, date: new Date(da.date) } },
+            update: { anchorEquity: da.anchorEquity },
+            create: {
               id: crypto.randomUUID(),
-              userId: internalUserId,
-              date: date,
-              note: note.note,
-              updatedAt: new Date()
+              phaseAccountId: targetPhaseId,
+              date: new Date(da.date),
+              anchorEquity: da.anchorEquity
             }
           })
         }
       }
     }
 
-    // --- TRADES IMPORT ---
+    if (data.payouts) {
+      for (const p of data.payouts) {
+        const targetMasterId = masterMap.get(p.accountName)
+        const targetPhaseId = p.phaseId ? phaseMap.get(p.phaseId) : null
+        if (targetMasterId && targetPhaseId) {
+          const existing = await prisma.payout.findFirst({
+            where: { masterAccountId: targetMasterId, phaseAccountId: targetPhaseId, amount: p.amount, requestDate: new Date(p.requestDate) }
+          })
+          if (!existing) {
+            await prisma.payout.create({
+              data: {
+                id: crypto.randomUUID(),
+                masterAccountId: targetMasterId,
+                phaseAccountId: targetPhaseId,
+                amount: p.amount,
+                status: p.status,
+                requestDate: new Date(p.requestDate),
+                approvedDate: p.approvedDate ? new Date(p.approvedDate) : null,
+                paidDate: p.paidDate ? new Date(p.paidDate) : null,
+                rejectedDate: p.rejectedDate ? new Date(p.rejectedDate) : null,
+                notes: p.notes,
+                rejectionReason: p.rejectionReason
+              }
+            })
+          }
+        }
+      }
+    }
 
-    let tradesImported = 0
-    let tradesSkipped = 0
+    // --- TRADES & BACKTESTS ---
+
+    let importedCount = 0
+    let skippedCount = 0
 
     // Helper to upload image
-    const uploadImage = async (zipFolder: string, originalId: string, suffix: string, newTradeId: string) => {
+    const uploadImage = async (zipFolder: string, originalId: string, suffix: string, newId: string) => {
       const result = findImageFile(zip.files, zipFolder, originalId, suffix)
       if (!result) return null
 
       const buffer = await result.file.async('arraybuffer')
-      const path = `trades/${internalUserId}/${newTradeId}/${suffix}.${result.ext}`
+      const path = `trades/${internalUserId}/${newId}/${suffix}.${result.ext}`
 
       const { data: uploadData, error } = await supabase.storage
         .from('trade-images')
@@ -262,100 +344,60 @@ export async function POST(request: NextRequest) {
       return publicUrl
     }
 
-    if (data.trades) {
-      for (const trade of data.trades) {
-        // Detect Duplicates
-        // Unique Index: [userId, accountNumber, symbol, entryDate, entryPrice, side, quantity]
-        // We must format fields to match DB expectation
-        const entryDateStr = typeof trade.entryDate === 'string' ? trade.entryDate : new Date(trade.entryDate).toISOString()
-        // Note: DB stores entryDate as String? Schema says `entryDate String`.
-        // Wait, schema says `entryDate String`.
+    const uploadTradeImages = async (trade: any, newId: string) => {
+      const suffixes = ['1', '2', '3', '4', '5', '6', 'preview']
+      const results: any = {}
+      for (const s of suffixes) {
+        const dbField = s === 'preview' ? 'cardPreviewImage' : `image${['One','Two','Three','Four','Five','Six'][parseInt(s)-1]}`
+        const url = await uploadImage('trades', trade.originalId || trade.id, s, newId)
+        if (url) results[dbField] = url
+      }
+      return results
+    }
 
+    if (data.trades) {
+      for (const t of data.trades) {
         const existing = await prisma.trade.findFirst({
           where: {
             userId: internalUserId,
-            accountNumber: trade.accountNumber,
-            symbol: trade.instrument, // `instrument` mapped to `symbol`?
-            // Schema: `instrument String`, `symbol String?`. Utils formatTradeData uses `instrument`.
-            // Export uses raw DB fields. DB has `instrument`.
-            instrument: trade.instrument,
-            entryDate: trade.entryDate,
-            entryPrice: trade.entryPrice,
-            side: trade.side,
-            quantity: parseFloat(trade.quantity.toString()) // Float
+            accountNumber: t.accountNumber,
+            instrument: t.instrument,
+            entryDate: t.entryDate,
+            entryPrice: t.entryPrice,
+            side: t.side,
+            quantity: parseFloat(t.quantity || 0)
           }
         })
+        if (existing) { skippedCount++; continue; }
 
-        if (existing) {
-          tradesSkipped++
-          continue
-        }
+        const newId = crypto.randomUUID()
+        const images = await uploadTradeImages(t, newId)
+        
+        const accountId = accountMap.get(t.accountNumber) || null
+        const phaseAccountId = phaseMap.get(t.accountNumber) || null
+        const modelId = t.modelName ? modelNameMap.get(t.modelName) : null
 
-        // Resolve Relations
-        const newAccountId = accountMap.get(trade.accountNumber) || null
-
-        // Resolve Phase Account ID
-        // If it's a prop trade, it has phaseAccountId.
-        // We try to look up by accountNumber if it matches a valid Phase ID.
-        let newPhaseAccountId = null
-        if (phaseMap.has(trade.accountNumber)) {
-          newPhaseAccountId = phaseMap.get(trade.accountNumber)
-        }
-        // If previous export had phaseAccountId but mapped to something else? 
-        // We rely on account number being consistent.
-
-        // Resolve Model
-        const newModelId = trade.modelName ? modelNameMap.get(trade.modelName) : null
-
-        // Prepare New Trade
-        const newTradeId = crypto.randomUUID()
-        const originalId = trade.originalId || trade.id // Fallback
-
-        // Handle Images
-        const imageOne = await uploadImage('trades', originalId, '1', newTradeId) || trade.imageOne
-        const imageTwo = await uploadImage('trades', originalId, '2', newTradeId) || trade.imageTwo
-        const imageThree = await uploadImage('trades', originalId, '3', newTradeId) || trade.imageThree
-        const imageFour = await uploadImage('trades', originalId, '4', newTradeId) || trade.imageFour
-        const imageFive = await uploadImage('trades', originalId, '5', newTradeId) || trade.imageFive
-        const imageSix = await uploadImage('trades', originalId, '6', newTradeId) || trade.imageSix
-        const preview = await uploadImage('trades', originalId, 'preview', newTradeId) || trade.cardPreviewImage
-
-        // Sanitize un-importable fields
-        const {
-          id, userId, accountId, phaseAccountId, modelId, originalId: _, modelName: __,
-          ...restTrade
-        } = trade
-
+        const { id, userId, originalId, modelName, ...rest } = t
         await prisma.trade.create({
           data: {
-            ...restTrade,
-            id: newTradeId,
+            ...rest,
+            ...images,
+            id: newId,
             userId: internalUserId,
-            quantity: parseFloat(trade.quantity ?? 0),
-            pnl: parseFloat(trade.pnl ?? 0),
-            commission: parseFloat(trade.commission ?? 0),
-            timeInPosition: parseFloat(trade.timeInPosition ?? 0),
-
-            accountId: newAccountId,
-            phaseAccountId: newPhaseAccountId,
-            modelId: newModelId,
-
-            imageOne, imageTwo, imageThree, imageFour, imageFive, imageSix,
-            cardPreviewImage: preview
+            accountId,
+            phaseAccountId,
+            modelId,
+            quantity: parseFloat(t.quantity || 0),
+            pnl: parseFloat(t.pnl || 0)
           }
         })
-        tradesImported++
+        importedCount++
       }
     }
-
-    // Backtests (Similar Logic) ...
-    // Skipping for brevity but should be included for "rewrite from scratch".
-    // I will include barebones backtest import.
 
     if (data.backtestTrades) {
       for (const bt of data.backtestTrades) {
         const newId = crypto.randomUUID()
-        // Check dupes (schema: userId, pair, dateExecuted, entryPrice, direction)
         const existing = await prisma.backtestTrade.findFirst({
           where: {
             userId: internalUserId,
@@ -368,27 +410,32 @@ export async function POST(request: NextRequest) {
 
         if (!existing) {
           const originalId = bt.id
-          const i1 = await uploadImage('backtest', originalId, '1', newId) || bt.imageOne
-          // ... simplify
+          const images: any = {}
+          const suffixes = ['1', '2', '3', '4', '5', '6', 'preview']
+          for (const s of suffixes) {
+            const dbField = s === 'preview' ? 'cardPreviewImage' : `image${['One','Two','Three','Four','Five','Six'][parseInt(s)-1]}`
+            const url = await uploadImage('backtest', originalId, s, newId)
+            if (url) images[dbField] = url
+          }
 
-          const { id, userId, User, ...rest } = bt
+          const { id, userId, ...rest } = bt
           await prisma.backtestTrade.create({
             data: {
               ...rest,
+              ...images,
               userId: internalUserId,
               id: newId,
-              imageOne: i1,
-              // Should map enums if strings match, Prisma handles string->enum if valid
             }
           })
+          importedCount++
         }
       }
     }
 
     return NextResponse.json({
       success: true,
-      imported: tradesImported,
-      skipped: tradesSkipped,
+      imported: importedCount,
+      skipped: skippedCount,
     })
 
   } catch (error) {
