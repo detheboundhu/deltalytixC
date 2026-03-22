@@ -19,7 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from "@/hooks/use-widget-data"
 import { cn, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
 
@@ -97,46 +97,27 @@ export default function PnLByInstrument({ size = 'small-long' }: PnLByInstrument
   // ---------------------------------------------------------------------------
   // DATA HOOKS (PRESERVED - DO NOT MODIFY)
   // ---------------------------------------------------------------------------
-  const { formattedTrades } = useData()
+  const { data: chartData = [], isLoading } = useWidgetData('pnlByInstrument')
 
-  // ---------------------------------------------------------------------------
-  // DATA PROCESSING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const chartData = React.useMemo(() => {
-    const { groupTradesByExecution } = require('@/lib/utils')
-    const groupedTrades = groupTradesByExecution(formattedTrades)
+  if (isLoading) {
+    return (
+      <WidgetCard title="P/L by Instrument">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-full h-[200px] bg-muted/20 rounded-xl" />
+        </div>
+      </WidgetCard>
+    )
+  }
 
-    const instrumentMap: Record<string, { pnl: number; trades: number; wins: number; losses: number }> = {}
-
-    groupedTrades.forEach((trade: any) => {
-      const instrument = trade.symbol || trade.instrument || 'Unknown'
-
-      if (!instrumentMap[instrument]) {
-        instrumentMap[instrument] = { pnl: 0, trades: 0, wins: 0, losses: 0 }
-      }
-
-      const netPnl = (trade.pnl || 0) - (trade.commission || 0)
-      instrumentMap[instrument].pnl += netPnl
-      instrumentMap[instrument].trades += 1
-
-      if (netPnl > BREAK_EVEN_THRESHOLD) {
-        instrumentMap[instrument].wins += 1
-      } else if (netPnl < -BREAK_EVEN_THRESHOLD) {
-        instrumentMap[instrument].losses += 1
-      }
-    })
-
-    const data: InstrumentData[] = Object.entries(instrumentMap).map(([instrument, stats]) => ({
-      instrument,
-      pnl: stats.pnl,
-      trades: stats.trades,
-      wins: stats.wins,
-      losses: stats.losses,
-      winRate: stats.trades > 0 ? (stats.wins / stats.trades) * 100 : 0,
-    }))
-
-    return data.sort((a, b) => b.pnl - a.pnl)
-  }, [formattedTrades])
+  if (chartData.length === 0) {
+    return (
+      <WidgetCard title="P/L by Instrument">
+        <div className="flex items-center justify-center h-full text-muted-foreground/50 text-sm">
+          No trade data available
+        </div>
+      </WidgetCard>
+    )
+  }
 
   // ---------------------------------------------------------------------------
   // Y-AXIS DOMAIN CALCULATION (PRESERVED - DO NOT MODIFY)
@@ -149,7 +130,7 @@ export default function PnLByInstrument({ size = 'small-long' }: PnLByInstrument
       }
     }
 
-    const pnls = chartData.map(item => item.pnl)
+    const pnls = chartData.map((item: any) => item.pnl)
     const minValue = Math.min(...pnls)
     const maxValue = Math.max(...pnls)
 
@@ -247,7 +228,7 @@ export default function PnLByInstrument({ size = 'small-long' }: PnLByInstrument
                 radius={CHART_CONFIG.barRadius}
                 maxBarSize={50}
               >
-                {chartData.map((entry, index) => (
+                {chartData.map((entry: any, index: number) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.pnl > BREAK_EVEN_THRESHOLD ? COLORS.profit : entry.pnl < -BREAK_EVEN_THRESHOLD ? COLORS.loss : 'hsl(var(--muted-foreground)/0.4)'}

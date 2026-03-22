@@ -19,7 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from "@/hooks/use-widget-data"
 import { cn, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
 
@@ -86,57 +86,27 @@ export default function PnLByStrategy({ size = 'small-long' }: PnLByStrategyProp
   // ---------------------------------------------------------------------------
   // DATA HOOKS (PRESERVED - DO NOT MODIFY)
   // ---------------------------------------------------------------------------
-  const { formattedTrades } = useData()
+  const { data: chartData = [], isLoading } = useWidgetData('pnlByStrategy')
 
-  // ---------------------------------------------------------------------------
-  // DATA PROCESSING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const chartData = React.useMemo(() => {
-    const { groupTradesByExecution } = require('@/lib/utils')
-    const groupedTrades = groupTradesByExecution(formattedTrades)
+  if (isLoading) {
+    return (
+      <WidgetCard title="P/L by Strategy">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-full h-[200px] bg-muted/20 rounded-xl" />
+        </div>
+      </WidgetCard>
+    )
+  }
 
-    const strategyMap: Record<string, { pnl: number; trades: number; wins: number; losses: number; grossWin: number; grossLoss: number }> = {}
-
-    groupedTrades.forEach((trade: any) => {
-      const strategy = trade.tradingModel || 'No Strategy'
-
-      if (!strategyMap[strategy]) {
-        strategyMap[strategy] = { pnl: 0, trades: 0, wins: 0, losses: 0, grossWin: 0, grossLoss: 0 }
-      }
-
-      const netPnl = (trade.pnl || 0) - (trade.commission || 0)
-      strategyMap[strategy].pnl += netPnl
-      strategyMap[strategy].trades += 1
-
-      if (netPnl > BREAK_EVEN_THRESHOLD) {
-        strategyMap[strategy].wins += 1
-        strategyMap[strategy].grossWin += netPnl
-      } else if (netPnl < -BREAK_EVEN_THRESHOLD) {
-        strategyMap[strategy].losses += 1
-        strategyMap[strategy].grossLoss += Math.abs(netPnl)
-      }
-    })
-
-    const data: StrategyData[] = Object.entries(strategyMap).map(([strategy, stats]) => {
-      const tradableCount = stats.wins + stats.losses
-      const winRate = tradableCount > 0 ? (stats.wins / tradableCount) * 100 : 0
-      const avgPnl = stats.trades > 0 ? stats.pnl / stats.trades : 0
-      const profitFactor = stats.grossLoss > 0 ? stats.grossWin / stats.grossLoss : stats.grossWin > 0 ? 999 : 0
-
-      return {
-        strategy,
-        pnl: stats.pnl,
-        trades: stats.trades,
-        wins: stats.wins,
-        losses: stats.losses,
-        winRate,
-        avgPnl,
-        profitFactor,
-      }
-    })
-
-    return data.sort((a, b) => b.pnl - a.pnl)
-  }, [formattedTrades])
+  if (chartData.length === 0) {
+    return (
+      <WidgetCard title="P/L by Strategy">
+        <div className="flex items-center justify-center h-full text-muted-foreground/50 text-sm">
+          No trade data available
+        </div>
+      </WidgetCard>
+    )
+  }
 
   // ---------------------------------------------------------------------------
   // SIZE-RESPONSIVE VALUES
@@ -205,7 +175,7 @@ export default function PnLByStrategy({ size = 'small-long' }: PnLByStrategyProp
                 radius={[0, 4, 4, 0]}
                 maxBarSize={40}
               >
-                {chartData.map((entry, index) => (
+                {chartData.map((entry: any, index: number) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.pnl > BREAK_EVEN_THRESHOLD ? COLORS.profit : entry.pnl < -BREAK_EVEN_THRESHOLD ? COLORS.loss : 'hsl(var(--muted-foreground)/0.4)'}

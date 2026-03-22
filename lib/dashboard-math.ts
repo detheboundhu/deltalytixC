@@ -163,3 +163,208 @@ export function calculateAccountBalanceChart(trades: Partial<Trade>[], activeAcc
       }
     })
 }
+
+import { groupTradesByExecution } from '@/lib/utils'
+import { calculateZellaScore, calculateMetricsFromTrades } from '@/lib/zella-score'
+
+export function calculatePnlByStrategy(trades: Partial<Trade>[]) {
+  const groupedTrades = groupTradesByExecution(trades as any)
+  const strategyMap: Record<string, { pnl: number; trades: number; wins: number; losses: number; grossWin: number; grossLoss: number }> = {}
+
+  groupedTrades.forEach((trade: any) => {
+    const strategy = trade.tradingModel || trade.TradingModel?.name || 'No Strategy'
+    if (!strategyMap[strategy]) strategyMap[strategy] = { pnl: 0, trades: 0, wins: 0, losses: 0, grossWin: 0, grossLoss: 0 }
+    const netPnl = (trade.pnl || 0) + (trade.commission || 0)
+    strategyMap[strategy].pnl += netPnl
+    strategyMap[strategy].trades += 1
+
+    if (netPnl > BREAK_EVEN_THRESHOLD) {
+      strategyMap[strategy].wins += 1
+      strategyMap[strategy].grossWin += netPnl
+    } else if (netPnl < -BREAK_EVEN_THRESHOLD) {
+      strategyMap[strategy].losses += 1
+      strategyMap[strategy].grossLoss += Math.abs(netPnl)
+    }
+  })
+
+  return Object.entries(strategyMap).map(([strategy, stats]) => {
+    const tradableCount = stats.wins + stats.losses
+    return {
+      strategy,
+      pnl: stats.pnl,
+      trades: stats.trades,
+      wins: stats.wins,
+      losses: stats.losses,
+      winRate: tradableCount > 0 ? (stats.wins / tradableCount) * 100 : 0,
+      avgPnl: stats.trades > 0 ? stats.pnl / stats.trades : 0,
+      profitFactor: stats.grossLoss > 0 ? stats.grossWin / stats.grossLoss : stats.grossWin > 0 ? 999 : 0,
+    }
+  }).sort((a, b) => b.pnl - a.pnl)
+}
+
+export function calculatePnlByInstrument(trades: Partial<Trade>[]) {
+  const groupedTrades = groupTradesByExecution(trades as any)
+  const instrumentMap: Record<string, { pnl: number; trades: number; wins: number; losses: number }> = {}
+
+  groupedTrades.forEach((trade: any) => {
+    const instrument = trade.symbol || trade.instrument || 'Unknown'
+    if (!instrumentMap[instrument]) instrumentMap[instrument] = { pnl: 0, trades: 0, wins: 0, losses: 0 }
+    const netPnl = (trade.pnl || 0) + (trade.commission || 0)
+    instrumentMap[instrument].pnl += netPnl
+    instrumentMap[instrument].trades += 1
+    if (netPnl > BREAK_EVEN_THRESHOLD) instrumentMap[instrument].wins += 1
+    else if (netPnl < -BREAK_EVEN_THRESHOLD) instrumentMap[instrument].losses += 1
+  })
+
+  return Object.entries(instrumentMap).map(([instrument, stats]) => ({
+    instrument,
+    pnl: stats.pnl,
+    trades: stats.trades,
+    wins: stats.wins,
+    losses: stats.losses,
+    winRate: stats.trades > 0 ? (stats.wins / stats.trades) * 100 : 0,
+  })).sort((a, b) => b.pnl - a.pnl)
+}
+
+export function calculateWinRateByStrategy(trades: Partial<Trade>[]) {
+  const groupedTrades = groupTradesByExecution(trades as any)
+  const strategyMap: Record<string, { wins: number; losses: number; grossWin: number; grossLoss: number; allWins: number[] }> = {}
+
+  groupedTrades.forEach((trade: any) => {
+    const strategy = trade.tradingModel || trade.TradingModel?.name || 'No Strategy'
+    if (!strategyMap[strategy]) strategyMap[strategy] = { wins: 0, losses: 0, grossWin: 0, grossLoss: 0, allWins: [] }
+    const netPnl = (trade.pnl || 0) + (trade.commission || 0)
+    if (netPnl > BREAK_EVEN_THRESHOLD) {
+      strategyMap[strategy].wins += 1
+      strategyMap[strategy].grossWin += netPnl
+      strategyMap[strategy].allWins.push(netPnl)
+    } else if (netPnl < -BREAK_EVEN_THRESHOLD) {
+      strategyMap[strategy].losses += 1
+      strategyMap[strategy].grossLoss += Math.abs(netPnl)
+    }
+  })
+
+  return Object.entries(strategyMap).map(([strategy, stats]) => {
+    const totalTrades = stats.wins + stats.losses
+    const avgWin = stats.allWins.length > 0 ? stats.allWins.reduce((a, b) => a + b, 0) / stats.allWins.length : 0
+    const variance = stats.allWins.length > 0
+      ? stats.allWins.reduce((sum, win) => sum + Math.pow(win - avgWin, 2), 0) / stats.allWins.length : 0
+    const stdDev = Math.sqrt(variance)
+    return {
+      strategy,
+      winRate: totalTrades > 0 ? (stats.wins / totalTrades) * 100 : 0,
+      totalTrades,
+      wins: stats.wins,
+      losses: stats.losses,
+      profitFactor: stats.grossLoss > 0 ? stats.grossWin / stats.grossLoss : stats.grossWin > 0 ? 999 : 0,
+      consistency: avgWin > 0 ? Math.max(0, 100 - (stdDev / avgWin) * 100) : 0,
+    }
+  }).sort((a, b) => b.winRate - a.winRate)
+}
+
+function calculateDurationMinutes(entryTime: string, exitTime: string): number {
+  return (new Date(exitTime).getTime() - new Date(entryTime).getTime()) / (1000 * 60)
+}
+
+function getDurationBucket(minutes: number): string {
+  if (minutes < 1) return "< 1min"
+  if (minutes < 5) return "1-5min"
+  if (minutes < 15) return "5-15min"
+  if (minutes < 30) return "15-30min"
+  if (minutes < 60) return "30min-1hr"
+  if (minutes < 120) return "1-2hr"
+  if (minutes < 240) return "2-4hr"
+  return "4hr+"
+}
+
+export function calculateTradeDurationPerformance(trades: Partial<Trade>[]) {
+  const groupedTrades = groupTradesByExecution(trades as any)
+  const durationMap: Record<string, { pnl: number; trades: number; wins: number; losses: number }> = {}
+  
+  const order = ["< 1min", "1-5min", "5-15min", "15-30min", "30min-1hr", "1-2hr", "2-4hr", "4hr+"]
+  order.forEach(b => { durationMap[b] = { pnl: 0, trades: 0, wins: 0, losses: 0 } })
+
+  groupedTrades.forEach((trade: any) => {
+    if (trade.entryDate && trade.closeDate) {
+      const durationMinutes = calculateDurationMinutes(trade.entryDate.toString(), trade.closeDate.toString())
+      const bucket = getDurationBucket(durationMinutes)
+      const netPnL = (trade.pnl || 0) + (trade.commission || 0)
+      durationMap[bucket].pnl += netPnL
+      durationMap[bucket].trades++
+
+      if (netPnL > BREAK_EVEN_THRESHOLD) durationMap[bucket].wins++
+      else if (netPnL < -BREAK_EVEN_THRESHOLD) durationMap[bucket].losses++
+    }
+  })
+
+  return order.map(bucket => {
+    const data = durationMap[bucket]
+    return {
+      bucket,
+      pnl: data.pnl,
+      trades: data.trades,
+      wins: data.wins,
+      losses: data.losses,
+      winRate: data.trades > 0 ? (data.wins / data.trades) * 100 : 0,
+      avgPnl: data.trades > 0 ? data.pnl / data.trades : 0,
+    }
+  }).filter(item => item.trades > 0)
+}
+
+export function calculateWeekdayPnl(trades: Partial<Trade>[]) {
+  const groupedTrades = groupTradesByExecution(trades as any)
+  const weekdayMap: Record<number, { pnl: number; trades: number; wins: number; losses: number }> = {}
+
+  groupedTrades.forEach((trade: any) => {
+    if (!trade.entryDate) return
+    const dayOfWeek = new Date(trade.entryDate).getDay()
+
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      if (!weekdayMap[dayOfWeek]) weekdayMap[dayOfWeek] = { pnl: 0, trades: 0, wins: 0, losses: 0 }
+      const netPnL = (trade.pnl || 0) + (trade.commission || 0)
+      weekdayMap[dayOfWeek].pnl += netPnL
+      weekdayMap[dayOfWeek].trades++
+      if (netPnL > BREAK_EVEN_THRESHOLD) weekdayMap[dayOfWeek].wins++
+      else if (netPnL < -BREAK_EVEN_THRESHOLD) weekdayMap[dayOfWeek].losses++
+    }
+  })
+
+  const weekdays = [
+    { day: '1', dayName: 'Monday' },
+    { day: '2', dayName: 'Tuesday' },
+    { day: '3', dayName: 'Wednesday' },
+    { day: '4', dayName: 'Thursday' },
+    { day: '5', dayName: 'Friday' },
+  ]
+
+  return weekdays.map(({ day, dayName }) => {
+    const dayNum = parseInt(day)
+    const data = weekdayMap[dayNum] || { pnl: 0, trades: 0, wins: 0, losses: 0 }
+    return {
+      day,
+      dayName,
+      pnl: data.pnl,
+      trades: data.trades,
+      wins: data.wins,
+      losses: data.losses,
+      winRate: data.trades > 0 ? (data.wins / data.trades) * 100 : 0,
+    }
+  })
+}
+
+export function calculatePerformanceScoreResult(trades: Partial<Trade>[]) {
+  const metrics = calculateMetricsFromTrades(trades as any)
+  if (!metrics) return { hasData: false }
+  
+  const scoreResult = calculateZellaScore(metrics)
+  const radarData = [
+    { metric: 'Win %', value: scoreResult.breakdown.tradeWinPercentageScore, fullMark: 100, rawValue: scoreResult.metrics.tradeWinPercentage, weight: 15, description: 'Percentage of winning trades', target: '60%+' },
+    { metric: 'Profit Factor', value: scoreResult.breakdown.profitFactorScore, fullMark: 100, rawValue: scoreResult.metrics.profitFactor, weight: 25, description: 'Total Wins ÷ Total Losses', target: '2.6+' },
+    { metric: 'Avg W/L', value: scoreResult.breakdown.avgWinLossScore, fullMark: 100, rawValue: scoreResult.metrics.avgWinLoss, weight: 20, description: 'Average Win ÷ Average Loss', target: '2.6+' },
+    { metric: 'Recovery', value: scoreResult.breakdown.recoveryFactorScore, fullMark: 100, rawValue: scoreResult.metrics.recoveryFactor, weight: 10, description: 'Net Profit ÷ Max Drawdown', target: '3.5+' },
+    { metric: 'Consistency', value: scoreResult.breakdown.consistencyScoreValue, fullMark: 100, rawValue: scoreResult.metrics.consistencyScore, weight: 10, description: 'Stability of daily returns', target: 'Higher is better' },
+    { metric: 'Drawdown', value: scoreResult.breakdown.maxDrawdownScore, fullMark: 100, rawValue: scoreResult.metrics.maxDrawdown, weight: 20, description: 'Maximum peak-to-trough decline', target: 'Lower is better' },
+  ]
+
+  return { chartData: radarData, overallScore: scoreResult.overallScore, hasData: true }
+}

@@ -159,41 +159,46 @@ export default function AccountsPage() {
   const { user } = useAuth()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const userStore = useUserStore(state => state.user)
-  const { refreshTrades } = useData()
 
   // State
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [filterType, setFilterType] = useState<FilterType>('all')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
+  const [page, setPage] = useState(1)
 
-  const { accounts, isLoading, refetch: refetchAccounts } = useAccounts({
-    includeArchived: filterStatus === 'archived',
-    includeFailed: filterStatus === 'failed'
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      setPage(1) // Reset page on search
+    }, 400)
+    return () => clearTimeout(handler)
+  }, [searchQuery])
+
+  const { accounts: serverAccounts, isLoading, refetch: refetchAccounts, updateAccountInCache, pagination } = useAccounts({
+    page,
+    limit: 50,
+    status: filterStatus as any,
+    type: filterType,
+    search: debouncedSearch
   })
-  const { formattedTrades } = useData()
-  const allTrades = useTradesStore(state => state.trades)
-  const { transactions } = useLiveAccountTransactions()
 
-  // Subscribe to realtime account changes for instant UI updates
-  // Using "Signal -> Fetch" pattern: Realtime signals change, then we fetch fresh data
-  // This ensures data integrity (handles DB triggers, joins, computed fields)
+  // Subscribe to realtime account changes for instant UI updates (Granular Patches)
   useDatabaseRealtime({
     userId: userStore?.id,
     enabled: !!userStore?.id,
     onAccountChange: (change) => {
-      // When Account, MasterAccount, or PhaseAccount changes, refresh accounts
       if (['Account', 'MasterAccount', 'PhaseAccount'].includes(change.table)) {
-        // Clear caches to force fresh fetch
-        clearAccountsCache()
-        // Add small delay to ensure DB transaction is fully committed and cache invalidation completes
-        // Realtime events fire immediately, but DB commit and cache invalidation need time
-        setTimeout(() => {
-          // Fetch fresh data from server - Zustand will automatically trigger re-renders
-          refreshTrades().catch(() => {
-            // Silently handle errors - realtime subscription will retry on next change
-          })
-        }, 300) // 300ms delay ensures DB commit and cache invalidation complete
+        const accountId = change.newRecord?.id || change.oldRecord?.id
+        if (accountId && (change as any).eventType === 'UPDATE' && change.newRecord) {
+           updateAccountInCache(accountId as string, change.newRecord as any)
+        } else {
+           refetchAccounts()
+        }
       }
+    },
+    onTradeChange: () => {
+      refetchAccounts()
     }
   })
 
@@ -234,92 +239,22 @@ export default function AccountsPage() {
     }
   }, [])
 
-  // Filter accounts
-  const filteredAccounts = useMemo(() => {
-    return accounts.filter(account => {
-      const matchesSearch = !searchQuery ||
-        account.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        account.number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        account.broker?.toLowerCase().includes(searchQuery.toLowerCase())
-
-      const matchesType = filterType === 'all' || account.accountType === filterType
-      const isPassedAccount = account.status === 'passed'
-      const shouldHideByDefault = account.status === 'failed' || account.status === 'pending'
-
-      if (isPassedAccount) return false
-
-      if (filterStatus === 'archived') {
-        return matchesSearch && matchesType && account.isArchived === true
-      }
-
-      if (account.isArchived === true) return false
-
-      const matchesStatus = filterStatus === 'all'
-        ? !shouldHideByDefault
-        : account.status === filterStatus
-
-      return matchesSearch && matchesType && matchesStatus
-    })
-  }, [accounts, searchQuery, filterType, filterStatus])
-
-  // Calculate real equity and grouped trade counts
-  const accountsWithRealEquity = useMemo(() => {
-    const accountEquities = calculateAccountBalances(filteredAccounts, allTrades, transactions, {
-      excludeFailedAccounts: false,
-      includePayouts: true
-    })
-
-    // Pre-group trades by account number and phase ID for efficient grouped count
-    const tradesByAccountNumber = new Map<string, any[]>()
-    const tradesByPhaseId = new Map<string, any[]>()
-    allTrades.forEach(trade => {
-      if (trade.accountNumber) {
-        if (!tradesByAccountNumber.has(trade.accountNumber)) tradesByAccountNumber.set(trade.accountNumber, [])
-        tradesByAccountNumber.get(trade.accountNumber)!.push(trade)
-      }
-      if (trade.phaseAccountId) {
-        if (!tradesByPhaseId.has(trade.phaseAccountId)) tradesByPhaseId.set(trade.phaseAccountId, [])
-        tradesByPhaseId.get(trade.phaseAccountId)!.push(trade)
-      }
-    })
-
-    return filteredAccounts.map(account => {
-      // Get trades for this account (same logic as balance-calculator)
-      let accountTrades: any[] = []
-      if (account.accountType === 'prop-firm') {
-        accountTrades = tradesByPhaseId.get(account.id) || tradesByAccountNumber.get(account.number) || []
-      } else {
-        accountTrades = tradesByAccountNumber.get(account.number) || []
-      }
-      // Group by execution to match reports page counting
-      const groupedCount = accountTrades.length > 0 ? groupTradesByExecution(accountTrades as any).length : 0
-
-      return {
-        ...account,
-        calculatedEquity: accountEquities.get(account.number) || account.startingBalance || 0,
-        tradeCount: groupedCount
-      }
-    })
-  }, [filteredAccounts, allTrades, transactions])
-
   // Stats
   const accountStats = useMemo(() => {
-    const totalEquity = accountsWithRealEquity.reduce((sum, account) => sum + account.calculatedEquity, 0)
-    const pnl = totalEquity - accountsWithRealEquity.reduce((sum, acc) => sum + (acc.startingBalance || 0), 0)
-
-    // Use the grouped trade counts already computed in accountsWithRealEquity
-    const totalTrades = accountsWithRealEquity.reduce((sum, account) => sum + (account.tradeCount || 0), 0)
+    const totalEquity = serverAccounts.reduce((sum, account) => sum + (account.calculatedEquity || account.startingBalance || 0), 0)
+    const pnl = serverAccounts.reduce((sum, acc) => sum + (acc.pnl || 0), 0)
+    const totalTrades = serverAccounts.reduce((sum, account) => sum + (account.tradeCount || 0), 0)
 
     return {
-      total: filteredAccounts.length,
-      live: filteredAccounts.filter(a => a.accountType === 'live').length,
-      propFirm: filteredAccounts.filter(a => a.accountType === 'prop-firm').length,
-      funded: filteredAccounts.filter(a => a.accountType === 'prop-firm' && isAccountFunded(a)).length,
+      total: pagination?.total || serverAccounts.length,
+      live: serverAccounts.filter(a => a.accountType === 'live').length,
+      propFirm: serverAccounts.filter(a => a.accountType === 'prop-firm').length,
+      funded: serverAccounts.filter(a => a.accountType === 'prop-firm' && isAccountFunded(a)).length,
       totalEquity,
       pnl,
       totalTrades
     }
-  }, [filteredAccounts, accountsWithRealEquity])
+  }, [serverAccounts, pagination])
 
   // Handlers
   const handleRefresh = useCallback(async () => {
@@ -327,35 +262,35 @@ export default function AccountsPage() {
     try {
       // Clear caches first
       clearAccountsCache()
-      // Use refreshTrades which reloads all data including accounts from the server
+      // Use refetchAccounts which reloads all data including accounts from the server
       // This is the proper way to refresh - it calls loadData() which fetches fresh data
-      await refreshTrades()
+      await refetchAccounts()
       toast.success("Accounts refreshed")
     } catch (error) {
       toast.error("Failed to refresh accounts")
     } finally {
       setIsRefreshing(false)
     }
-  }, [refreshTrades])
+  }, [refetchAccounts])
 
   const handleAccountCreated = useCallback(() => {
     clearAccountsCache()
-    // Use refreshTrades to reload all data - Zustand will automatically trigger re-render
-    refreshTrades()
+    // Use refetchAccounts to reload all data - Zustand will automatically trigger re-render
+    refetchAccounts()
     setCreateLiveDialogOpen(false)
     setCreatePropFirmDialogOpen(false)
     toast.success("Account created successfully")
-  }, [refreshTrades])
+  }, [refetchAccounts])
 
   const handleAccountUpdated = useCallback(() => {
     clearAccountsCache()
-    // Use refreshTrades to reload all data - Zustand will automatically trigger re-render
-    refreshTrades()
+    // Use refetchAccounts to reload all data - Zustand will automatically trigger re-render
+    refetchAccounts()
     setEditLiveDialogOpen(false)
     setEditPropFirmDialogOpen(false)
     setEditingAccount(null)
     toast.success("Account updated successfully")
-  }, [refreshTrades])
+  }, [refetchAccounts])
 
   const handleViewAccount = useCallback((account: Account) => {
     if (account.accountType === 'prop-firm') {
@@ -404,14 +339,13 @@ export default function AccountsPage() {
 
       toast.success(`${accountName} deleted permanently`)
       clearAccountsCache()
-      // Use refreshTrades to reload all data - Zustand will automatically trigger re-render
-      await refreshTrades()
+      await refetchAccounts()
       setDeletingAccount(null)
       setDeleteConfirmText('')
     } catch (error) {
       toast.error("Failed to delete account")
     }
-  }, [deletingAccount, refreshTrades, deleteConfirmText])
+  }, [deletingAccount, refetchAccounts, deleteConfirmText])
 
   const handleArchiveAccount = useCallback(async (account: Account) => {
     const accountName = account.displayName || account.name || account.number
@@ -436,12 +370,11 @@ export default function AccountsPage() {
 
       toast.success(isArchived ? `${accountName} restored` : `${accountName} archived`)
       clearAccountsCache()
-      // Use refreshTrades to reload all data - Zustand will automatically trigger re-render
-      await refreshTrades()
+      await refetchAccounts()
     } catch (error) {
       toast.error("Failed to update account")
     }
-  }, [refreshTrades])
+  }, [refetchAccounts])
 
   // Loading state
   if (isLoading) {
@@ -614,9 +547,9 @@ export default function AccountsPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.15 }}
           >
-            {filteredAccounts.length === 0 ? (
+            {serverAccounts.length === 0 ? (
               <EmptyState
-                hasAccounts={accounts.length > 0}
+                hasAccounts={true}
                 searchQuery={searchQuery}
                 onCreateLive={() => setCreateLiveDialogOpen(true)}
                 onCreatePropFirm={() => setCreatePropFirmDialogOpen(true)}
@@ -625,7 +558,7 @@ export default function AccountsPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
                 <AnimatePresence mode="popLayout">
-                  {accountsWithRealEquity.map((account, index) => (
+                  {serverAccounts.map((account, index) => (
                     <motion.div
                       key={account.id}
                       layout
@@ -636,7 +569,7 @@ export default function AccountsPage() {
                     >
                       <AccountCard
                         account={account}
-                        allAccounts={accounts}
+                        allAccounts={serverAccounts}
                         onView={() => handleViewAccount(account)}
                         onEdit={() => handleEditAccount(account)}
                         onDelete={() => handleDeleteAccount(account)}
@@ -823,7 +756,7 @@ function AccountCard({
   const pnl = equity - startingBalance
   const pnlPercent = startingBalance > 0 ? (pnl / startingBalance) * 100 : 0
 
-  // tradeCount is pre-computed with groupTradesByExecution in accountsWithRealEquity
+  // tradeCount is pre-computed with groupTradesByExecution in serverAccounts
   const displayTradeCount = account.tradeCount || 0
 
   const isAtRisk = isPropFirm && !isFailed && (

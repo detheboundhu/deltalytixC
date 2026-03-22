@@ -13,11 +13,11 @@ import {
 
 const AnyRadarChart = RadarChart as any
 import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from "@/hooks/use-widget-data"
 import { cn } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
 import { TrendingUp, TrendingDown, Trophy, Info } from "lucide-react"
-import { calculateZellaScore, calculateMetricsFromTrades } from "@/lib/zella-score"
+
 import {
   Tooltip as UiTooltip,
   TooltipContent as UiTooltipContent,
@@ -97,91 +97,19 @@ export default function PerformanceScore({ size = 'small-long' }: PerformanceSco
   // ---------------------------------------------------------------------------
   // DATA HOOKS (PRESERVED - DO NOT MODIFY)
   // ---------------------------------------------------------------------------
-  const { formattedTrades } = useData()
+  const { data: scoreData, isLoading } = useWidgetData('performanceScore')
 
-  // ---------------------------------------------------------------------------
-  // DATA PROCESSING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const { chartData, overallScore, hasData } = React.useMemo(() => {
-    const metrics = calculateMetricsFromTrades(formattedTrades)
+  if (isLoading) {
+    return (
+      <WidgetCard title="Performance Score">
+        <div className="flex items-center justify-center p-6 h-full min-h-[250px]">
+          <div className="animate-pulse w-48 h-48 rounded-full bg-muted/20" />
+        </div>
+      </WidgetCard>
+    )
+  }
 
-    if (!metrics) {
-      const emptyData: MetricData[] = [
-        { metric: 'Win %', value: 0, fullMark: 100 },
-        { metric: 'Profit Factor', value: 0, fullMark: 100 },
-        { metric: 'Avg W/L', value: 0, fullMark: 100 },
-        { metric: 'Recovery', value: 0, fullMark: 100 },
-        { metric: 'Consistency', value: 0, fullMark: 100 },
-        { metric: 'Drawdown', value: 0, fullMark: 100 },
-      ]
-      return { chartData: emptyData, overallScore: 0, hasData: false }
-    }
-
-    const scoreResult = calculateZellaScore(metrics)
-
-    const radarData: MetricData[] = [
-      {
-        metric: 'Win %',
-        value: scoreResult.breakdown.tradeWinPercentageScore,
-        fullMark: 100,
-        rawValue: scoreResult.metrics.tradeWinPercentage,
-        weight: 15,
-        description: 'Percentage of winning trades',
-        target: '60%+'
-      },
-      {
-        metric: 'Profit Factor',
-        value: scoreResult.breakdown.profitFactorScore,
-        fullMark: 100,
-        rawValue: scoreResult.metrics.profitFactor,
-        weight: 25,
-        description: 'Total Wins ÷ Total Losses',
-        target: '2.6+'
-      },
-      {
-        metric: 'Avg W/L',
-        value: scoreResult.breakdown.avgWinLossScore,
-        fullMark: 100,
-        rawValue: scoreResult.metrics.avgWinLoss,
-        weight: 20,
-        description: 'Average Win ÷ Average Loss',
-        target: '2.6+'
-      },
-      {
-        metric: 'Recovery',
-        value: scoreResult.breakdown.recoveryFactorScore,
-        fullMark: 100,
-        rawValue: scoreResult.metrics.recoveryFactor,
-        weight: 10,
-        description: 'Net Profit ÷ Max Drawdown',
-        target: '3.5+'
-      },
-      {
-        metric: 'Consistency',
-        value: scoreResult.breakdown.consistencyScoreValue,
-        fullMark: 100,
-        rawValue: scoreResult.metrics.consistencyScore,
-        weight: 10,
-        description: 'Stability of daily returns',
-        target: 'Higher is better'
-      },
-      {
-        metric: 'Drawdown',
-        value: scoreResult.breakdown.maxDrawdownScore,
-        fullMark: 100,
-        rawValue: scoreResult.metrics.maxDrawdown,
-        weight: 20,
-        description: 'Maximum peak-to-trough decline',
-        target: 'Lower is better'
-      },
-    ]
-
-    return {
-      chartData: radarData,
-      overallScore: scoreResult.overallScore,
-      hasData: true
-    }
-  }, [formattedTrades])
+  const { chartData = [], overallScore = 0, hasData = false } = scoreData || {}
 
   // ---------------------------------------------------------------------------
   // SCORE COLOR UTILITIES

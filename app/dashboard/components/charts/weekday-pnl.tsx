@@ -19,7 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from "@/hooks/use-widget-data"
 import { cn, formatCurrency, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
 import { Switch } from "@/components/ui/switch"
@@ -87,64 +87,36 @@ const WeekdayPnL = React.memo(function WeekdayPnL({ size = 'small-long' }: Weekd
   // ---------------------------------------------------------------------------
   // DATA HOOKS (PRESERVED - DO NOT MODIFY)
   // ---------------------------------------------------------------------------
-  const { formattedTrades } = useData()
+  const { data: baseData = [], isLoading } = useWidgetData('weekdayPnl')
   const [showAverage, setShowAverage] = React.useState(false)
 
-  // ---------------------------------------------------------------------------
-  // DATA PROCESSING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
   const chartData = React.useMemo(() => {
-    const { groupTradesByExecution } = require('@/lib/utils')
-    const groupedTrades = groupTradesByExecution(formattedTrades)
+    if (!baseData) return []
+    return baseData.map((day: any) => ({
+      ...day,
+      pnl: showAverage && day.trades > 0 ? day.pnl / day.trades : day.pnl
+    }))
+  }, [baseData, showAverage])
 
-    const weekdayMap: Record<number, { pnl: number; trades: number; wins: number; losses: number }> = {}
+  if (isLoading) {
+    return (
+      <WidgetCard title="Weekday P/L">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-full h-[200px] bg-muted/20 rounded-xl" />
+        </div>
+      </WidgetCard>
+    )
+  }
 
-    groupedTrades.forEach((trade: any) => {
-      const date = new Date(trade.entryDate)
-      const dayOfWeek = date.getDay()
-
-      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-        if (!weekdayMap[dayOfWeek]) {
-          weekdayMap[dayOfWeek] = { pnl: 0, trades: 0, wins: 0, losses: 0 }
-        }
-
-        const netPnL = trade.pnl - (trade.commission || 0)
-        weekdayMap[dayOfWeek].pnl += netPnL
-        weekdayMap[dayOfWeek].trades++
-
-        if (netPnL > BREAK_EVEN_THRESHOLD) {
-          weekdayMap[dayOfWeek].wins++
-        } else if (netPnL < -BREAK_EVEN_THRESHOLD) {
-          weekdayMap[dayOfWeek].losses++
-        }
-      }
-    })
-
-    const weekdays = [
-      { day: '1', dayName: 'Monday' },
-      { day: '2', dayName: 'Tuesday' },
-      { day: '3', dayName: 'Wednesday' },
-      { day: '4', dayName: 'Thursday' },
-      { day: '5', dayName: 'Friday' },
-    ]
-
-    return weekdays.map(({ day, dayName }) => {
-      const dayNum = parseInt(day)
-      const data = weekdayMap[dayNum] || { pnl: 0, trades: 0, wins: 0, losses: 0 }
-      const winRate = data.trades > 0 ? (data.wins / data.trades) * 100 : 0
-      const displayPnl = showAverage && data.trades > 0 ? data.pnl / data.trades : data.pnl
-
-      return {
-        day,
-        dayName,
-        pnl: displayPnl,
-        trades: data.trades,
-        wins: data.wins,
-        losses: data.losses,
-        winRate,
-      }
-    })
-  }, [formattedTrades, showAverage])
+  if (baseData.length === 0) {
+    return (
+      <WidgetCard title="Weekday P/L">
+        <div className="flex items-center justify-center h-full text-muted-foreground/50 text-sm">
+          No trade data available
+        </div>
+      </WidgetCard>
+    )
+  }
 
   // ---------------------------------------------------------------------------
   // SIZE-RESPONSIVE VALUES
@@ -211,7 +183,7 @@ const WeekdayPnL = React.memo(function WeekdayPnL({ size = 'small-long' }: Weekd
                 radius={CHART_CONFIG.barRadius}
                 maxBarSize={60}
               >
-                {chartData.map((entry, index) => (
+                {chartData.map((entry: any, index: number) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.pnl > BREAK_EVEN_THRESHOLD ? COLORS.profit : entry.pnl < -BREAK_EVEN_THRESHOLD ? COLORS.loss : 'hsl(var(--muted-foreground)/0.4)'}

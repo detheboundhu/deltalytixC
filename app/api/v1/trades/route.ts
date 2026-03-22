@@ -22,6 +22,12 @@ import {
   calculateNetDailyPnl,
   calculateDailyCumulativePnl,
   calculateAccountBalanceChart,
+  calculatePnlByStrategy,
+  calculatePnlByInstrument,
+  calculateWinRateByStrategy,
+  calculateTradeDurationPerformance,
+  calculateWeekdayPnl,
+  calculatePerformanceScoreResult,
 } from '@/lib/dashboard-math'
 import { CacheHeaders } from '@/lib/api-cache-headers'
 import { applyRateLimit, apiLimiter } from '@/lib/rate-limiter'
@@ -194,6 +200,12 @@ export async function GET(request: NextRequest) {
       outcomeDistribution: calculateOutcomeDistribution(trades),
       dayOfWeekPerformance: calculateDayOfWeekPerformance(trades),
       accountBalanceChart: calculateAccountBalanceChart(trades, accounts),
+      pnlByStrategy: calculatePnlByStrategy(trades),
+      pnlByInstrument: calculatePnlByInstrument(trades),
+      winRateByStrategy: calculateWinRateByStrategy(trades),
+      tradeDurationPerformance: calculateTradeDurationPerformance(trades),
+      weekdayPnl: calculateWeekdayPnl(trades),
+      performanceScore: calculatePerformanceScoreResult(trades),
     } : null
 
     const total = trades.length

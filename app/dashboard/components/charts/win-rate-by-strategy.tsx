@@ -19,7 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from "@/hooks/use-widget-data"
 import { cn, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
 
@@ -71,67 +71,33 @@ export default function WinRateByStrategy({ size = 'small-long' }: WinRateByStra
   // ---------------------------------------------------------------------------
   // DATA HOOKS (PRESERVED - DO NOT MODIFY)
   // ---------------------------------------------------------------------------
-  const { formattedTrades } = useData()
+  const { data: chartData = [], isLoading } = useWidgetData('winRateByStrategy')
 
-  // ---------------------------------------------------------------------------
-  // DATA PROCESSING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
-  const chartData = React.useMemo(() => {
-    const { groupTradesByExecution } = require('@/lib/utils')
-    const groupedTrades = groupTradesByExecution(formattedTrades)
+  if (isLoading) {
+    return (
+      <WidgetCard title="Win Rate by Strategy">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-full h-[200px] bg-muted/20 rounded-xl" />
+        </div>
+      </WidgetCard>
+    )
+  }
 
-    const strategyMap: Record<string, { wins: number; losses: number; grossWin: number; grossLoss: number; allWins: number[] }> = {}
-
-    groupedTrades.forEach((trade: any) => {
-      const strategy = trade.tradingModel || 'No Strategy'
-
-      if (!strategyMap[strategy]) {
-        strategyMap[strategy] = { wins: 0, losses: 0, grossWin: 0, grossLoss: 0, allWins: [] }
-      }
-
-      const netPnl = (trade.pnl || 0) - (trade.commission || 0)
-
-      if (netPnl > BREAK_EVEN_THRESHOLD) {
-        strategyMap[strategy].wins += 1
-        strategyMap[strategy].grossWin += netPnl
-        strategyMap[strategy].allWins.push(netPnl)
-      } else if (netPnl < -BREAK_EVEN_THRESHOLD) {
-        strategyMap[strategy].losses += 1
-        strategyMap[strategy].grossLoss += Math.abs(netPnl)
-      }
-    })
-
-    const data: StrategyWinRate[] = Object.entries(strategyMap).map(([strategy, stats]) => {
-      const totalTrades = stats.wins + stats.losses
-      const winRate = totalTrades > 0 ? (stats.wins / totalTrades) * 100 : 0
-      const profitFactor = stats.grossLoss > 0 ? stats.grossWin / stats.grossLoss : stats.grossWin > 0 ? 999 : 0
-
-      const avgWin = stats.allWins.length > 0 ? stats.allWins.reduce((a, b) => a + b, 0) / stats.allWins.length : 0
-      const variance = stats.allWins.length > 0
-        ? stats.allWins.reduce((sum, win) => sum + Math.pow(win - avgWin, 2), 0) / stats.allWins.length
-        : 0
-      const stdDev = Math.sqrt(variance)
-      const consistency = avgWin > 0 ? Math.max(0, 100 - (stdDev / avgWin) * 100) : 0
-
-      return {
-        strategy,
-        winRate,
-        totalTrades,
-        wins: stats.wins,
-        losses: stats.losses,
-        profitFactor,
-        consistency,
-      }
-    })
-
-    return data.sort((a, b) => b.winRate - a.winRate)
-  }, [formattedTrades])
+  if (chartData.length === 0) {
+    return (
+      <WidgetCard title="Win Rate by Strategy">
+        <div className="flex items-center justify-center h-full text-muted-foreground/50 text-sm">
+          No trade data available
+        </div>
+      </WidgetCard>
+    )
+  }
 
   // ---------------------------------------------------------------------------
   // COMPUTED VALUES
   // ---------------------------------------------------------------------------
   const avgWinRate = chartData.length > 0
-    ? chartData.reduce((sum, item) => sum + item.winRate, 0) / chartData.length
+    ? chartData.reduce((sum: number, item: any) => sum + item.winRate, 0) / chartData.length
     : 0
 
   // ---------------------------------------------------------------------------
@@ -208,7 +174,7 @@ export default function WinRateByStrategy({ size = 'small-long' }: WinRateByStra
                 radius={CHART_CONFIG.barRadius}
                 maxBarSize={35}
               >
-                {chartData.map((entry, index) => (
+                {chartData.map((entry: any, index: number) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.winRate >= 50 ? COLORS.profit : COLORS.loss}

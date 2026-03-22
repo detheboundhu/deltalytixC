@@ -19,7 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { WidgetCard, ChartTooltip as SharedChartTooltip } from '../widget-card'
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from "@/hooks/use-widget-data"
 import { cn, formatCurrency, formatNumber, BREAK_EVEN_THRESHOLD } from "@/lib/utils"
 import { WidgetSize } from '@/app/dashboard/types/dashboard'
 import { Switch } from "@/components/ui/switch"
@@ -115,56 +115,36 @@ export default function TradeDurationPerformance({ size = 'small-long' }: TradeD
   // ---------------------------------------------------------------------------
   // DATA HOOKS (PRESERVED - DO NOT MODIFY)
   // ---------------------------------------------------------------------------
-  const { formattedTrades } = useData()
+  const { data: baseData = [], isLoading } = useWidgetData('tradeDurationPerformance')
   const [showAverage, setShowAverage] = React.useState(false)
 
-  // ---------------------------------------------------------------------------
-  // DATA PROCESSING (PRESERVED - DO NOT MODIFY)
-  // ---------------------------------------------------------------------------
   const chartData = React.useMemo(() => {
-    const { groupTradesByExecution } = require('@/lib/utils')
-    const groupedTrades = groupTradesByExecution(formattedTrades)
+    if (!baseData) return []
+    return baseData.map((item: any) => ({
+      ...item,
+      pnl: showAverage ? item.avgPnl : item.pnl
+    }))
+  }, [baseData, showAverage])
 
-    const durationMap: Record<string, { pnl: number; trades: number; wins: number; losses: number }> = {}
+  if (isLoading) {
+    return (
+      <WidgetCard title="Duration Performance">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-pulse w-full h-[200px] bg-muted/20 rounded-xl" />
+        </div>
+      </WidgetCard>
+    )
+  }
 
-    BUCKET_ORDER.forEach(bucket => {
-      durationMap[bucket] = { pnl: 0, trades: 0, wins: 0, losses: 0 }
-    })
-
-    groupedTrades.forEach((trade: any) => {
-      if (trade.entryDate && trade.closeDate) {
-        const durationMinutes = calculateDurationMinutes(trade.entryDate, trade.closeDate)
-        const bucket = getDurationBucket(durationMinutes)
-
-        const netPnL = trade.pnl - (trade.commission || 0)
-        durationMap[bucket].pnl += netPnL
-        durationMap[bucket].trades++
-
-        if (netPnL > BREAK_EVEN_THRESHOLD) {
-          durationMap[bucket].wins++
-        } else if (netPnL < -BREAK_EVEN_THRESHOLD) {
-          durationMap[bucket].losses++
-        }
-      }
-    })
-
-    return BUCKET_ORDER.map(bucket => {
-      const data = durationMap[bucket]
-      const winRate = data.trades > 0 ? (data.wins / data.trades) * 100 : 0
-      const avgPnl = data.trades > 0 ? data.pnl / data.trades : 0
-      const displayPnl = showAverage ? avgPnl : data.pnl
-
-      return {
-        bucket,
-        pnl: displayPnl,
-        trades: data.trades,
-        wins: data.wins,
-        losses: data.losses,
-        winRate,
-        avgPnl,
-      }
-    }).filter(item => item.trades > 0)
-  }, [formattedTrades, showAverage])
+  if (baseData.length === 0) {
+    return (
+      <WidgetCard title="Duration Performance">
+        <div className="flex items-center justify-center h-full text-muted-foreground/50 text-sm">
+          No trade data available
+        </div>
+      </WidgetCard>
+    )
+  }
 
   // ---------------------------------------------------------------------------
   // SIZE-RESPONSIVE VALUES
@@ -233,7 +213,7 @@ export default function TradeDurationPerformance({ size = 'small-long' }: TradeD
                 radius={CHART_CONFIG.barRadius}
                 maxBarSize={50}
               >
-                {chartData.map((entry, index) => (
+                {chartData.map((entry: any, index: number) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.pnl > BREAK_EVEN_THRESHOLD ? COLORS.profit : entry.pnl < -BREAK_EVEN_THRESHOLD ? COLORS.loss : 'hsl(var(--muted-foreground)/0.4)'}
