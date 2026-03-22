@@ -1,28 +1,19 @@
-'use client'
-
 import { useMemo } from 'react'
 import { useData } from '@/context/data-provider'
-import { calculateAverageWinLoss, groupTradesByExecution } from '@/lib/utils'
+import { groupTradesByExecution } from '@/lib/utils'
 
 /**
  * Custom hook that provides all trading statistics calculations
  * 
- * REFACTORED: Statistics now come from the server via DataProvider's
- * useFilteredTrades() hook. This hook is a thin wrapper that merges
- * the server-computed stats with client-side grouping for advanced display.
+ * REFACTORED: Statistics now come strictly from the server via DataProvider.
+ * Removed redundant client-side win/loss math to ensure 100% consistency.
  */
 export function useTradeStatistics() {
-  const { formattedTrades, accounts, statistics, accountNumbers } = useData()
+  const { formattedTrades, accounts, statistics } = useData()
 
-  // Group trades by execution for advanced display calculations
+  // Group trades by execution for advanced display calculations (if needed by components)
   const groupedTrades = useMemo(
     () => groupTradesByExecution(formattedTrades) as any[],
-    [formattedTrades]
-  )
-
-  // Average win/loss calculations (lightweight client-side)
-  const avgWinLossStats = useMemo(
-    () => calculateAverageWinLoss(formattedTrades),
     [formattedTrades]
   )
 
@@ -39,13 +30,13 @@ export function useTradeStatistics() {
       winningStreak,
     } = statistics
 
-    const netPnlWithPayouts = cumulativePnl - cumulativeFees - totalPayouts
-    const tradableTradesCount = nbWin + nbLoss
-    const winRate = tradableTradesCount > 0 ? Math.round((nbWin / tradableTradesCount) * 1000) / 10 : 0
-    const lossRate = nbTrades > 0 ? Math.round((nbLoss / nbTrades) * 1000) / 10 : 0
-    const beRate = nbTrades > 0 ? Math.round((nbBe / nbTrades) * 1000) / 10 : 0
+    const netPnlWithPayouts = Number(cumulativePnl || 0) - Number(cumulativeFees || 0) - Number(totalPayouts || 0)
+    const tradableTradesCount = Number(nbWin || 0) + Number(nbLoss || 0)
+    const winRate = tradableTradesCount > 0 ? Math.round((Number(nbWin || 0) / tradableTradesCount) * 1000) / 10 : 0
+    const lossRate = Number(nbTrades || 0) > 0 ? Math.round((Number(nbLoss || 0) / Number(nbTrades || 0)) * 1000) / 10 : 0
+    const beRate = Number(nbTrades || 0) > 0 ? Math.round((Number(nbBe || 0) / Number(nbTrades || 0)) * 1000) / 10 : 0
 
-    // Server stats may include streak properties — safely access them
+    // Server stats safely cast
     const stats = statistics as any
     
     return {
@@ -54,11 +45,11 @@ export function useTradeStatistics() {
       lossRate,
       beRate,
       winningStreak,
-      biggestWin: statistics.biggestWin ?? 0,
-      biggestLoss: statistics.biggestLoss ?? 0,
-      avgWin: avgWinLossStats.avgWin,
-      avgLoss: avgWinLossStats.avgLoss,
-      riskRewardRatio: avgWinLossStats.riskRewardRatio,
+      biggestWin: stats.biggestWin ?? 0,
+      biggestLoss: stats.biggestLoss ?? 0,
+      avgWin: stats.avgWin ?? 0,
+      avgLoss: stats.avgLoss ?? 0,
+      riskRewardRatio: stats.riskRewardRatio ?? 0,
       currentTradeStreak: stats.currentTradeStreak ?? 0,
       bestTradeStreak: stats.bestTradeStreak ?? 0,
       worstTradeStreak: stats.worstTradeStreak ?? 0,
@@ -66,25 +57,16 @@ export function useTradeStatistics() {
       bestDayStreak: stats.bestDayStreak ?? 0,
       worstDayStreak: stats.worstDayStreak ?? 0,
     }
-  }, [statistics, avgWinLossStats])
+  }, [statistics])
 
   return {
-    // Core statistics from server
     ...statistics,
-
-    // Derived statistics
     ...derivedStats,
-
-    // Average win/loss data
-    ...avgWinLossStats,
-
-    // Server stats metadata (backward-compatible)
     isLoadingServerStats: false,
     serverError: null,
     refetchServerStats: () => {},
-
-    // Raw trade data for advanced calculations
     formattedTrades,
-    accounts
+    accounts,
+    groupedTrades
   }
 }

@@ -15,45 +15,18 @@ import { prisma } from '@/lib/prisma'
 import { classifyTrade } from '@/lib/utils'
 import { getTradingSession } from '@/lib/time-utils'
 import { groupTradesByExecution } from '@/lib/utils'
+import { 
+  calculateRMultiple, 
+  calculateRSquared, 
+  calculatePeakToTroughDrawdown,
+  calculateExpectancy,
+  calculateProfitFactor,
+  calculateRecoveryFactor
+} from '@/lib/math/performance-metrics'
 
-/**
- * Calculates the R-Multiple using the Pure Price Method (Option 1).
- * Designed for server-side execution to prevent unit mismatch traps.
- */
-export function calculateRMultiple(
-  side: string | null | undefined,
-  entryPrice: number | string,
-  exitPrice: number | string,
-  stopLoss: number | string | null | undefined
-): number {
-  const sideStr = (side || '').toUpperCase()
-  const entry = typeof entryPrice === 'string' ? parseFloat(entryPrice) : entryPrice
-  const exit = typeof exitPrice === 'string' ? parseFloat(exitPrice) : exitPrice
-  const sl = typeof stopLoss === 'string' ? parseFloat(stopLoss) : (stopLoss || 0)
+export { calculateRMultiple }
 
-  // Edge Case 1: Missing, zero, or invalid stop loss
-  if (!sl || sl === 0 || sl === entry || isNaN(entry) || isNaN(exit) || isNaN(sl)) {
-    return 0
-  }
-
-  let riskPoints: number
-  let pnlPoints: number
-
-  if (sideStr === 'BUY' || sideStr === 'LONG') {
-    riskPoints = entry - sl
-    pnlPoints = exit - entry
-  } else if (sideStr === 'SELL' || sideStr === 'SHORT') {
-    riskPoints = sl - entry
-    pnlPoints = entry - exit
-  } else {
-    return 0
-  }
-
-  // Edge Case 2: Inverted Stop Loss
-  if (riskPoints <= 0) return 0
-
-  return pnlPoints / riskPoints
-}
+// Moved to @/lib/math/performance-metrics.ts
 
 // ===========================================
 // TYPES (Report-specific DTOs)

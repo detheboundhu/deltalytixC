@@ -68,51 +68,7 @@ function ProgressBar({ progress, color, label, detail }: {
   )
 }
 
-/** Streak calc — combined from old current-streak.tsx */
-function calculateStreaks(trades: any[]) {
-  if (!trades?.length) {
-    return { currentStreak: 0, isWinning: true, longestWinStreak: 0, longestLoseStreak: 0 }
-  }
 
-  const sorted = [...trades].sort((a, b) => {
-    const dateA = a.entryDate ? new Date(a.entryDate).getTime() : 0
-    const dateB = b.entryDate ? new Date(b.entryDate).getTime() : 0
-    return dateB - dateA
-  })
-
-  let currentStreak = 0
-  const firstResult = (sorted[0].pnl || 0) > 0
-  const isWinning = firstResult
-
-  for (const trade of sorted) {
-    if (((trade.pnl || 0) > 0) === firstResult) currentStreak++
-    else break
-  }
-
-  const chronological = [...trades].sort((a, b) => {
-    const dateA = a.entryDate ? new Date(a.entryDate).getTime() : 0
-    const dateB = b.entryDate ? new Date(b.entryDate).getTime() : 0
-    return dateA - dateB
-  })
-
-  let longestWinStreak = 0, longestLoseStreak = 0, tempStreak = 0
-  let lastWasWin: boolean | null = null
-
-  for (const trade of chronological) {
-    const isWin = (trade.pnl || 0) > 0
-    if (lastWasWin === null) { tempStreak = 1; lastWasWin = isWin }
-    else if (isWin === lastWasWin) { tempStreak++ }
-    else {
-      if (lastWasWin) longestWinStreak = Math.max(longestWinStreak, tempStreak)
-      else longestLoseStreak = Math.max(longestLoseStreak, tempStreak)
-      tempStreak = 1; lastWasWin = isWin
-    }
-  }
-  if (lastWasWin) longestWinStreak = Math.max(longestWinStreak, tempStreak)
-  else if (lastWasWin === false) longestLoseStreak = Math.max(longestLoseStreak, tempStreak)
-
-  return { currentStreak, isWinning, longestWinStreak, longestLoseStreak }
-}
 
 export default function TradingOverview({ size = 'large' }: TradingOverviewProps) {
   const { data: serverData } = useWidgetData('tradingOverview')

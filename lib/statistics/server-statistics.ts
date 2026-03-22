@@ -6,8 +6,13 @@
 import { prisma } from '@/lib/prisma'
 import { unstable_cache } from 'next/cache'
 import { calculateAccountBalances } from '@/lib/utils/balance-calculator'
-import { groupTradesByExecution } from '@/lib/utils'
+import { groupTradesByExecution, BREAK_EVEN_THRESHOLD } from '@/lib/utils'
 import { CACHE_DURATION_SHORT } from '@/lib/constants'
+import { 
+  calculateProfitFactor, 
+  calculateRecoveryFactor, 
+  calculateExpectancy 
+} from '@/lib/math/performance-metrics'
 
 // ===========================================
 // TYPES
@@ -79,15 +84,17 @@ function calculateStreaks(groupedTrades: any[]): {
   // Calculate trade streaks
   for (let i = 0; i < groupedTrades.length; i++) {
     const trade = groupedTrades[i]
-    const netPnl = trade.pnl + (trade.commission || 0)  // Commission is negative
-    const isWin = netPnl > 0
-
-    if (isWin) {
+    const netPnl = Number(trade.pnl || 0) + Number(trade.commission || 0)
+    
+    if (netPnl > BREAK_EVEN_THRESHOLD) {
       tempTradeStreak = tempTradeStreak >= 0 ? tempTradeStreak + 1 : 1
       bestTradeStreak = Math.max(bestTradeStreak, tempTradeStreak)
-    } else if (netPnl < 0) {
+    } else if (netPnl < -BREAK_EVEN_THRESHOLD) {
       tempTradeStreak = tempTradeStreak <= 0 ? tempTradeStreak - 1 : -1
       worstTradeStreak = Math.min(worstTradeStreak, tempTradeStreak)
+    } else {
+      // Break-even trades don't break streaks? (Standard usually says they don't, 
+      // but they don't increment either. Let's keep logic as is but use threshold)
     }
 
     if (i === groupedTrades.length - 1) {
@@ -117,15 +124,14 @@ function calculateStreaks(groupedTrades: any[]): {
   for (let i = 0; i < sortedDays.length; i++) {
     const dayTrades = tradesByDay[sortedDays[i]]
     const dayPnl = dayTrades.reduce(
-      (sum: number, t: any) => sum + (t.pnl + (t.commission || 0)),
+      (sum: number, t: any) => sum + (Number(t.pnl || 0) + Number(t.commission || 0)),
       0
     )
-    const isWinDay = dayPnl > 0
 
-    if (isWinDay) {
+    if (dayPnl > BREAK_EVEN_THRESHOLD) {
       tempDayStreak = tempDayStreak >= 0 ? tempDayStreak + 1 : 1
       bestDayStreak = Math.max(bestDayStreak, tempDayStreak)
-    } else if (dayPnl < 0) {
+    } else if (dayPnl < -BREAK_EVEN_THRESHOLD) {
       tempDayStreak = tempDayStreak <= 0 ? tempDayStreak - 1 : -1
       worstDayStreak = Math.min(worstDayStreak, tempDayStreak)
     }
@@ -225,15 +231,16 @@ async function calculateStatisticsCore(
   const groupedTrades = groupTradesByExecution(trades as any[]) as any[]
 
   // Calculate win/loss counts
-  const winningTrades = groupedTrades.filter(
-    t => t.pnl + (t.commission || 0) > 0
-  ).length
-  const losingTrades = groupedTrades.filter(
-    t => t.pnl + (t.commission || 0) < 0
-  ).length
-  const breakEvenTrades = groupedTrades.filter(
-    t => t.pnl + (t.commission || 0) === 0
-  ).length
+  const wins = groupedTrades.filter(
+    t => (Number(t.pnl || 0) + Number(t.commission || 0)) > BREAK_EVEN_THRESHOLD
+  )
+  const losses = groupedTrades.filter(
+    t => (Number(t.pnl || 0) + Number(t.commission || 0)) < -BREAK_EVEN_THRESHOLD
+  )
+  const breakEvenTradesCount = groupedTrades.length - wins.length - losses.length
+
+  const winningTrades = wins.length
+  const losingTrades = losses.length
 
   // Calculate rates
   const tradableCount = winningTrades + losingTrades
@@ -245,55 +252,35 @@ async function calculateStatisticsCore(
     : 0
 
   // Calculate P&L metrics
-  const grossProfits = groupedTrades.reduce((sum: number, t: any) => {
-    const netPnL = t.pnl + (t.commission || 0)
-    return netPnL > 0 ? sum + netPnL : sum
+  const grossProfits = wins.reduce((sum: number, t: any) => {
+    return sum + (Number(t.pnl || 0) + Number(t.commission || 0))
   }, 0)
 
   const grossLosses = Math.abs(
-    groupedTrades.reduce((sum, t) => {
-      const netPnL = t.pnl + (t.commission || 0)
-      return netPnL < 0 ? sum + netPnL : sum
+    losses.reduce((sum, t) => {
+      return sum + (Number(t.pnl || 0) + Number(t.commission || 0))
     }, 0)
   )
 
   const totalPnL = groupedTrades.reduce(
-    (sum: number, t: any) => sum + (t.pnl + (t.commission || 0)),
+    (sum: number, t: any) => sum + (Number(t.pnl || 0) + Number(t.commission || 0)),
     0
   )
 
-  const profitFactor =
-    grossLosses === 0
-      ? grossProfits > 0
-        ? Infinity
-        : 0
-      : grossProfits / grossLosses
+  const profitFactor = calculateProfitFactor(grossProfits, grossLosses)
 
   // Calculate averages
-  const wins = groupedTrades.filter(t => t.pnl + (t.commission || 0) > 0)
-  const losses = groupedTrades.filter(t => t.pnl + (t.commission || 0) < 0)
-
-  const avgWin =
-    wins.length > 0
-      ? wins.reduce((sum, t) => sum + (t.pnl + (t.commission || 0)), 0) /
-      wins.length
-      : 0
-  const avgLoss =
-    losses.length > 0
-      ? losses.reduce(
-        (sum, t) => sum + Math.abs(t.pnl + (t.commission || 0)),
-        0
-      ) / losses.length
-      : 0
+  const avgWin = winningTrades > 0 ? grossProfits / winningTrades : 0
+  const avgLoss = losingTrades > 0 ? grossLosses / losingTrades : 0
   const riskRewardRatio = avgLoss > 0 ? avgWin / avgLoss : 0
 
   // Find biggest win/loss
   const biggestWin = Math.max(
     0,
-    ...groupedTrades.map(t => t.pnl + (t.commission || 0))
+    ...groupedTrades.map(t => Number(t.pnl || 0) + Number(t.commission || 0))
   )
   const biggestLoss = Math.abs(
-    Math.min(0, ...groupedTrades.map(t => t.pnl + (t.commission || 0)))
+    Math.min(0, ...groupedTrades.map(t => Number(t.pnl || 0) + Number(t.commission || 0)))
   )
 
   // Calculate streaks
@@ -342,7 +329,7 @@ async function calculateStatisticsCore(
     totalTrades: groupedTrades.length,
     winningTrades,
     losingTrades,
-    breakEvenTrades,
+    breakEvenTrades: breakEvenTradesCount,
     winRate,
     lossRate,
     profitFactor: Math.round(profitFactor * 100) / 100,

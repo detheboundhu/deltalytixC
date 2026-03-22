@@ -1,10 +1,13 @@
 import { Trade, Account } from '@prisma/client'
 import { startOfMonth, endOfMonth, parseISO, isWithinInterval, startOfWeek, endOfWeek, format, differenceInDays, getDay } from 'date-fns'
 import { getTradingSession } from '@/lib/time-utils'
-import { classifyTrade } from '@/lib/utils'
+import { classifyTrade, BREAK_EVEN_THRESHOLD } from '@/lib/utils'
 import { CHART_COLORS } from '@/app/dashboard/components/widget-card'
-import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
-import { calculateRMultiple } from '@/lib/statistics/report-statistics'
+import { 
+  calculateRMultiple, 
+  calculatePeakToTroughDrawdown,
+  calculateExpectancy 
+} from '@/lib/math/performance-metrics'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -399,8 +402,8 @@ export function calculateTradingOverviewKpis(trades: Partial<Trade>[]) {
     return isWithinInterval(new Date(t.entryDate), { start: weekStart, end: weekEnd })
   })
 
-  const monthWins = monthTrades.filter(t => (t.pnl || 0) > 0).length
-  const weekPnL = weekTrades.reduce((sum, t) => sum + (t.pnl || 0), 0)
+  const monthWins = monthTrades.filter(t => (Number(t.pnl || 0) + Number(t.commission || 0)) > BREAK_EVEN_THRESHOLD).length
+  const weekPnL = weekTrades.reduce((sum, t) => sum + (Number(t.pnl || 0) + Number(t.commission || 0)), 0)
 
   const currentStats = { 
     monthTrades: monthTrades.length, 
@@ -408,35 +411,33 @@ export function calculateTradingOverviewKpis(trades: Partial<Trade>[]) {
     weekPnL 
   }
 
-  let peak = 0, maxDrawdown = 0, runningTotal = 0
   const sortedByTime = [...trades].sort((a, b) => (new Date(a.entryDate || 0).getTime()) - (new Date(b.entryDate || 0).getTime()))
+  const pnls = sortedByTime.map(t => (Number(t.pnl || 0) + Number(t.commission || 0)))
   
-  sortedByTime.forEach(trade => {
-    runningTotal += trade.pnl || 0
-    if (runningTotal > peak) peak = runningTotal
-    const dd = peak - runningTotal
-    if (dd > maxDrawdown) maxDrawdown = dd
-  })
+  const { maxDrawdown } = calculatePeakToTroughDrawdown(pnls)
 
-  const losses = trades.filter(t => (t.pnl || 0) < 0)
-  const largestLoss = Math.abs(Math.min(...losses.map(t => t.pnl || 0), 0))
-  const avgLoss = losses.length > 0 ? losses.reduce((sum, t) => sum + Math.abs(t.pnl || 0), 0) / losses.length : 0
+  const losses = trades.filter(t => (Number(t.pnl || 0) + Number(t.commission || 0)) < -BREAK_EVEN_THRESHOLD)
+  const largestLoss = Math.abs(Math.min(...losses.map(t => (Number(t.pnl || 0) + Number(t.commission || 0))), 0))
+  const avgLoss = losses.length > 0 ? losses.reduce((sum, t) => sum + Math.abs(Number(t.pnl || 0) + Number(t.commission || 0)), 0) / losses.length : 0
 
   let lossStreak = 0
   for (let i = sortedByTime.length - 1; i >= 0; i--) {
-    if ((sortedByTime[i].pnl || 0) < 0) lossStreak++
-    else break
+    const netPnl = (Number(sortedByTime[i].pnl || 0) + Number(sortedByTime[i].commission || 0))
+    if (netPnl < -BREAK_EVEN_THRESHOLD) lossStreak++
+    else if (netPnl > BREAK_EVEN_THRESHOLD) break
   }
 
   const riskStats = { maxDrawdown, largestLoss, avgLoss, lossStreak }
 
   const sortedDesc = [...sortedByTime].reverse()
   let currentStreak = 0
-  const firstResult = (sortedDesc[0].pnl || 0) > 0
-  const isWinning = firstResult
+  const firstNetPnl = (Number(sortedDesc[0].pnl || 0) + Number(sortedDesc[0].commission || 0))
+  const isWinning = firstNetPnl > BREAK_EVEN_THRESHOLD
+  const wasWin = isWinning
 
   for (const trade of sortedDesc) {
-    if (((trade.pnl || 0) > 0) === firstResult) currentStreak++
+    const netPnl = (Number(trade.pnl || 0) + Number(trade.commission || 0))
+    if (netPnl > BREAK_EVEN_THRESHOLD === wasWin) currentStreak++
     else break
   }
 

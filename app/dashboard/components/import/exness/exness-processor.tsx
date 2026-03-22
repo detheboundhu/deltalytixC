@@ -55,9 +55,15 @@ const ExnessProcessor = ({
         const quantity = parseFloat(row[headers.indexOf('lots')]) || 0
         const entryPrice = parseFloat(row[headers.indexOf('opening_price')]) || 0
         const closePrice = parseFloat(row[headers.indexOf('closing_price')]) || 0
-        const commission = parseFloat(row[headers.indexOf('commission_usd')]) || 0
-        const swap = parseFloat(row[headers.indexOf('swap_usd')]) || 0
-        const pnl = parseFloat(row[headers.indexOf('profit_usd')]) || 0
+        
+        // Handle commission, swap and profit possibly missing the _usd suffix
+        const commissionIdx = headers.indexOf('commission_usd') !== -1 ? headers.indexOf('commission_usd') : headers.indexOf('commission')
+        const swapIdx = headers.indexOf('swap_usd') !== -1 ? headers.indexOf('swap_usd') : headers.indexOf('swap')
+        const profitIdx = headers.indexOf('profit_usd') !== -1 ? headers.indexOf('profit_usd') : headers.indexOf('profit')
+
+        const commission = commissionIdx !== -1 ? parseFloat(row[commissionIdx]) || 0 : 0
+        const swap = swapIdx !== -1 ? parseFloat(row[swapIdx]) || 0 : 0
+        const pnl = profitIdx !== -1 ? parseFloat(row[profitIdx]) || 0 : 0
         
         // Handle stop loss and take profit (can be empty)
         const stopLossRaw = row[headers.indexOf('stop_loss')]

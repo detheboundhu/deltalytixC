@@ -1,4 +1,11 @@
 import { groupTradesByExecution, BREAK_EVEN_THRESHOLD } from '@/lib/utils'
+import { 
+  calculateRSquared, 
+  calculatePeakToTroughDrawdown, 
+  calculateRecoveryFactor,
+  calculateProfitFactor,
+  calculateExpectancy 
+} from '@/lib/math/performance-metrics'
 
 /**
  * Performance Score Calculation
@@ -140,21 +147,9 @@ export function calculateRecoveryFactorScore(recoveryFactor: number): number {
 }
 
 /**
- * Calculate Consistency Score
- * Formula: If avg profit < 0, then 0
- * Otherwise: 100 - ((Std Dev of Profits / Total Profit) × 100)
+ * Consistency Score (Input Value)
+ * Now calculated via R-Squared in calculateMetricsFromTrades
  */
-export function calculateConsistencyScore(
-  avgProfit: number,
-  stdDevProfits: number,
-  totalProfit: number
-): number {
-  if (avgProfit < 0) return 0
-  if (totalProfit === 0) return 0
-
-  const score = 100 - ((stdDevProfits / totalProfit) * 100)
-  return Math.max(0, Math.min(100, score))
-}
 
 /**
  * Calculate Complete Performance Score
@@ -211,15 +206,12 @@ export interface Trade {
 }
 
 export function calculateMetricsFromTrades(trades: Trade[]): ZellaScoreMetrics | null {
-  // Return null when there's no data - let components handle empty state
   if (trades.length === 0) {
     return null
   }
 
-  // CRITICAL FIX: Group trades to handle partial closes
   const groupedTrades = groupTradesByExecution(trades as any)
 
-  // Calculate wins and losses using NET P&L (commission is negative)
   const wins = groupedTrades.filter((t: any) => {
     const netPnL = t.pnl + (t.commission || 0)
     return netPnL > BREAK_EVEN_THRESHOLD
@@ -230,60 +222,34 @@ export function calculateMetricsFromTrades(trades: Trade[]): ZellaScoreMetrics |
     return netPnL < -BREAK_EVEN_THRESHOLD
   })
 
-  // Gross win/loss amounts
   const grossWin = wins.reduce((sum: number, t: any) => sum + (t.pnl + (t.commission || 0)), 0)
   const grossLoss = Math.abs(losses.reduce((sum: number, t: any) => sum + (t.pnl + (t.commission || 0)), 0))
 
-  // Average Win/Loss Ratio
   const avgWin = wins.length > 0 ? grossWin / wins.length : 0
   const avgLoss = losses.length > 0 ? grossLoss / losses.length : 0
   const avgWinLoss = avgLoss > 0 ? avgWin / avgLoss : avgWin > 0 ? 5 : 0
 
-  // Trade Win Percentage (exclude break-even trades - industry standard)
   const tradableCount = wins.length + losses.length
   const tradeWinPercentage = tradableCount > 0 ? (wins.length / tradableCount) * 100 : 0
-
-  // Profit Factor
-  const profitFactor = grossLoss > 0 ? grossWin / grossLoss : grossWin > 0 ? 5 : 0
-
-  // Calculate Max Drawdown using GROUPED trades for consistency
-  let peak = 0
-  let maxDrawdown = 0
-  let runningPnL = 0
 
   const sortedTrades = [...groupedTrades].sort((a, b) =>
     new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime()
   )
 
-  sortedTrades.forEach(trade => {
-    runningPnL += (trade.pnl + (trade.commission || 0))
-    if (runningPnL > peak) peak = runningPnL
-    const drawdown = peak - runningPnL
-    if (drawdown > maxDrawdown) maxDrawdown = drawdown
-  })
-
+  const pnls = sortedTrades.map((t: any) => (t.pnl + (t.commission || 0)))
+  const { maxDrawdown, peak } = calculatePeakToTroughDrawdown(pnls)
   const maxDrawdownPercent = peak > 0 ? (maxDrawdown / peak) * 100 : 0
 
-  // Net Profit using GROUPED trades
-  const netProfit = groupedTrades.reduce((sum: number, t: any) => sum + (t.pnl + (t.commission || 0)), 0)
+  const netProfit = pnls.reduce((sum: number, pnl: number) => sum + pnl, 0)
+  const recoveryFactor = calculateRecoveryFactor(netProfit, maxDrawdown)
+  const profitFactor = calculateProfitFactor(grossWin, grossLoss)
 
-  // Recovery Factor
-  const recoveryFactor = maxDrawdown > 0 ? netProfit / maxDrawdown : netProfit > 0 ? 5 : 0
-
-  // Consistency Score using GROUPED trades for consistency
-  const dailyPnL: Record<string, number> = {}
-  groupedTrades.forEach((trade: any) => {
-    const date = trade.entryDate.split('T')[0]
-    if (!dailyPnL[date]) dailyPnL[date] = 0
-    dailyPnL[date] += (trade.pnl + (trade.commission || 0))
+  let currentEquity = 0
+  const equityCurve = pnls.map((pnl: number) => {
+    currentEquity += pnl
+    return currentEquity
   })
-
-  const dailyReturns = Object.values(dailyPnL)
-  const avgDaily = dailyReturns.reduce((sum, val) => sum + val, 0) / dailyReturns.length
-  const variance = dailyReturns.reduce((sum, val) => sum + Math.pow(val - avgDaily, 2), 0) / dailyReturns.length
-  const stdDev = Math.sqrt(variance)
-
-  const consistencyScore = calculateConsistencyScore(avgDaily, stdDev, netProfit)
+  const consistencyScore = calculateRSquared(equityCurve)
 
   return {
     avgWinLoss,
