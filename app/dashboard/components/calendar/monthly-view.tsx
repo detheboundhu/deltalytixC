@@ -65,96 +65,125 @@ const DayCell = memo(function DayCell({
     <div
       onClick={!isMiniCalendar && onClick ? onClick : undefined}
       className={cn(
-        "relative flex flex-col items-center justify-center rounded-[6px] border transition-all duration-150 select-none group min-h-[50px] md:min-h-[70px]",
-        !isMiniCalendar && "min-h-[85px] md:min-h-[100px] cursor-pointer",
+        "relative flex flex-col items-center justify-center rounded-[4px] md:rounded-[6px] border transition-all duration-150 select-none group",
+        isMiniCalendar ? "aspect-square" : "aspect-square md:aspect-auto md:min-h-[100px] cursor-pointer",
 
         // No trades — dark neutral
-        !hasTrades && isCurrentMonth && "bg-[#16181d] border-[#22252b] hover:border-[#333842]",
+        !hasTrades && isCurrentMonth && "bg-transparent md:bg-[#16181d] border-transparent md:border-[#22252b] hover:border-border/30",
 
         // Profit — dark green
-        hasTrades && isProfit && "bg-[#092a1a] border-[#14472a] hover:bg-[#0c3823] hover:border-[#1b5c37]",
+        hasTrades && isProfit && "bg-long/10 md:bg-[#092a1a] border-long/40 md:border-[#14472a] hover:bg-long/20 md:hover:bg-[#0c3823] hover:border-long/50 md:hover:border-[#1b5c37]",
 
         // Loss — dark red
-        hasTrades && isLoss && "bg-[#3b1212] border-[#591c1c] hover:bg-[#4a1717] hover:border-[#732424]",
+        hasTrades && isLoss && "bg-short/10 md:bg-[#3b1212] border-short/40 md:border-[#591c1c] hover:bg-short/20 md:hover:bg-[#4a1717] hover:border-short/50 md:hover:border-[#732424]",
 
         // Breakeven
-        hasTrades && isBreakEven && "bg-[#1f2229] border-[#2c313a]",
+        hasTrades && isBreakEven && "bg-muted/30 md:bg-[#1f2229] border-border/30 md:border-[#2c313a]",
 
         // Not current month
         !isCurrentMonth && "opacity-20 pointer-events-none",
-
-        // Today ring
-        isTodayDate && isCurrentMonth && "ring-1 ring-primary ring-offset-0",
+        
+        // Today styling for simple cell
+        isTodayDate && isCurrentMonth && !isMiniCalendar && "ring-1 ring-primary ring-offset-0 md:ring-1",
       )}
     >
-      {/* Note Icon — top left */}
-      {hasNotes && (
-        <div className="absolute top-1.5 left-1.5 opacity-70">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
+      {/* =======================
+          MOBILE & MINI VIEW (Simple)
+          ======================= */}
+      <div className={cn(
+        "flex flex-col items-center justify-center w-full h-full relative",
+        !isMiniCalendar && "md:hidden"
+      )}>
+        {/* Simple Note Dot */}
+        {hasNotes && (
+          <div className="absolute top-[10%] right-[10%] md:top-1 md:right-1.5 w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-primary" />
+        )}
+        
+        {/* Centered Date Number for Simple View */}
+        <span
+          className={cn(
+            "text-sm md:text-sm font-semibold",
+            isTodayDate && isCurrentMonth
+              ? "text-primary-foreground bg-primary rounded-full w-6 h-6 flex items-center justify-center"
+              : "text-foreground/80",
+          )}
+        >
+          {format(date, 'd')}
+        </span>
+      </div>
+
+      {/* =======================
+          DESKTOP VIEW (Detailed)
+          ======================= */}
+      <div className={cn(
+        "hidden flex-col w-full h-full relative p-1.5",
+        !isMiniCalendar && "md:flex"
+      )}>
+        {/* Note Icon — top left */}
+        {hasNotes && (
+          <div className="absolute top-1.5 left-1.5 opacity-70">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </div>
+        )}
+
+        {/* Day number — top right  */}
+        <span
+          className={cn(
+            "absolute top-1.5 right-1.5 font-bold leading-none",
+            isTodayDate
+              ? "text-primary-foreground bg-primary rounded-full w-5 h-5 flex items-center justify-center text-[10px]"
+              : "text-muted-foreground/60 text-[11px]",
+          )}
+        >
+          {format(date, 'd')}
+        </span>
+
+        {/* Main Content Container (P&L, trades, stats) */}
+        <div className="flex flex-col items-center justify-center w-full mt-4">
+          {/* P&L */}
+          {hasTrades && visibleStats.pnl && (
+            <div
+              className={cn(
+                "font-bold tracking-tight text-center text-[14px] lg:text-[16px] xl:text-[20px]",
+                isProfit ? "text-[#3ce07e]" : isLoss ? "text-[#ff4c4c]" : "text-white"
+              )}
+            >
+              {dayData.pnl < 0 ? `-$${Math.abs(dayData.pnl).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : `$${dayData.pnl.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`}
+            </div>
+          )}
+
+          {/* Trade Count */}
+          {hasTrades && visibleStats.trades && (
+            <span className="font-medium leading-none text-white/80 text-[10px] lg:text-[11px] mt-0.5 xl:mt-1">
+              {dayData.tradeNumber} trade{dayData.tradeNumber !== 1 ? 's' : ''}
+            </span>
+          )}
+
+          {/* Secondary Stats Row (R & WinRate) */}
+          {hasTrades && (
+            <div className="flex flex-wrap items-center justify-center gap-0.5 mt-1 xl:mt-1.5 w-full">
+              {visibleStats.rMultiple && dayData.dailyRMultiple !== undefined && (
+                <span className={cn(
+                  "text-[9px] lg:text-[10px] font-medium opacity-80 whitespace-nowrap",
+                  isProfit ? "text-[#3ce07e]" : isLoss ? "text-[#ff4c4c]" : "text-white"
+                )}>
+                  {dayData.dailyRMultiple.toFixed(2)}R{visibleStats.winRate ? ',' : ''}
+                </span>
+              )}
+              {visibleStats.winRate && (
+                <span className={cn(
+                  "text-[9px] lg:text-[10px] font-medium opacity-80 ml-0.5 whitespace-nowrap",
+                  isProfit ? "text-[#3ce07e]" : isLoss ? "text-[#ff4c4c]" : "text-white"
+                )}>
+                  {winRateValue.toFixed(1)}%
+                </span>
+              )}
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Day number — top right  */}
-      <span
-        className={cn(
-          "absolute top-1 right-1.5 font-semibold leading-none",
-          isTodayDate
-            ? "text-primary-foreground bg-primary rounded-full w-4.5 h-4.5 flex items-center justify-center text-[10px]"
-            : "text-muted-foreground/60 text-[11px]",
-        )}
-      >
-        {format(date, 'd')}
-      </span>
-
-      {/* Main Content Container */}
-      <div className="flex flex-col items-center justify-center w-full px-1 mt-3">
-        {/* P&L */}
-        {hasTrades && visibleStats.pnl && (
-          <div
-            className={cn(
-              "font-bold tracking-tight text-center",
-              isMiniCalendar ? "text-[11px]" : "text-[14px] md:text-[16px]",
-              isProfit ? "text-[#3ce07e]" : isLoss ? "text-[#ff4c4c]" : "text-white"
-            )}
-          >
-            {dayData.pnl > 0 && !isMiniCalendar ? "" : ""}{isMiniCalendar ? (dayData.pnl > 0 ? "+" : "") : ""}{isMiniCalendar ? formatCompact(dayData.pnl) : (dayData.pnl < 0 ? `-$${Math.abs(dayData.pnl).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : `$${dayData.pnl.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`)}
-          </div>
-        )}
-
-        {/* Trade Count */}
-        {hasTrades && visibleStats.trades && (
-          <span className={cn(
-            "font-medium leading-none text-white/80",
-            isMiniCalendar ? "text-[8px] mt-0.5" : "text-[10px] md:text-[11px] mt-0.5"
-          )}>
-            {dayData.tradeNumber} trade{dayData.tradeNumber !== 1 ? 's' : ''}
-          </span>
-        )}
-
-        {/* Secondary Stats Row (R & WinRate) */}
-        {hasTrades && !isMiniCalendar && (
-          <div className="flex items-center justify-center gap-0.5 mt-1.5 w-full">
-            {visibleStats.rMultiple && dayData.dailyRMultiple !== undefined && (
-              <span className={cn(
-                "text-[9px] font-medium opacity-80",
-                isProfit ? "text-[#3ce07e]" : isLoss ? "text-[#ff4c4c]" : "text-white"
-              )}>
-                {dayData.dailyRMultiple > 0 ? '' : ''}{dayData.dailyRMultiple.toFixed(2)}R{visibleStats.winRate ? ',' : ''}
-              </span>
-            )}
-            {visibleStats.winRate && (
-              <span className={cn(
-                "text-[9px] font-medium opacity-80 ml-0.5",
-                isProfit ? "text-[#3ce07e]" : isLoss ? "text-[#ff4c4c]" : "text-white"
-              )}>
-                {winRateValue.toFixed(1)}%
-              </span>
-            )}
-          </div>
-        )}
       </div>
     </div>
   )
@@ -282,7 +311,7 @@ export default function MonthlyView({
 
   return (
     <div className="flex h-full w-full overflow-x-auto overflow-y-hidden">
-      <div className={cn("flex flex-1 min-w-[700px] md:min-w-0 h-full", isMiniCalendar && "min-w-[400px]")}>
+      <div className={cn("flex flex-1 w-full md:min-w-0 h-full", isMiniCalendar && "min-w-[400px]")}>
         {/* Main Calendar Grid */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Weekday Headers */}
