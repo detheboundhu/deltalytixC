@@ -117,7 +117,7 @@ function LoadingSkeleton() {
 export function DataManagementCard() {
   const router = useRouter()
   const user = useUserStore((state) => state.user)
-  const { accounts: allAccounts, isLoading: accountsLoading, refetch: refetchAccounts } = useAccounts({ includeArchived: true, includeFailed: true })
+  const { accounts: allAccounts, isLoading: accountsLoading, refetch: refetchAccounts } = useAccounts({ includeFailed: true })
 
   const { refreshTrades } = useData()
   const [deleteLoading, setDeleteLoading] = useState(false)
