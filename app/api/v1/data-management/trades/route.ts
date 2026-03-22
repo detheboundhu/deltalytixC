@@ -31,13 +31,38 @@ export async function GET(request: NextRequest) {
     // This is for the Data Management "everything" view
     const [trades, total] = await Promise.all([
       prisma.trade.findMany({
-        where: { userId: user.id },
+        where: { 
+          userId: user.id,
+          // Exclude trades from pending/pending_approval accounts
+          OR: [
+            { phaseAccountId: null },
+            {
+              PhaseAccount: {
+                NOT: {
+                  status: { in: ['pending', 'pending_approval'] }
+                }
+              }
+            }
+          ]
+        },
         orderBy: { exitTime: 'desc' },
         skip: offset,
         take: limit,
       }),
       prisma.trade.count({
-        where: { userId: user.id }
+        where: { 
+          userId: user.id,
+          OR: [
+            { phaseAccountId: null },
+            {
+              PhaseAccount: {
+                NOT: {
+                  status: { in: ['pending', 'pending_approval'] }
+                }
+              }
+            }
+          ]
+        }
       })
     ])
 

@@ -87,7 +87,11 @@ export async function GET(request: NextRequest) {
     propFirmAccounts.forEach(master => {
       if (master.PhaseAccount && master.PhaseAccount.length > 0) {
         master.PhaseAccount.forEach((phase: any) => {
-          // IMPORTANT: No status/empty ID filtering for Data Management
+          // EXCLUDE 'pending' and 'pending_approval' per user request
+          if (phase.status === 'pending' || phase.status === 'pending_approval') {
+            return
+          }
+
           unified.push({
             id: phase.id,
             number: phase.phaseId || `PENDING-${phase.id.slice(0, 8)}`,
