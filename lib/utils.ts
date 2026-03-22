@@ -6,7 +6,6 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { StatisticsProps } from "@/app/dashboard/types/statistics"
 import { Account } from "@/context/data-provider"
 import { ExtendedTrade, MarketBias } from "@/types/trade-extended"
-import DOMPurify from 'isomorphic-dompurify'
 
 // Threshold for considering a trade break-even (e.g. +/- $5.00)
 export const BREAK_EVEN_THRESHOLD = 10.0;
@@ -215,21 +214,14 @@ export function formatTradeData(trade: Trade, timezone?: string) {
 }
 
 /**
- * Sanitize content by removing colorful emojis while preserving specific symbols.
- * Removes symbols like ⚠️, ⏳ and other colorful keyboard emojis.
- * Preserves "innocent" symbols like ⌘, →, ←, ↑, ↓.
+ * Clean content by removing colorful emojis while preserving specific symbols.
+ * Safe for server-side usage without touching the DOM.
  */
 export function cleanContent(content: any): any {
   if (content === null || content === undefined) return content;
 
   if (typeof content === 'string') {
-    // Sanitize HTML securely
-    const sanitized = DOMPurify.sanitize(content, { ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'li', 'ol'] });
-    
-    // Remove colorful emojis using regex, but preserve innocent symbols like ⌘ and →
-    return sanitized.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA70}-\u{1FAFF}]|[\u{2300}-\u{23FF}]/gu, (match) => {
-      // Preserve standard symbols we want to keep (innocent symbols)
-      // Including ⌘, →, ←, ↑, ↓, ⚡, and other non-colorful symbols
+    return content.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA70}-\u{1FAFF}]|[\u{2300}-\u{23FF}]/gu, (match) => {
       if (['⌘', '→', '←', '↑', '↓', '⚡', '✓', '✔', '✖', '✗', '©', '®', '™'].includes(match)) return match;
       return '';
     }).trim()

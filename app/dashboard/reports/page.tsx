@@ -211,13 +211,6 @@ export default function ReportsPage() {
         ruleBroken: advancedFilters.ruleBroken !== 'all' ? advancedFilters.ruleBroken : undefined,
     })
 
-    // DEV: log to diagnose empty state
-    useEffect(() => {
-        if (process.env.NODE_ENV !== 'development') return
-        console.log('Report Data:', reportData)
-        console.log('Is Loading:', isLoading)
-    }, [reportData, isLoading])
-
     // Extract server-computed data
     const tradingActivity = reportData?.tradingActivity ?? null
     const psychMetrics = reportData?.psychMetrics ?? null

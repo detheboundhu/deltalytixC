@@ -7,8 +7,12 @@ import { createSuccessResponse, createErrorResponse, ErrorResponses } from '@/li
 import { tradeQuerySchema, tradeDeleteSchema } from '@/lib/validation/trade-schemas'
 import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
 import { logActivity, getClientIp } from '@/lib/activity-logger'
+import { applyRateLimit, apiLimiter } from '@/lib/rate-limiter'
 
 export async function GET(request: NextRequest) {
+  const rateLimitRes = await applyRateLimit(request, apiLimiter)
+  if (rateLimitRes) return rateLimitRes
+
   try {
     const userId = await getUserIdSafe()
 
@@ -217,6 +221,9 @@ async function getTotalTradeCount() {
 }
 
 export async function PUT(request: NextRequest) {
+  const rateLimitRes = await applyRateLimit(request, apiLimiter)
+  if (rateLimitRes) return rateLimitRes
+
   try {
     const updatedTrade = await request.json()
 
@@ -286,6 +293,9 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const rateLimitRes = await applyRateLimit(request, apiLimiter)
+  if (rateLimitRes) return rateLimitRes
+
   try {
     const { searchParams } = new URL(request.url)
     const tradeId = searchParams.get('id')
@@ -321,6 +331,9 @@ export async function DELETE(request: NextRequest) {
 
 // New endpoint for progressive data loading
 export async function POST(request: NextRequest) {
+  const rateLimitRes = await applyRateLimit(request, apiLimiter)
+  if (rateLimitRes) return rateLimitRes
+
   try {
     const userId = await getUserIdSafe()
 

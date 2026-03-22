@@ -6,9 +6,13 @@ import { prisma } from '@/lib/prisma'
 import { getUserId } from '@/server/auth'
 import { getActiveAccountsWhereClause } from '@/lib/utils/account-filters'
 import { logActivity, getClientIp } from '@/lib/activity-logger'
+import { applyRateLimit, apiLimiter } from '@/lib/rate-limiter'
 
 // PATCH /api/accounts - Clear cache
 export async function PATCH(request: NextRequest) {
+  const rateLimitRes = await applyRateLimit(request, apiLimiter)
+  if (rateLimitRes) return rateLimitRes
+
   try {
     const { action } = await request.json()
     
@@ -29,6 +33,9 @@ export async function PATCH(request: NextRequest) {
 
 // GET /api/accounts - Optimized accounts fetching with caching
 export async function GET(request: NextRequest) {
+  const rateLimitRes = await applyRateLimit(request, apiLimiter)
+  if (rateLimitRes) return rateLimitRes
+
   try {
     // Get user ID using the proper auth function
     let authUserId: string
