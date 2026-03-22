@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { LexicalEditor } from '@/components/ui/editor/lexical-editor'
 import { Trash2, Save, Check } from 'lucide-react'
-import { cn, cleanContent } from '@/lib/utils'
+import { cn, cleanContent, formatNoteContent } from '@/lib/utils'
 import {
   Popover,
   PopoverContent,
@@ -90,7 +90,7 @@ export function TradeComment({ tradeIds, comment: initialComment, onCommentChang
             >
               {localComment ? (
                 <div className="truncate">
-                  {cleanContent(localComment)}
+                  {cleanContent(formatNoteContent(localComment))}
                 </div>
               ) : "Add comment"}
             </Button>

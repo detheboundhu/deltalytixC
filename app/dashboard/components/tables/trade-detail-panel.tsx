@@ -8,36 +8,8 @@ import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { useTags } from '@/context/tags-provider'
 import { useNewsEvents } from '@/hooks/use-news-events'
 import { formatTimeInZone, getKillzoneBadge, getTradingSession } from '@/lib/time-utils'
-import { classifyTrade, cn, formatCurrency } from '@/lib/utils'
-import DOMPurify from 'isomorphic-dompurify'
+import { classifyTrade, cn, formatCurrency, formatNoteContent } from '@/lib/utils'
 
-/**
- * Sanitize HTML securely for dangerouslySetInnerHTML.
- */
-function sanitizeHtmlContent(content: any): any {
-  if (content === null || content === undefined) return content;
-
-  if (typeof content === 'string') {
-    // Sanitize HTML securely
-    const sanitized = DOMPurify.sanitize(content, { ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'li', 'ol'] });
-    
-    // Remove colorful emojis using regex, but preserve innocent symbols like ⌘ and →
-    return sanitized.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA70}-\u{1FAFF}]|[\u{2300}-\u{23FF}]/gu, (match) => {
-      // Preserve standard symbols we want to keep (innocent symbols)
-      if (['⌘', '→', '←', '↑', '↓', '⚡', '✓', '✔', '✖', '✗', '©', '®', '™'].includes(match)) return match;
-      return '';
-    }).trim()
-  } else if (Array.isArray(content)) {
-    return content.map((item: any) => sanitizeHtmlContent(item))
-  } else if (typeof content === 'object') {
-    const cleaned: any = {}
-    for (const key in content) {
-      cleaned[key] = sanitizeHtmlContent(content[key])
-    }
-    return cleaned
-  }
-  return content
-}
 
 import { useUserStore } from '@/store/user-store'
 import {
@@ -352,10 +324,9 @@ export function TradeDetailPanel({ trade, onClose, basePath }: TradeDetailPanelP
               <section className="pt-2 border-t border-border/20">
                 <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 mb-3">Trade Journal</h3>
                 <div className="p-4 rounded-xl bg-muted/10 border border-border/40">
-                  <div
-                    className="text-sm text-foreground/80 prose prose-sm dark:prose-invert max-w-none break-words"
-                    dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(trade.comment || '') }}
-                  />
+                  <div className="text-sm text-foreground/80 whitespace-pre-wrap break-words leading-relaxed">
+                    {formatNoteContent(trade.comment)}
+                  </div>
                 </div>
               </section>
             )}

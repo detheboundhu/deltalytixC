@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
-import { BREAK_EVEN_THRESHOLD, cn } from '@/lib/utils'; // Assuming cn utility is imported from here
+import { BREAK_EVEN_THRESHOLD, classifyTrade, cn, formatCurrency, formatNoteContent } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { Eye, FileText, MoreVertical, Pencil, Plus, Trash2 as Trash } from 'lucide-react'
 import { useState } from 'react'
@@ -134,9 +134,9 @@ function StrategyBlock({
       </div>
 
       {model.notes && (
-        <p className="text-[11px] text-muted-foreground/70 mt-4 leading-relaxed line-clamp-2 italic font-medium">
-          "{model.notes}"
-        </p>
+        <div className="text-[11px] text-muted-foreground/70 mt-4 leading-relaxed line-clamp-2 italic font-medium whitespace-pre-wrap">
+          {formatNoteContent(model.notes)}
+        </div>
       )}
     </div>
   )
@@ -368,9 +368,9 @@ export default function PlaybookPage() {
             {viewModel?.notes && (
               <div className="pt-6 border-t border-border/40">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 mb-3">Model Analysis & Notes</h4>
-                <p className="text-xs text-muted-foreground italic leading-relaxed bg-muted/20 p-4 rounded-xl border border-border/10">
-                  "{viewModel.notes}"
-                </p>
+                <div className="text-xs text-muted-foreground italic leading-relaxed bg-muted/20 p-4 rounded-xl border border-border/10 whitespace-pre-wrap">
+                  {formatNoteContent(viewModel.notes)}
+                </div>
               </div>
             )}
 

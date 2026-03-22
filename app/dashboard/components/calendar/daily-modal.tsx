@@ -24,7 +24,7 @@ import { LexicalEditor } from "@/components/ui/editor/lexical-editor"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { BarChart3, BookOpen, PenLine, Save, X } from "lucide-react"
-import { cn, parsePositionTime, formatCurrency } from "@/lib/utils"
+import { cn, parsePositionTime, formatCurrency, formatNoteContent } from "@/lib/utils"
 import { Trade } from "@prisma/client"
 import { CalendarEntry } from "@/app/dashboard/types/calendar"
 import { DailyStats } from "./daily-stats"
@@ -345,7 +345,7 @@ export function CalendarModal({
                             <div>
                               <p className="text-xs text-muted-foreground mb-1">Notes</p>
                               <div className="text-sm whitespace-pre-wrap bg-muted/30 rounded-lg p-3">
-                                {note}
+                                {formatNoteContent(note)}
                               </div>
                             </div>
                           )}

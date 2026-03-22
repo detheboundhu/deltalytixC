@@ -237,6 +237,46 @@ export function cleanContent(content: any): any {
   return content
 }
 
+/**
+ * Safely extracts plain text from a Lexical JSON string or returns the string as-is if not JSON.
+ * Preserves line breaks between paragraphs and list items.
+ */
+export function formatNoteContent(content: string | null | undefined): string {
+  if (!content) return "";
+  
+  const trimmed = content.trim();
+  // Quick check: if it doesn't start with '{', it's definitely not Lexical JSON
+  if (!trimmed.startsWith('{')) return content;
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    
+    // Check if it looks like Lexical state
+    if (!parsed.root || !parsed.root.children) return content;
+
+    const extractText = (nodes: any[]): string => {
+      return nodes.map(node => {
+        if (node.text) return node.text;
+        if (node.children) {
+          const childrenText = extractText(node.children);
+          // Add line break for block-level elements
+          if (['paragraph', 'listitem', 'heading', 'quote'].includes(node.type)) {
+            return childrenText + '\n';
+          }
+          return childrenText;
+        }
+        if (node.type === 'linebreak') return '\n';
+        return "";
+      }).join("");
+    };
+
+    return extractText(parsed.root.children).trim();
+  } catch (e) {
+    // Not valid JSON, return original string
+    return content;
+  }
+}
+
 export function parsePositionTime(timeInSeconds: number): string {
   const hours = Math.floor(timeInSeconds / 3600);
   const minutesLeft = Math.floor((timeInSeconds - (hours * 3600)) / 60);
