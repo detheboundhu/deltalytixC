@@ -376,14 +376,80 @@ export default function AccountsPage() {
     }
   }, [refetchAccounts])
 
-  // Loading state
-  if (isLoading) {
-    return <AccountsPageSkeleton />
-  }
-
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background">
+      {/* Dialogs globally mounted to prevent data loss on layout reload */}
+      <CreateLiveAccountDialog open={createLiveDialogOpen} onOpenChange={setCreateLiveDialogOpen} onSuccess={handleAccountCreated} />
+      <CreatePropFirmDialog open={createPropFirmDialogOpen} onOpenChange={setCreatePropFirmDialogOpen} onSuccess={handleAccountCreated} />
+      <EditLiveAccountDialog open={editLiveDialogOpen} onOpenChange={setEditLiveDialogOpen} account={editingAccount as any} onSuccess={handleAccountUpdated} />
+      <EditPropFirmAccountDialog open={editPropFirmDialogOpen} onOpenChange={setEditPropFirmDialogOpen} account={editingAccount as any} onSuccess={handleAccountUpdated} />
+      
+      <AlertDialog open={!!deletingAccount} onOpenChange={(open) => !open && setDeletingAccount(null)}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                <Trash className="h-5 w-5 text-destructive" />
+              </div>
+              <span>Delete Account</span>
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  This will permanently delete <strong>{deletingAccount?.displayName || deletingAccount?.name || deletingAccount?.number}</strong> and all associated data including:
+                </p>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• All trades and history</li>
+                  <li>• Performance analytics</li>
+                  <li>• Screenshots and media</li>
+                  {deletingAccount?.accountType === 'prop-firm' && (
+                    <li>• Phase progress and payouts</li>
+                  )}
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-2 py-2">
+            <Label className="text-sm">
+              Type <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
+                {deletingAccount?.displayName || deletingAccount?.name || deletingAccount?.number}
+              </code> to confirm
+            </Label>
+            <Input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder={deletingAccount?.displayName || deletingAccount?.name || deletingAccount?.number}
+              className="font-mono text-sm"
+              onKeyDown={(e) => {
+                 if (e.key === 'Enter' && deleteConfirmText === (deletingAccount?.displayName || deletingAccount?.name || deletingAccount?.number)) confirmDeleteAccount()
+              }}
+            />
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeletingAccount(null)
+              setDeleteConfirmText('')
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteAccount}
+              disabled={deleteConfirmText !== (deletingAccount?.displayName || deletingAccount?.name || deletingAccount?.number)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Primary Layout conditional guard */}
+      {isLoading && serverAccounts.length === 0 ? (
+        <AccountsPageSkeleton />
+      ) : (
+        <div className="min-h-screen bg-background">
         <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
 
           {/* Header */}
@@ -583,92 +649,8 @@ export default function AccountsPage() {
           </motion.div>
         </div>
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={!!deletingAccount} onOpenChange={() => {
-          setDeletingAccount(null)
-          setDeleteConfirmText('')
-        }}>
-          <AlertDialogContent className="max-w-md">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                  <Trash className="h-5 w-5 text-destructive"  />
-                </div>
-                <span>Delete Account</span>
-              </AlertDialogTitle>
-              <AlertDialogDescription asChild>
-                <div className="space-y-3">
-                  <p>
-                    This will permanently delete <strong>{deletingAccount?.displayName || deletingAccount?.name || deletingAccount?.number}</strong> and all associated data including:
-                  </p>
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• All trades and history</li>
-                    <li>• Performance analytics</li>
-                    <li>• Screenshots and media</li>
-                    {deletingAccount?.accountType === 'prop-firm' && (
-                      <li>• Phase progress and payouts</li>
-                    )}
-                  </ul>
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <div className="space-y-2 py-2">
-              <Label className="text-sm">
-                Type <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
-                  {deletingAccount?.displayName || deletingAccount?.name || deletingAccount?.number}
-                </code> to confirm
-              </Label>
-              <Input
-                value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder="Type account name..."
-                className="font-mono text-sm"
-              />
-            </div>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => {
-                setDeletingAccount(null)
-                setDeleteConfirmText('')
-              }}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={confirmDeleteAccount}
-                disabled={deleteConfirmText !== (deletingAccount?.displayName || deletingAccount?.name || deletingAccount?.number)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Delete Permanently
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Dialogs */}
-        <CreateLiveAccountDialog
-          open={createLiveDialogOpen}
-          onOpenChange={setCreateLiveDialogOpen}
-          onSuccess={handleAccountCreated}
-        />
-        <CreatePropFirmDialog
-          open={createPropFirmDialogOpen}
-          onOpenChange={setCreatePropFirmDialogOpen}
-          onSuccess={handleAccountCreated}
-        />
-        <EditLiveAccountDialog
-          open={editLiveDialogOpen}
-          onOpenChange={setEditLiveDialogOpen}
-          account={editingAccount}
-          onSuccess={handleAccountUpdated}
-        />
-        <EditPropFirmAccountDialog
-          open={editPropFirmDialogOpen}
-          onOpenChange={setEditPropFirmDialogOpen}
-          account={editingAccount}
-          onSuccess={handleAccountUpdated}
-        />
-      </div>
+        </div>
+      )}
     </TooltipProvider>
   )
 }
