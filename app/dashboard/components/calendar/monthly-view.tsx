@@ -311,11 +311,11 @@ export default function MonthlyView({
 
   return (
     <div className="flex h-full w-full overflow-x-auto overflow-y-hidden">
-      <div className={cn("flex flex-1 w-full md:min-w-0 h-full", isMiniCalendar && "min-w-[400px]")}>
+      <div className={cn("flex flex-1 w-full h-full", isMiniCalendar ? "min-w-[400px]" : "min-w-[700px]")}>
         {/* Main Calendar Grid */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Weekday Headers */}
-          <div className={cn("grid gap-1 md:gap-1.5 px-2 md:px-3 pt-3 pb-1", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
+          <div className={cn("grid gap-1 md:gap-1.5 px-2 md:px-3 py-1.5 md:py-2", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
             {displayWeekdays.map((day) => (
               <div
                 key={day}
@@ -327,7 +327,7 @@ export default function MonthlyView({
           </div>
 
           {/* Day Grid */}
-          <div className={cn("flex-1 grid gap-1 md:gap-1.5 p-2 md:p-3 pt-0 auto-rows-[minmax(70px,1fr)] md:auto-rows-[minmax(100px,1fr)] min-h-0 overflow-y-auto", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
+          <div className={cn("flex-1 grid gap-1 md:gap-1.5 p-2 md:p-3 pt-0 auto-rows-fr min-h-0", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
             {weeks.map((week, weekIndex) => (
               <React.Fragment key={weekIndex}>
                 {week.map((date) => {

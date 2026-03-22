@@ -307,7 +307,7 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
         </div>
 
         {/* Calendar Content */}
-        <div className="flex-1 min-h-[300px] overflow-auto relative">
+        <div className="flex-1 min-h-[450px] md:min-h-[500px] overflow-auto relative">
           <div className="min-w-[600px] h-full flex flex-col">
             {viewMode === 'daily' ? (
             <MonthlyView
