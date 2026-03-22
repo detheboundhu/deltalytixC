@@ -6,6 +6,10 @@ export interface CalendarEntry {
   longNumber: number;
   shortNumber: number;
   trades: Trade[];
+  isProfit?: boolean;
+  isLoss?: boolean;
+  isBreakEven?: boolean;
+  dailyRMultiple?: number;
 }
 
 export interface CalendarData {

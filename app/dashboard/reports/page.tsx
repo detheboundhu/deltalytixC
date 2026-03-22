@@ -569,24 +569,24 @@ export default function ReportsPage() {
                                                     <div className="space-y-1">
                                                         <p className="text-[8px] uppercase font-bold text-muted-foreground/50 tracking-widest">RR Efficiency</p>
                                                         <p className="text-xl font-black font-mono tracking-tighter">
-                                                            {(parseFloat(psychMetrics.avgWin.replace(/[$,]/g, '')) / Math.abs(parseFloat(psychMetrics.avgLoss.replace(/[$,]/g, '')) || 1)).toFixed(2)}
+                                                            {psychMetrics.rrEfficiency}
                                                         </p>
                                                         <div className="h-1 w-full bg-muted/20 rounded-full overflow-hidden">
                                                             <div 
                                                                 className="h-full bg-long transition-all duration-1000" 
-                                                                style={{ width: `${Math.min(100, (parseFloat(psychMetrics.avgWin.replace(/[$,]/g, '')) / Math.abs(parseFloat(psychMetrics.avgLoss.replace(/[$,]/g, '')) || 1)) * 40)}%` }} 
+                                                                style={{ width: `${Math.min(100, parseFloat(psychMetrics.rrEfficiency) * 40)}%` }} 
                                                             />
                                                         </div>
                                                     </div>
                                                     <div className="space-y-1">
                                                         <p className="text-[8px] uppercase font-bold text-muted-foreground/50 tracking-widest">Recovery Factor</p>
                                                         <p className="text-xl font-black font-mono tracking-tighter">
-                                                            {(psychMetrics.totalNetPnL / Math.abs(parseFloat(psychMetrics.maxDrawdown.replace(/[$,]/g, '')) || 1)).toFixed(2)}
+                                                            {psychMetrics.recoveryFactor}
                                                         </p>
                                                         <div className="h-1 w-full bg-muted/20 rounded-full overflow-hidden">
                                                             <div 
                                                                 className="h-full bg-primary transition-all duration-1000" 
-                                                                style={{ width: `${Math.min(100, (psychMetrics.totalNetPnL / Math.abs(parseFloat(psychMetrics.maxDrawdown.replace(/[$,]/g, '')) || 1)) * 20)}%` }} 
+                                                                style={{ width: `${Math.min(100, parseFloat(psychMetrics.recoveryFactor) * 20)}%` }} 
                                                             />
                                                         </div>
                                                     </div>
@@ -597,7 +597,19 @@ export default function ReportsPage() {
                                                     <div className="space-y-1">
                                                         <p className="text-[8px] uppercase font-bold text-muted-foreground/50 tracking-widest">Consistency Score</p>
                                                         <p className="text-xl font-black font-mono tracking-tighter">
-                                                            {Math.min(100, (parseFloat(tradingActivity.winRate) * 0.6 + (parseFloat(psychMetrics.profitFactor) * 20))).toFixed(0)}%
+                                                            {psychMetrics.consistencyScore}%
+                                                        </p>
+                                                        <div className="h-1 w-full bg-muted/20 rounded-full overflow-hidden">
+                                                            <div 
+                                                                className="h-full bg-foreground transition-all duration-1000" 
+                                                                style={{ width: `${psychMetrics.consistencyScore}%` }} 
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-[8px] uppercase font-bold text-muted-foreground/50 tracking-widest">Total R-Multiple</p>
+                                                        <p className={cn("text-xl font-black font-mono tracking-tighter", parseFloat(psychMetrics.totalRMultiple) >= 0 ? "text-long" : "text-short")}>
+                                                            {parseFloat(psychMetrics.totalRMultiple) > 0 ? '+' : ''}{psychMetrics.totalRMultiple}R
                                                         </p>
                                                     </div>
                                                 </div>

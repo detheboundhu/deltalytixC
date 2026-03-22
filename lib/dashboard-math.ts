@@ -4,6 +4,7 @@ import { getTradingSession } from '@/lib/time-utils'
 import { classifyTrade } from '@/lib/utils'
 import { CHART_COLORS } from '@/app/dashboard/components/widget-card'
 import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
+import { calculateRMultiple } from '@/lib/statistics/report-statistics'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -461,24 +462,50 @@ export function calculateTradingOverviewKpis(trades: Partial<Trade>[]) {
 }
 
 export function calculateCalendarData(trades: Partial<Trade>[]) {
-  const data: Record<string, { pnl: number; tradeNumber: number; longNumber: number; shortNumber: number }> = {}
+  const data: Record<string, { 
+    pnl: number; 
+    tradeNumber: number; 
+    longNumber: number; 
+    shortNumber: number;
+    dailyRMultiple: number;
+    isProfit: boolean;
+    isLoss: boolean;
+    isBreakEven: boolean;
+  }> = {}
 
   trades.forEach(trade => {
     if (!trade.entryDate) return
 
     const key = format(new Date(trade.entryDate), 'yyyy-MM-dd')
     if (!data[key]) {
-      data[key] = { pnl: 0, tradeNumber: 0, longNumber: 0, shortNumber: 0 }
+      data[key] = { 
+        pnl: 0, 
+        tradeNumber: 0, 
+        longNumber: 0, 
+        shortNumber: 0,
+        dailyRMultiple: 0,
+        isProfit: false,
+        isLoss: false,
+        isBreakEven: true
+      }
     }
 
     const netPnl = (trade.pnl || 0) + (trade.commission || 0)
     data[key].pnl += netPnl
     data[key].tradeNumber++
 
+    const r = calculateRMultiple(trade.side, trade.entryPrice || 0, trade.closePrice || 0, trade.stopLoss)
+    data[key].dailyRMultiple += r
+
     const side = trade.side?.toLowerCase()
     const isLong = side === 'long' || side === 'buy' || side === 'b'
     if (isLong) data[key].longNumber++
     else data[key].shortNumber++
+    
+    // Update outcome flags based on daily aggregate
+    data[key].isProfit = data[key].pnl > BREAK_EVEN_THRESHOLD
+    data[key].isLoss = data[key].pnl < -BREAK_EVEN_THRESHOLD
+    data[key].isBreakEven = !data[key].isProfit && !data[key].isLoss
   })
 
   return data

@@ -16,6 +16,45 @@ import { classifyTrade } from '@/lib/utils'
 import { getTradingSession } from '@/lib/time-utils'
 import { groupTradesByExecution } from '@/lib/utils'
 
+/**
+ * Calculates the R-Multiple using the Pure Price Method (Option 1).
+ * Designed for server-side execution to prevent unit mismatch traps.
+ */
+export function calculateRMultiple(
+  side: string | null | undefined,
+  entryPrice: number | string,
+  exitPrice: number | string,
+  stopLoss: number | string | null | undefined
+): number {
+  const sideStr = (side || '').toUpperCase()
+  const entry = typeof entryPrice === 'string' ? parseFloat(entryPrice) : entryPrice
+  const exit = typeof exitPrice === 'string' ? parseFloat(exitPrice) : exitPrice
+  const sl = typeof stopLoss === 'string' ? parseFloat(stopLoss) : (stopLoss || 0)
+
+  // Edge Case 1: Missing, zero, or invalid stop loss
+  if (!sl || sl === 0 || sl === entry || isNaN(entry) || isNaN(exit) || isNaN(sl)) {
+    return 0
+  }
+
+  let riskPoints: number
+  let pnlPoints: number
+
+  if (sideStr === 'BUY' || sideStr === 'LONG') {
+    riskPoints = entry - sl
+    pnlPoints = exit - entry
+  } else if (sideStr === 'SELL' || sideStr === 'SHORT') {
+    riskPoints = sl - entry
+    pnlPoints = entry - exit
+  } else {
+    return 0
+  }
+
+  // Edge Case 2: Inverted Stop Loss
+  if (riskPoints <= 0) return 0
+
+  return pnlPoints / riskPoints
+}
+
 // ===========================================
 // TYPES (Report-specific DTOs)
 // ===========================================
@@ -43,6 +82,10 @@ export interface PsychMetricsDTO {
   avgHoldingTime: string
   maxDrawdown: string
   peakEquity: string
+  rrEfficiency: string
+  consistencyScore: string
+  recoveryFactor: string
+  totalRMultiple: string
 }
 
 export interface SessionPerformanceDTO {
@@ -278,6 +321,29 @@ function buildFilterOptions(symbols: string[], strategies: Array<{ id: string; n
   }
 }
 
+/**
+ * Calculates R-Squared for an equity curve to measure consistency.
+ */
+function calculateRSquared(data: number[]): number {
+  if (data.length < 2) return 0
+  const n = data.length
+  const x = Array.from({ length: n }, (_, i) => i)
+  const y = data
+
+  const sumX = x.reduce((a, b) => a + b, 0)
+  const sumY = y.reduce((a, b) => a + b, 0)
+  const sumXY = x.reduce((a, b, i) => a + b * y[i], 0)
+  const sumX2 = x.reduce((a, b) => a + b * b, 0)
+  const sumY2 = y.reduce((a, b) => a + b * b, 0)
+
+  const numerator = n * sumXY - sumX * sumY
+  const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY))
+
+  if (denominator === 0) return 0
+  const r = numerator / denominator
+  return Math.pow(r, 2)
+}
+
 // ===========================================
 // ALL METRICS IN OPTIMIZED PASSES
 // ===========================================
@@ -332,6 +398,8 @@ function computeAllMetrics(
     '2R to 3R': 0,
     '>3R': 0,
   }
+
+  let totalRMultipleDelta = 0
 
   // Chart data
   const equityCurve: any[] = []
@@ -457,27 +525,16 @@ function computeAllMetrics(
       }
     }
 
-    // R-multiple distribution
-    const entry = typeof trade.entryPrice === 'string' ? parseFloat(trade.entryPrice) : trade.entryPrice
-    const sl = typeof trade.stopLoss === 'string' ? parseFloat(trade.stopLoss) : (trade.stopLoss || 0)
-    const qty = trade.quantity || 0
+    // R-multiple distribution (PRICE POINTS - OPTION 1)
+    const r = calculateRMultiple(trade.side, trade.entryPrice, trade.closePrice, trade.stopLoss)
+    totalRMultipleDelta += r
 
-    if (sl > 0 && entry > 0 && qty > 0) {
-      const risk = Math.abs(entry - sl) * qty
-      if (risk > 0) {
-        const r = netPnL / risk
-        if (r < -1) rDistribution['<-1R']++
-        else if (r < 0) rDistribution['-1R to 0R']++
-        else if (r < 1) rDistribution['0R to 1R']++
-        else if (r < 2) rDistribution['1R to 2R']++
-        else if (r < 3) rDistribution['2R to 3R']++
-        else rDistribution['>3R']++
-      }
-    } else {
-      if (outcome === 'win') rDistribution['1R to 2R']++
-      else if (outcome === 'loss') rDistribution['-1R to 0R']++
-      else rDistribution['0R to 1R']++
-    }
+    if (r < -1) rDistribution['<-1R']++
+    else if (r < 0) rDistribution['-1R to 0R']++
+    else if (r < 1) rDistribution['0R to 1R']++
+    else if (r < 2) rDistribution['1R to 2R']++
+    else if (r < 3) rDistribution['2R to 3R']++
+    else rDistribution['>3R']++
   }
 
   // Finalize streaks
@@ -488,12 +545,23 @@ function computeAllMetrics(
 
   // --- Derived metrics ---
   const tradableCount = wins.length + losses.length
-  const winRate = tradableCount > 0 ? ((wins.length / tradableCount) * 100).toFixed(1) : '0.0'
+  const winRateNum = tradableCount > 0 ? (wins.length / tradableCount) : 0
+  const winRate = (winRateNum * 100).toFixed(1)
 
   const avgWin = wins.length > 0 ? totalGrossProfit / wins.length : 0
   const avgLoss = losses.length > 0 ? totalGrossLoss / losses.length : 0
-  const expectancy = sorted.length > 0 ? cumulativePnL / sorted.length : 0
+  
+  // CORRECTED EXPECTANCY: (P_w * AvgWin) - (P_l * Abs(AvgLoss))
+  const lossRateNum = tradableCount > 0 ? (losses.length / tradableCount) : 0
+  const expectancy = (winRateNum * avgWin) - (lossRateNum * avgLoss)
+  
   const profitFactor = totalGrossLoss > 0 ? totalGrossProfit / totalGrossLoss : totalGrossProfit > 0 ? 99 : 0
+  const rrEfficiency = avgLoss > 0 ? avgWin / avgLoss : 0
+  const recoveryFactor = maxDD > 0 ? cumulativePnL / maxDD : 0
+  
+  // CONSISTENCY: R-Squared of the equity curve
+  const rSquared = calculateRSquared(equityCurve.map(p => p.equity))
+  const consistencyScore = (rSquared * 100).toFixed(0)
 
   const avgHoldingTimeMs = tradesWithDuration > 0 ? totalHoldingTimeMs / tradesWithDuration : 0
   const hours = Math.floor(avgHoldingTimeMs / (1000 * 60 * 60))
@@ -556,6 +624,10 @@ function computeAllMetrics(
       avgHoldingTime: `${hours}h ${minutes}m`,
       maxDrawdown: maxDD.toFixed(2),
       peakEquity: peakEquity.toFixed(2),
+      rrEfficiency: rrEfficiency.toFixed(2),
+      consistencyScore,
+      recoveryFactor: recoveryFactor.toFixed(2),
+      totalRMultiple: totalRMultipleDelta.toFixed(2),
     },
     sessionPerformance: sessions,
     rMultipleDistribution: rDistribution,

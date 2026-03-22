@@ -50,12 +50,10 @@ const DayCell = memo(function DayCell({
   const { visibleStats } = useCalendarViewStore()
   const isTodayDate = isToday(date)
 
-  const stats = useMemo(() => {
-    if (!dayData?.trades || dayData.trades.length === 0) return null
-    return calculateDailyStats(dayData.trades)
-  }, [dayData])
-
-  const hasTrades = !!stats
+  const hasTrades = !!dayData && dayData.tradeNumber > 0
+  const isProfit = dayData?.isProfit ?? (dayData?.pnl ? dayData.pnl > BREAK_EVEN_THRESHOLD : false)
+  const isLoss = dayData?.isLoss ?? (dayData?.pnl ? dayData.pnl < -BREAK_EVEN_THRESHOLD : false)
+  const isBreakEven = dayData?.isBreakEven ?? (!isProfit && !isLoss && hasTrades)
 
   return (
     <div
@@ -68,13 +66,13 @@ const DayCell = memo(function DayCell({
         !hasTrades && isCurrentMonth && "bg-card/50 border-border/30 hover:border-border/60",
 
         // Profit — deep green
-        hasTrades && stats.isProfit && "bg-long/15 border-long/25 hover:bg-long/25 hover:border-long/40",
+        hasTrades && isProfit && "bg-long/15 border-long/25 hover:bg-long/25 hover:border-long/40",
 
         // Loss — deep red
-        hasTrades && stats.isLoss && "bg-short/15 border-short/25 hover:bg-short/25 hover:border-short/40",
+        hasTrades && isLoss && "bg-short/15 border-short/25 hover:bg-short/25 hover:border-short/40",
 
         // Breakeven
-        hasTrades && stats.isBreakEven && "bg-muted/30 border-border/30",
+        hasTrades && isBreakEven && "bg-muted/30 border-border/30",
 
         // Not current month
         !isCurrentMonth && "opacity-15 pointer-events-none",
@@ -102,10 +100,10 @@ const DayCell = memo(function DayCell({
         <div
           className={cn(
             "font-black tracking-tighter text-[11px] md:text-[15px] leading-none mt-1",
-            stats.isProfit ? "text-long" : stats.isLoss ? "text-short" : "text-muted-foreground",
+            isProfit ? "text-long" : isLoss ? "text-short" : "text-muted-foreground",
           )}
         >
-          {formatCompact(stats.pnl)}
+          {formatCompact(dayData.pnl)}
         </div>
       )}
 
@@ -114,17 +112,17 @@ const DayCell = memo(function DayCell({
         <div className="hidden md:flex flex-col items-center gap-0 mt-0.5">
           {visibleStats.trades && (
             <span className="text-[9px] font-semibold text-muted-foreground/60">
-              {stats.tradeCount} trade{stats.tradeCount !== 1 ? 's' : ''}
+              {dayData.tradeNumber} trade{dayData.tradeNumber !== 1 ? 's' : ''}
             </span>
           )}
-          {visibleStats.winRate && (
+          {visibleStats.winRate && dayData.trades && dayData.trades.length > 0 && (
             <span className="text-[9px] font-semibold text-muted-foreground/60">
-              {stats.winRate.toFixed(1)}%
+              {((dayData.trades.filter(t => (Number(t.pnl) + Number(t.commission || 0)) > BREAK_EVEN_THRESHOLD).length / dayData.trades.length) * 100).toFixed(1)}%
             </span>
           )}
-          {visibleStats.rMultiple && (
+          {visibleStats.rMultiple && dayData.dailyRMultiple !== undefined && (
             <span className="text-[9px] font-semibold text-muted-foreground/60">
-              {stats.rMultiple.toFixed(2)}R
+              {dayData.dailyRMultiple.toFixed(2)}R
             </span>
           )}
         </div>
