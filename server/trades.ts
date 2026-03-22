@@ -75,3 +75,30 @@ export async function updateTradeImage(
   }
 }
 
+/**
+ * Update a trade by ID
+ */
+export async function updateTradeAction(tradeId: string, data: any) {
+  try {
+    const userId = await getUserIdSafe()
+    if (!userId) {
+      throw new Error('User not authenticated')
+    }
+
+    const updated = await prisma.trade.update({
+      where: {
+        id: tradeId,
+        userId: userId
+      },
+      data: data
+    })
+
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(updated))
+    }
+  } catch (error) {
+    console.error('[Update Trade Action] Error:', error)
+    throw error
+  }
+}

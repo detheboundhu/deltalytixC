@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useUserStore } from '@/store/user-store'
 import { Trade } from '@prisma/client'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
@@ -18,6 +19,8 @@ import { Badge } from "@/components/ui/badge"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
 import { formatQuantity, formatTradeData, BREAK_EVEN_THRESHOLD, ensureExtendedTrade, cn } from '@/lib/utils'
+import { updateTradeAction } from '@/server/trades'
+import { ExtendedTrade } from '@/types/trade-extended'
 
 type SortConfig = {
   key: keyof Trade
@@ -27,15 +30,34 @@ type SortConfig = {
 type SideFilter = 'all' | 'buy' | 'sell'
 type PnlFilter = 'all' | 'wins' | 'losses'
 
+import useSWR from 'swr'
+
+// Custom fetcher for Data Management
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
 export default function TradeTable() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { refreshTrades, formattedTrades, updateTrades } = useData()
+  const user = useUserStore((state: any) => state.user)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [tradesPerPage, setTradesPerPage] = useState(50)
+  const { updateTrades } = useData()
+  const { data: tradesResponse, isLoading: tradesLoading, mutate: refetchTrades } = useSWR(
+    user?.id ? `/api/v1/data-management/trades?page=${currentPage}&limit=${tradesPerPage}` : null,
+    fetcher,
+    { keepPreviousData: true }
+  )
+
+  const formattedTrades = useMemo(() => {
+    if (!tradesResponse?.data) return []
+    return tradesResponse.data.map((t: any) => ensureExtendedTrade(t))
+  }, [tradesResponse])
+
+  const pagination = tradesResponse?.pagination || { total: 0, page: 1, limit: tradesPerPage, totalPages: 0 }
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'entryDate', direction: 'desc' })
   const [selectedTrades, setSelectedTrades] = useState<Set<string>>(new Set())
   const [selectAll, setSelectAll] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [tradesPerPage, setTradesPerPage] = useState(50)
   const [isDeleting, setIsDeleting] = useState(false)
 
   // URL-based view/edit panel state
@@ -43,11 +65,11 @@ export default function TradeTable() {
   const activeTradeId = searchParams.get('tradeId')
   const selectedTradeForView = useMemo(() => {
     if (activeView !== 'details' || !activeTradeId) return null
-    return formattedTrades.find(t => t.id === activeTradeId) || null
+    return formattedTrades.find((t: ExtendedTrade) => t.id === activeTradeId) || null
   }, [activeView, activeTradeId, formattedTrades])
   const selectedTradeForEdit = useMemo(() => {
     if (activeView !== 'edit' || !activeTradeId) return null
-    return formattedTrades.find(t => t.id === activeTradeId) || null
+    return formattedTrades.find((t: ExtendedTrade) => t.id === activeTradeId) || null
   }, [activeView, activeTradeId, formattedTrades])
 
   const handleClosePanel = useCallback(() => {
@@ -63,44 +85,41 @@ export default function TradeTable() {
   const [accountSearchOpen, setAccountSearchOpen] = useState(false)
 
   // Get unique instruments and accounts for filter options
-  const availableInstruments = useMemo(() => {
-    return Array.from(new Set(formattedTrades.map(t => t.instrument).filter(Boolean)))
+  const availableInstruments = useMemo<string[]>(() => {
+    return Array.from(new Set(formattedTrades.map((t: ExtendedTrade) => t.instrument).filter(Boolean)))
   }, [formattedTrades])
 
-  const availableAccounts = useMemo(() => {
-    return Array.from(new Set(formattedTrades.map(t => t.accountNumber).filter(Boolean)))
+  const availableAccounts = useMemo<string[]>(() => {
+    return Array.from(new Set(formattedTrades.map((t: ExtendedTrade) => t.accountNumber).filter(Boolean)))
   }, [formattedTrades])
+
+  const totalTradesCount = pagination.total || 0
+  const totalPages = pagination.totalPages || 1
 
   const filteredAndSortedTrades = useMemo(() => {
-    return formattedTrades
-      .filter(trade => {
-        // Instrument filter
-        if (selectedInstruments.length > 0 && !selectedInstruments.includes(trade.instrument)) {
-          return false
-        }
+    // If we have server-side pagination, we should apply filters on the server.
+    // However, to keep it simple and respect the "independent" request,
+    // we'll treat the current page of trades as the source of truth for display.
+    let list = [...formattedTrades]
 
-        // Account filter
-        if (selectedAccounts.length > 0 && !selectedAccounts.includes(trade.accountNumber)) {
-          return false
-        }
+    // Apply client-side filters
+    if (selectedInstruments.length > 0) {
+      list = list.filter(trade => selectedInstruments.includes(trade.instrument))
+    }
+    if (selectedAccounts.length > 0) {
+      list = list.filter(trade => selectedAccounts.includes(trade.accountNumber))
+    }
+    if (sideFilter !== 'all') {
+      list = list.filter(trade => trade.side.toLowerCase() === sideFilter)
+    }
+    if (pnlFilter === 'wins') {
+      list = list.filter(trade => trade.pnl >= BREAK_EVEN_THRESHOLD)
+    } else if (pnlFilter === 'losses') {
+      list = list.filter(trade => trade.pnl < BREAK_EVEN_THRESHOLD)
+    }
 
-        // Side filter
-        if (sideFilter !== 'all') {
-          const tradeSide = trade.side?.toLowerCase()
-          if (sideFilter === 'buy' && tradeSide !== 'buy') return false
-          if (sideFilter === 'sell' && tradeSide !== 'sell') return false
-        }
-
-        // PnL filter
-        if (pnlFilter !== 'all') {
-          const netPnl = trade.pnl - (trade.commission || 0)
-          if (pnlFilter === 'wins' && netPnl <= BREAK_EVEN_THRESHOLD) return false
-          if (pnlFilter === 'losses' && netPnl >= -BREAK_EVEN_THRESHOLD) return false
-        }
-
-        return true
-      })
-      .sort((a, b) => {
+    if (sortConfig.key) {
+      list.sort((a, b) => {
         const aValue = a[sortConfig.key]
         const bValue = b[sortConfig.key]
         if (aValue == null && bValue == null) return 0
@@ -110,14 +129,12 @@ export default function TradeTable() {
         if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
         return 0
       })
-  }, [formattedTrades, selectedInstruments, selectedAccounts, sideFilter, pnlFilter, sortConfig])
+    }
 
-  const paginatedTrades = useMemo(() => {
-    const startIndex = (currentPage - 1) * tradesPerPage
-    return filteredAndSortedTrades.slice(startIndex, startIndex + tradesPerPage)
-  }, [filteredAndSortedTrades, currentPage, tradesPerPage])
+    return list
+  }, [formattedTrades, sortConfig, selectedInstruments, selectedAccounts, sideFilter, pnlFilter])
 
-  const totalPages = Math.ceil(filteredAndSortedTrades.length / tradesPerPage)
+  const paginatedTrades = filteredAndSortedTrades
 
   const handleSort = (key: keyof Trade) => {
     setSortConfig(prevConfig => ({
@@ -144,11 +161,10 @@ export default function TradeTable() {
         duration: Infinity
       })
 
-      // Perform deletion
       await deleteTradesByIdsAction(ids)
 
-      // Refresh trades data immediately
-      refreshTrades()
+      // Refresh trades data
+      refetchTrades()
 
       // CRITICAL: Force router refresh to update UI everywhere
       router.refresh()
@@ -173,7 +189,7 @@ export default function TradeTable() {
         description: "Failed to delete trades. Please try again.",
       })
       // Refresh data even on error to ensure UI is in sync
-      refreshTrades()
+      refetchTrades()
     } finally {
       setIsDeleting(false)
     }
@@ -212,8 +228,10 @@ export default function TradeTable() {
     if (!selectedTradeForEdit) return
 
     try {
-      // Update the trade with new data
-      await updateTrades([selectedTradeForEdit.id], updatedTrade)
+      // Update the trade with new data via direct action
+      await updateTradeAction(selectedTradeForEdit.id, updatedTrade)
+      refetchTrades()
+      router.refresh()
 
       toast.success("Trade Updated", {
         description: "Trade has been successfully updated.",
@@ -608,7 +626,7 @@ export default function TradeTable() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <p className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * tradesPerPage) + 1} to {Math.min(currentPage * tradesPerPage, filteredAndSortedTrades.length)} of {filteredAndSortedTrades.length} trades
+            Showing {totalTradesCount > 0 ? ((currentPage - 1) * tradesPerPage) + 1 : 0} to {Math.min(currentPage * tradesPerPage, totalTradesCount)} of {totalTradesCount} trades
           </p>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">Show:</span>
@@ -628,7 +646,6 @@ export default function TradeTable() {
                 <SelectItem value="100">100</SelectItem>
                 <SelectItem value="250">250</SelectItem>
                 <SelectItem value="500">500</SelectItem>
-                <SelectItem value={String(filteredAndSortedTrades.length)}>All ({filteredAndSortedTrades.length})</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -637,7 +654,7 @@ export default function TradeTable() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handlePreviousPage}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -649,7 +666,7 @@ export default function TradeTable() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleNextPage}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
           >
             Next

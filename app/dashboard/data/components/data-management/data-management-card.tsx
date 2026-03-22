@@ -22,8 +22,14 @@ import {
   removeAccountsFromTradesAction, 
   renameAccountAction
 } from "@/server/accounts"
-import { useData } from '@/context/data-provider'
 import { toast } from 'sonner'
+import { useSWRConfig } from 'swr'
+import useSWR from 'swr'
+import { Badge } from "@/components/ui/badge"
+import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -32,12 +38,7 @@ import { AdvancedExportDialog } from './advanced-export-dialog'
 import { ImportDialog } from './import-dialog'
 import { DeleteAllDataDialog } from '@/components/data-management/delete-all-data-dialog'
 import { useUserStore } from '@/store/user-store'
-import { useAccounts } from '@/hooks/use-accounts'
-import { Badge } from "@/components/ui/badge"
-import { cn } from '@/lib/utils'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Skeleton } from '@/components/ui/skeleton'
+import { useSearchParams } from 'next/navigation'
 
 type AccountWithTrades = {
   id: string
@@ -114,12 +115,23 @@ function LoadingSkeleton() {
   )
 }
 
+// Custom fetcher for Data Management
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
 export function DataManagementCard() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const user = useUserStore((state) => state.user)
-  const { accounts: allAccounts, isLoading: accountsLoading, refetch: refetchAccounts } = useAccounts({ includeFailed: true })
+  const [currentPage, setCurrentPage] = useState(1)
+  const { mutate: globalMutate } = useSWRConfig()
 
-  const { refreshTrades } = useData()
+  // Use dedicated, unfiltered API for Data Management
+  const { data: accountsResponse, isLoading: accountsLoading, mutate: refetchAccounts } = useSWR(
+    user?.id ? '/api/v1/data-management/accounts' : null,
+    fetcher
+  )
+  const allAccounts = accountsResponse?.data || []
+
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [renameLoading, setRenameLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -137,11 +149,11 @@ export function DataManagementCard() {
 
     const grouped: Record<string, GroupedAccount> = {}
 
-    allAccounts.forEach(account => {
+    allAccounts.forEach((account: any) => {
       const accountName = account.name
-      
+
       // Use tradeCount directly from account (comes from server)
-      const tradeCount = (account as any).tradeCount || 0
+      const tradeCount = account.tradeCount || 0
 
       if (!grouped[accountName]) {
         grouped[accountName] = {
@@ -180,14 +192,14 @@ export function DataManagementCard() {
   // Flat list for selection and deletion operations
   const accountsWithTrades = useMemo(() => {
     if (!allAccounts || accountsLoading) return []
-    
-    return allAccounts.map(account => ({
+
+    return allAccounts.map((account: any) => ({
       id: account.id,
       number: account.number,
       name: account.name,
       displayName: account.displayName,
       accountType: account.accountType,
-      tradeCount: (account as any).tradeCount || 0,
+      tradeCount: account.tradeCount || 0,
       trades: [],
       currentPhaseDetails: account.currentPhaseDetails
     }))
@@ -198,7 +210,7 @@ export function DataManagementCard() {
     const liveAccounts = groupedAccounts.filter(g => g.accountType === 'live')
     const propAccounts = groupedAccounts.filter(g => g.accountType === 'prop-firm')
     const totalTrades = groupedAccounts.reduce((sum, g) => sum + g.totalTrades, 0)
-    
+
     return {
       totalAccounts: groupedAccounts.length,
       totalTrades,
@@ -210,19 +222,23 @@ export function DataManagementCard() {
 
   const handleDeleteAccounts = useCallback(async () => {
     if (!user || selectedAccounts.length === 0) return
+
+    let loadingToastId: string | number | undefined
     try {
       setDeleteLoading(true)
+      loadingToastId = toast.loading("Deleting trades...")
+
       const accountsToDelete = selectedAccounts
 
       const uniqueAccountIds = new Set<string>()
       const accountsToDeleteData: Array<{id: string, endpoint: string, displayName: string}> = []
 
       for (const accountNumber of accountsToDelete) {
-        const account = accountsWithTrades.find(acc => acc.number === accountNumber)
+        const account = accountsWithTrades.find((acc: any) => acc.number === accountNumber)
         if (account) {
           let endpoint: string
           let accountId: string
-          
+
           if (account.accountType === 'prop-firm') {
             accountId = account.currentPhaseDetails?.masterAccountId || account.id
             endpoint = `/api/prop-firm/accounts/${accountId}`
@@ -230,7 +246,7 @@ export function DataManagementCard() {
             accountId = account.id
             endpoint = `/api/accounts/${accountId}`
           }
-          
+
           if (!uniqueAccountIds.has(accountId)) {
             uniqueAccountIds.add(accountId)
             accountsToDeleteData.push({ id: accountId, endpoint, displayName: account.displayName })
@@ -245,46 +261,41 @@ export function DataManagementCard() {
         }
       }
 
-      const { invalidateAccountsCache } = await import('@/hooks/use-accounts')
-      const { invalidateUserCaches } = await import('@/server/accounts')
-      
-      invalidateAccountsCache('account-deleted')
-      if (user?.id) {
-        await invalidateUserCaches(user.id)
-      }
-      
       router.refresh()
       
-      await Promise.all([
-        refetchAccounts(),
-        refreshTrades()
-      ])
+      refetchAccounts()
       
       setSelectedAccounts([])
-      toast.success('Deleted successfully', {
-        description: `${accountsToDelete.length} account${accountsToDelete.length > 1 ? 's' : ''} and associated trades removed.`,
+      toast.success("Accounts Deleted", {
+        description: `Successfully deleted ${accountsToDelete.length} account(s).`,
       })
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to delete accounts'))
-      toast.error('Delete failed', {
-        description: error instanceof Error ? error.message : 'Please try again.',
+
+      // Dismiss loading toast before showing error
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId)
+      }
+
+      toast.error("Error", {
+        description: error instanceof Error ? error.message : "Failed to delete accounts. Please try again.",
       })
     } finally {
       setDeleteLoading(false)
       setDeleteDialogOpen(false)
     }
-  }, [user, accountsWithTrades, selectedAccounts, refetchAccounts, refreshTrades, router])
+  }, [user, accountsWithTrades, selectedAccounts, refetchAccounts, router])
 
   const handleSelectAccount = useCallback((accountNumber: string) => {
-    setSelectedAccounts(prev =>
+    setSelectedAccounts((prev: string[]) =>
       prev.includes(accountNumber)
-        ? prev.filter(acc => acc !== accountNumber)
+        ? prev.filter((acc: string) => acc !== accountNumber)
         : [...prev, accountNumber]
     )
   }, [])
 
   const handleSelectAll = useCallback(() => {
-    const allAccountNumbers = accountsWithTrades.map(acc => acc.number)
+    const allAccountNumbers = accountsWithTrades.map((acc: any) => acc.number)
     if (selectedAccounts.length === allAccountNumbers.length) {
       setSelectedAccounts([])
     } else {
@@ -314,7 +325,7 @@ export function DataManagementCard() {
     try {
       setRenameLoading(true)
       await renameAccountAction(accountToRename, newAccountNumber)
-      await Promise.all([refetchAccounts(), refreshTrades()])
+      await refetchAccounts()
       toast.success('Account renamed', {
         description: `${accountToRename} → ${newAccountNumber}`,
       })
@@ -328,7 +339,7 @@ export function DataManagementCard() {
     } finally {
       setRenameLoading(false)
     }
-  }, [user, accountToRename, newAccountNumber, refetchAccounts, refreshTrades])
+  }, [user, accountToRename, newAccountNumber, refetchAccounts])
 
   if (error) {
     return (
