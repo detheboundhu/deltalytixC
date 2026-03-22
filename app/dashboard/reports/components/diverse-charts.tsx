@@ -20,83 +20,23 @@ import {
 } from 'recharts'
 
 interface DiverseChartsProps {
-    trades: any[]
+    chartData: {
+        equityCurve: any[]
+        outcomeDistribution: any[]
+        dayOfWeekPerformance: any[]
+    }
 }
 
 const COLORS = {
     bullish: 'hsl(var(--chart-bullish))',
-    bearish: 'hsl(var(--chart-bearish))', // Deep amber/copper — matches aesthetic
-    muted: 'hsl(220, 15%, 55%)'        // Visible neutral grey
+    bearish: 'hsl(var(--chart-bearish))',
+    muted: 'hsl(220, 15%, 55%)'
 }
 
-export function DiverseCharts({ trades }: DiverseChartsProps) {
-    const equityData = useMemo(() => {
-        if (!trades || trades.length === 0) return []
-        
-        const sorted = [...trades].sort((a, b) => {
-            const dateA = a.entryDate ? new Date(a.entryDate).getTime() : 0
-            const dateB = b.entryDate ? new Date(b.entryDate).getTime() : 0
-            return dateA - dateB
-        })
+export function DiverseCharts({ chartData }: DiverseChartsProps) {
+    if (!chartData || chartData.equityCurve.length === 0) return null
 
-        let cumulative = 0
-        return sorted.map((t, idx) => {
-            const net = (t.pnl || 0) + (t.commission || 0)
-            cumulative += net
-            return {
-                name: t.entryDate ? format(parseISO(t.entryDate), 'MMM dd') : `T${idx+1}`,
-                date: t.entryDate,
-                equity: cumulative,
-                netPnL: net
-            }
-        })
-    }, [trades])
-
-    const outcomeData = useMemo(() => {
-        if (!trades || trades.length === 0) return []
-        let wins = 0; let losses = 0; let breakevens = 0
-        
-        trades.forEach(t => {
-            const net = (t.pnl || 0) + (t.commission || 0)
-            const outcome = classifyTrade(net)
-            if (outcome === 'win') wins++
-            else if (outcome === 'loss') losses++
-            else breakevens++
-        })
-
-        return [
-            { name: 'Wins', value: wins, color: COLORS.bullish },
-            { name: 'Losses', value: losses, color: COLORS.bearish },
-            { name: 'Breakeven', value: breakevens, color: COLORS.muted }
-        ].filter(d => d.value > 0)
-    }, [trades])
-
-    const dayOfWeekData = useMemo(() => {
-        if (!trades || trades.length === 0) return []
-        
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-        const dayStats: Record<string, { win: number; loss: number }> = {}
-        
-        days.forEach(d => { dayStats[d] = { win: 0, loss: 0 }})
-
-        trades.forEach(t => {
-            if (!t.entryDate) return
-            const date = new Date(t.entryDate.includes('Z') ? t.entryDate : `${t.entryDate}Z`)
-            const dayName = days[date.getDay()]
-            
-            const net = (t.pnl || 0) + (t.commission || 0)
-            const outcome = classifyTrade(net)
-            
-            if (outcome === 'win') dayStats[dayName].win += net
-            else if (outcome === 'loss') dayStats[dayName].loss += Math.abs(net)
-        })
-
-        return days.map(day => ({
-            name: day.substring(0, 3),
-            Win: Number(dayStats[day].win.toFixed(2)),
-            Loss: Number(dayStats[day].loss.toFixed(2))
-        })).filter(d => d.Win > 0 || d.Loss > 0)
-    }, [trades])
+    const { equityCurve: equityData, outcomeDistribution: outcomeData, dayOfWeekPerformance: dayOfWeekData } = chartData
 
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
@@ -119,8 +59,6 @@ export function DiverseCharts({ trades }: DiverseChartsProps) {
         }
         return null
     }
-
-    if (!trades || trades.length === 0) return null
 
     return (
         <div className="space-y-6">
@@ -192,7 +130,7 @@ export function DiverseCharts({ trades }: DiverseChartsProps) {
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-2xl font-black">{trades.length}</span>
+                            <span className="text-2xl font-black">{outcomeData.reduce((acc, curr) => acc + curr.value, 0)}</span>
                             <span className="text-[9px] uppercase font-bold text-muted-foreground">Trades</span>
                         </div>
                     </div>

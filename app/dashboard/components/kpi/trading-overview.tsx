@@ -7,7 +7,7 @@ import { WidgetCard } from '../widget-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useData } from '@/context/data-provider'
+import { useWidgetData } from '@/hooks/use-widget-data'
 import {
   Target,
   TrendingUp,
@@ -115,7 +115,8 @@ function calculateStreaks(trades: any[]) {
 }
 
 export default function TradingOverview({ size = 'large' }: TradingOverviewProps) {
-  const { formattedTrades } = useData()
+  const { data: serverData } = useWidgetData('tradingOverview')
+  
   const queryClient = useQueryClient()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [tempTargets, setTempTargets] = useState(DEFAULT_GOALS)
@@ -154,63 +155,11 @@ export default function TradingOverview({ size = 'large' }: TradingOverviewProps
     }
   }
 
-  // Stats
-  const currentStats = useMemo(() => {
-    const now = new Date()
-    const monthStart = startOfMonth(now)
-    const monthEnd = endOfMonth(now)
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
-    const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
-
-    const monthTrades = (formattedTrades || []).filter(t => {
-      if (!t.entryDate) return false
-      return isWithinInterval(parseISO(t.entryDate), { start: monthStart, end: monthEnd })
-    })
-
-    const weekTrades = (formattedTrades || []).filter(t => {
-      if (!t.entryDate) return false
-      return isWithinInterval(parseISO(t.entryDate), { start: weekStart, end: weekEnd })
-    })
-
-    const monthWins = monthTrades.filter(t => (t.pnl || 0) > 0).length
-    const weekPnL = weekTrades.reduce((sum, t) => sum + (t.pnl || 0), 0)
-
-    return { monthTrades: monthTrades.length, monthWinRate: monthTrades.length > 0 ? (monthWins / monthTrades.length) * 100 : 0, weekPnL }
-  }, [formattedTrades])
-
-  // Risk
-  const riskStats = useMemo(() => {
-    if (!formattedTrades?.length) return { maxDrawdown: 0, largestLoss: 0, avgLoss: 0, lossStreak: 0 }
-
-    let peak = 0, maxDrawdown = 0, runningTotal = 0
-    const sorted = [...formattedTrades].sort((a, b) => {
-      return (a.entryDate ? new Date(a.entryDate).getTime() : 0) - (b.entryDate ? new Date(b.entryDate).getTime() : 0)
-    })
-
-    sorted.forEach(trade => {
-      runningTotal += trade.pnl || 0
-      if (runningTotal > peak) peak = runningTotal
-      const dd = peak - runningTotal
-      if (dd > maxDrawdown) maxDrawdown = dd
-    })
-
-    const losses = formattedTrades.filter(t => (t.pnl || 0) < 0)
-    const largestLoss = Math.abs(Math.min(...losses.map(t => t.pnl || 0), 0))
-    const avgLoss = losses.length > 0 ? losses.reduce((sum, t) => sum + Math.abs(t.pnl || 0), 0) / losses.length : 0
-
-    let lossStreak = 0
-    for (let i = sorted.length - 1; i >= 0; i--) {
-      if ((sorted[i].pnl || 0) < 0) lossStreak++
-      else break
-    }
-
-    return { maxDrawdown, largestLoss, avgLoss, lossStreak }
-  }, [formattedTrades])
-
-  // Streak
-  const streakData = useMemo(() => calculateStreaks(formattedTrades || []), [formattedTrades])
-
-  const hasData = formattedTrades && formattedTrades.length > 0
+  const currentStats = serverData?.currentStats || { monthTrades: 0, monthWinRate: 0, weekPnL: 0 }
+  const riskStats = serverData?.riskStats || { maxDrawdown: 0, largestLoss: 0, avgLoss: 0, lossStreak: 0 }
+  const streakData = serverData?.streakData || { currentStreak: 0, isWinning: true, longestWinStreak: 0, longestLoseStreak: 0 }
+  
+  const hasData = !!serverData
 
   const goals = [
     {

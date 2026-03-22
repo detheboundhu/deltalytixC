@@ -72,6 +72,11 @@ export interface ReportStatsResponse {
   psychMetrics: PsychMetricsDTO | null
   sessionPerformance: SessionPerformanceDTO | null
   rMultipleDistribution: RMultipleDistributionDTO | null
+  chartData: {
+    equityCurve: any[]
+    outcomeDistribution: any[]
+    dayOfWeekPerformance: any[]
+  } | null
   filteredTrades: any[]
   filterOptions: {
     symbols: string[]
@@ -232,6 +237,7 @@ export async function calculateReportStatistics(
       psychMetrics: null,
       sessionPerformance: null,
       rMultipleDistribution: null,
+      chartData: null,
       filteredTrades: [],
       filterOptions: buildFilterOptions(symbols, strategies),
     }
@@ -242,7 +248,7 @@ export async function calculateReportStatistics(
 
   return {
     ...result,
-    filteredTrades,
+    filteredTrades: filteredTrades.slice(0, 100),
     filterOptions: buildFilterOptions(symbols, strategies),
   }
 }
@@ -327,6 +333,14 @@ function computeAllMetrics(
     '>3R': 0,
   }
 
+  // Chart data
+  const equityCurve: any[] = []
+  const outcomeDistribution: any[] = [
+    { name: 'Wins', value: 0, color: 'hsl(var(--chart-bullish))' },
+    { name: 'Losses', value: 0, color: 'hsl(var(--chart-bearish))' },
+    { name: 'Breakeven', value: 0, color: 'hsl(220, 15%, 55%)' }
+  ]
+
   // New metrics: day-of-week and pair aggregation
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const dayTradeCount: Record<string, number> = {}
@@ -344,13 +358,26 @@ function computeAllMetrics(
     const dd = peakEquity - cumulativePnL
     if (dd > maxDD) maxDD = dd
 
+    if (trade.entryDate) {
+      equityCurve.push({
+        name: new Date(trade.entryDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit' }),
+        date: trade.entryDate,
+        equity: cumulativePnL,
+        netPnL: netPnL
+      })
+    }
+
     // Win/Loss classification
     if (outcome === 'win') {
       wins.push(trade)
       totalGrossProfit += netPnL
+      outcomeDistribution[0].value++
     } else if (outcome === 'loss') {
       losses.push(trade)
       totalGrossLoss += Math.abs(netPnL)
+      outcomeDistribution[1].value++
+    } else {
+      outcomeDistribution[2].value++
     }
 
     // Streaks
@@ -532,5 +559,14 @@ function computeAllMetrics(
     },
     sessionPerformance: sessions,
     rMultipleDistribution: rDistribution,
+    chartData: {
+      equityCurve,
+      outcomeDistribution: outcomeDistribution.filter(d => d.value > 0),
+      dayOfWeekPerformance: dayNames.map(day => ({
+        name: day.substring(0, 3),
+        Win: Number((dayPnL[day] > 0 ? dayPnL[day] : 0).toFixed(2)),
+        Loss: Number((dayPnL[day] < 0 ? Math.abs(dayPnL[day]) : 0).toFixed(2))
+      })).filter(d => d.Win > 0 || d.Loss > 0)
+    }
   }
 }

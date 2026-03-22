@@ -614,7 +614,9 @@ export default function ReportsPage() {
                                 </div>
 
                                 {/* Rich Visualizations */}
-                                <DiverseCharts trades={filteredTrades} />
+                                {reportData?.chartData && (
+                                    <DiverseCharts chartData={reportData.chartData} />
+                                )}
                             </div>
                         </TabsContent>
 
@@ -627,6 +629,10 @@ export default function ReportsPage() {
                         </TabsContent>
 
                         <TabsContent value="spreadsheet" className="focus-visible:outline-none">
+                            <div className="flex items-center justify-between mb-2 px-1">
+                                <h3 className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">Recent Activity</h3>
+                                <span className="text-[9px] font-bold text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">Displaying up to 100 most recent trades</span>
+                            </div>
                             <div className="border border-border/40 rounded-xl overflow-x-auto no-scrollbar bg-card/50">
                               <div className="min-w-[700px] w-full">
                                 <Table>

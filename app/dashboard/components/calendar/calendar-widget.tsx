@@ -14,7 +14,7 @@ import { CalendarSettings } from "./calendar-settings"
 import { useCalendarViewStore } from "@/store/calendar-view"
 import { useCalendarNotes } from "@/app/dashboard/hooks/use-calendar-notes"
 import { useUserStore } from "@/store/user-store"
-import { useData } from "@/context/data-provider"
+import { useWidgetData } from "@/hooks/use-widget-data"
 import { CalendarData } from "@/app/dashboard/types/calendar"
 import { WidgetCard } from "../widget-card"
 
@@ -34,7 +34,7 @@ interface CalendarPnlProps {
 
 const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
   const timezone = useUserStore(state => state.timezone)
-  const { formattedTrades, isLoading } = useData()
+  const { data: serverCalendarData, isLoading } = useWidgetData('calendarData')
 
   const dateLocale = enUS
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -52,39 +52,10 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
     return () => window.removeEventListener('notesSaved', handleNotesSaved)
   }, [refetchNotes])
 
-  // Construct Calendar Data locally for MAXIMUM consistency with grid lookups
+  // Construct Calendar Data entirely from the server 
   const localCalendarData = useMemo(() => {
-    const data: CalendarData = {}
-    if (!formattedTrades) return data
-
-    formattedTrades.forEach(trade => {
-      if (!trade.entryDate) return
-
-      const key = format(new Date(trade.entryDate), 'yyyy-MM-dd')
-
-      if (!data[key]) {
-        data[key] = {
-          pnl: 0,
-          tradeNumber: 0,
-          trades: [],
-          longNumber: 0,
-          shortNumber: 0
-        }
-      }
-
-      const netPnl = (trade.pnl || 0) + (trade.commission || 0)
-      data[key].trades.push(trade)
-      data[key].pnl += netPnl
-      data[key].tradeNumber++
-
-      const side = trade.side?.toLowerCase()
-      const isLong = side === 'long' || side === 'buy' || side === 'b'
-      if (isLong) data[key].longNumber++
-      else data[key].shortNumber++
-    })
-
-    return data
-  }, [formattedTrades])
+    return (serverCalendarData as CalendarData) || {}
+  }, [serverCalendarData])
 
 
   const handleScreenshot = useCallback(async () => {

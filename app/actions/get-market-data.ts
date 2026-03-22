@@ -17,8 +17,6 @@ async function fetchMarketDataManual(symbol: string, options: any): Promise<any>
     const p2 = Math.floor(new Date(period2).getTime() / 1000);
     const url = `https://query2.finance.yahoo.com/v8/finance/chart/${symbol}?useYfid=true&interval=${interval}&includePrePost=true&events=div%7Csplit%7Cearn&lang=en-US&period1=${p1}&period2=${p2}`;
 
-    console.log(`[MANUAL_FETCH] Requesting: ${url}`);
-
     const response = await fetch(url, {
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Browser/120.0.0.0 Safari/537.36',
@@ -96,7 +94,6 @@ export async function getMarketData(
 
     // JOIN CONCURRENT REQUESTS
     if (inFlightRequests.has(requestKey) && !forceRefresh) {
-        console.log(`[JOIN_REQUEST] Already fetching ${symbol} for ${startStr}. Joining promise...`)
         return inFlightRequests.get(requestKey)!
     }
 
@@ -113,8 +110,6 @@ export async function getMarketData(
                     throw dbError;
                 }
             }
-
-            console.log(`[SV_ACTION_ENTRY] symbol: ${symbol}, startDate: ${startDate?.toISOString()}, tradeId: ${tradeId || 'N/A'}${forceRefresh ? ' [FORCE_REFRESH]' : ''}`)
 
             // Map common symbols to Yahoo Finance tickers
             let querySymbol = symbol.toUpperCase()
@@ -161,7 +156,6 @@ export async function getMarketData(
             try {
                 const cachedData = await getCached<CandleData[]>(baseCacheKey)
                 if (cachedData && cachedData.length > 0) {
-                    console.log(`[CACHE_HIT] ${querySymbol} (${startStr})`)
                     return { data: cachedData }
                 }
             } catch (cacheError) {
@@ -182,8 +176,6 @@ export async function getMarketData(
                         interval: queryInterval as any
                     }
 
-                    console.log(`[YAHOO_FETCH] Trying ${queryInterval} for ${querySymbol} (Range: ${diffDays.toFixed(1)} days)`)
-
                     let result: any;
                     try {
                         result = await yahooFinance.chart(querySymbol, queryOptions);
@@ -200,7 +192,6 @@ export async function getMarketData(
                     // Process Results (Support both lib and manual format)
                     let sourceQuotes = result?.quotes;
                     if (!sourceQuotes && result?.chart?.result?.[0]) {
-                        console.log(`[DATA_FORMAT] Detected manual fetch structure`);
                         const res = result.chart.result[0];
                         sourceQuotes = res.timestamp?.map((t: number, i: number) => ({
                             date: new Date(t * 1000),
@@ -222,11 +213,9 @@ export async function getMarketData(
                                 close: q.close,
                             }));
 
-                        if (candles.length > 0) {
+                            if (candles.length > 0) {
                             const ttl = diffDays > 1 ? CacheTTL.EXTRA_LONG : CacheTTL.MEDIUM
                             await setCached(baseCacheKey, candles, ttl)
-
-                            console.log(`[FETCH_SUCCESS] ${querySymbol} - ${candles.length} candles (First: ${new Date(candles[0].time * 1000).toISOString()})`)
                             return { data: candles }
                         }
                     }

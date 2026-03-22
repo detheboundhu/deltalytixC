@@ -98,6 +98,9 @@ export async function GET(request: NextRequest) {
     const includeStats = params.get('includeStats') !== 'false'
     const includeCalendar = params.get('includeCalendar') !== 'false'
     const timezone = params.get('timezone') || 'UTC'
+    const search = params.get('search') || ''
+    const side = params.get('side') || ''
+    const tagIds = params.get('tags') ? params.get('tags')!.split(',').filter(Boolean) : []
     
     // Build Prisma where clause — ALL filtering server-side
     const whereClause: any = { userId: internalUserId }
@@ -145,6 +148,27 @@ export async function GET(request: NextRequest) {
       if (range) {
         whereClause.timeInPosition = { gte: range[0], lt: range[1] }
       }
+    }
+    
+    if (tagIds.length > 0) {
+      if (!whereClause.AND) whereClause.AND = []
+      whereClause.AND.push({ tags: { hasSome: tagIds } })
+    }
+
+    if (side) {
+      if (!whereClause.AND) whereClause.AND = []
+      whereClause.AND.push({ side: { equals: side, mode: 'insensitive' } })
+    }
+
+    if (search) {
+      if (!whereClause.AND) whereClause.AND = []
+      whereClause.AND.push({
+        OR: [
+          { instrument: { contains: search, mode: 'insensitive' } },
+          { symbol: { contains: search, mode: 'insensitive' } },
+          { comment: { contains: search, mode: 'insensitive' } },
+        ]
+      })
     }
     
     // PERF: Fetch trades (slim select) + accounts in parallel

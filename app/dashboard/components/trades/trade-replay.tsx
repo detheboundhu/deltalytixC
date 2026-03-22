@@ -56,8 +56,6 @@ export default function TradeReplay({ trade, onClose }: TradeReplayProps) {
         setIsLoading(true)
         setError(null)
 
-        console.log(`[CLIENT_TRACE] initChart for ${trade.instrument} ${trade.entryDate} (ID: ${trade.id})${force ? ' [FORCE]' : ''}`)
-
         try {
             // Fetch Real Data
             const { data, error: fetchError } = await getMarketData(

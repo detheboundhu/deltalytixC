@@ -12,8 +12,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getUserIdSafe } from '@/server/auth'
 import { convertDecimal } from '@/lib/utils/decimal'
+import { applyRateLimit, apiLimiter } from '@/lib/rate-limiter'
 
 export async function GET(request: NextRequest) {
+  const rateLimitResponse = await applyRateLimit(request, apiLimiter)
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const authUserId = await getUserIdSafe()
     

@@ -1,9 +1,9 @@
 'use client'
 
 import { WidgetCard } from '../widget-card'
-import { useData } from '@/context/data-provider'
-import { getTradingSession, MarketSession } from '@/lib/time-utils'
-import { classifyTrade, cn } from '@/lib/utils'
+import { useWidgetData } from '@/hooks/use-widget-data'
+import { MarketSession } from '@/lib/time-utils'
+import { cn } from '@/lib/utils'
 import { useUserStore } from '@/store/user-store'
 import {
     Globe,
@@ -26,43 +26,9 @@ const SESSION_META: Record<MarketSession, { name: string; icon: any; color: stri
 }
 
 export default function SessionAnalysis({ size }: SessionAnalysisProps) {
-    const { formattedTrades } = useData()
-    const timezone = useUserStore((state) => state.timezone) || 'America/New_York'
+    const { data: sessionStats } = useWidgetData('sessionAnalysis')
 
-    const sessionStats = useMemo(() => {
-        if (!formattedTrades || formattedTrades.length === 0) {
-            return null
-        }
-
-        const stats: Record<string, { trades: number; wins: number; pnl: number }> = {
-            'New York': { trades: 0, wins: 0, pnl: 0 },
-            'London': { trades: 0, wins: 0, pnl: 0 },
-            'Asia': { trades: 0, wins: 0, pnl: 0 },
-            'Outside Session': { trades: 0, wins: 0, pnl: 0 }
-        }
-
-        formattedTrades.forEach(trade => {
-            if (!trade.entryDate) return
-
-            try {
-                const session = getTradingSession(trade.entryDate)
-
-                if (session && stats[session]) {
-                    stats[session].trades++
-                    stats[session].pnl += trade.pnl || 0
-                    if (classifyTrade(trade.pnl || 0) === 'win') {
-                        stats[session].wins++
-                    }
-                }
-            } catch (e) {
-                // Invalid date, skip
-            }
-        })
-
-        return stats
-    }, [formattedTrades])
-
-    if (!sessionStats) {
+    if (!sessionStats || Object.keys(sessionStats).length === 0) {
         return (
             <WidgetCard title="Session Analysis">
                 <div className="flex items-center justify-center h-full">

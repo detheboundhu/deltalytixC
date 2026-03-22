@@ -3,8 +3,7 @@
 import React from 'react'
 import { WidgetCard } from '../widget-card'
 import { useData } from '@/context/data-provider'
-import { useAccounts } from '@/hooks/use-accounts'
-import { useTradeStatistics } from '@/hooks/use-trade-statistics'
+import { useWidgetData } from '@/hooks/use-widget-data'
 import { cn } from '@/lib/utils'
 import { Info } from "lucide-react"
 import {
@@ -20,32 +19,13 @@ interface AccountBalancePnlProps {
 }
 
 const AccountBalancePnl = React.memo(function AccountBalancePnl({ size }: AccountBalancePnlProps) {
-  const { accountNumbers, formattedTrades } = useData()
-  const { accounts } = useAccounts()
+  const { accountNumbers } = useData()
+  const { data: balanceInfo } = useWidgetData('accountBalancePnl')
 
-  // Filter accounts based on selection
-  const filteredAccounts = React.useMemo(() => {
-    if (!accounts || !Array.isArray(accounts) || accounts.length === 0) return []
-
-    // If no accounts selected (or explicit "all accounts" mode where accountNumbers is empty/null), return ALL accounts
-    if (!accountNumbers || accountNumbers.length === 0) {
-      return accounts
-    }
-
-    // Filter to selected accounts by matching account number (phaseId) ONLY
-    return accounts.filter(acc => accountNumbers.includes(acc.number))
-  }, [accounts, accountNumbers])
-
-  // USE UNIFIED CALCULATOR - Single source of truth for all balance calculations
-  // This replaces the old custom logic (lines 39-71) with centralized, tested functions
-  const balanceInfo = React.useMemo(() => {
-    return calculateBalanceInfo(filteredAccounts, formattedTrades)
-  }, [filteredAccounts, formattedTrades])
-
-  const totalBalance = balanceInfo.currentBalance
-  const grossPnl = balanceInfo.totalPnL
-  const totalCommissions = Math.abs(balanceInfo.totalCommissions)
-  const netPnl = balanceInfo.netPnL
+  const totalBalance = balanceInfo?.currentBalance || 0
+  const grossPnl = balanceInfo?.totalPnL || 0
+  const totalCommissions = Math.abs(balanceInfo?.totalCommissions || 0)
+  const netPnl = balanceInfo?.netPnL || 0
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

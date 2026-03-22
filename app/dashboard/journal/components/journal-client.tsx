@@ -56,32 +56,29 @@ import Fuse from 'fuse.js'
 import { getAssetSearchTerms } from '@/lib/asset-aliases'
 import { useTags } from '@/context/tags-provider'
 import { cn, ensureExtendedTrade } from '@/lib/utils'
+import { useJournal } from '@/hooks/use-journal'
 
 const ITEMS_PER_PAGE = 21
 
 // Stats Component
-function JournalStats({ trades }: { trades: Trade[] }) {
-  const stats = useMemo(() => {
-    if (trades.length === 0) return null
+function JournalStats({ statistics }: { statistics: any }) {
+  if (!statistics) return null
 
-    const wins = trades.filter(t => t.pnl > BREAK_EVEN_THRESHOLD)
-    const losses = trades.filter(t => t.pnl < -BREAK_EVEN_THRESHOLD)
-    const totalPnl = trades.reduce((sum, t) => sum + t.pnl, 0)
-    const avgDuration = trades.reduce((sum, t) => sum + (t.timeInPosition || 0), 0) / trades.length
+  // Process the raw numbers safely
+  const winRate = typeof statistics.winRate === 'number' ? statistics.winRate : 0;
+  const totalPnl = typeof statistics.totalPnL === 'number' ? statistics.totalPnL : (statistics.cumulativePnl || 0);
 
-    // Win Rate = Wins / (Wins + Losses) - break-even trades excluded from denominator
-    const tradableCount = wins.length + losses.length
-    const winRate = tradableCount > 0 ? (wins.length / tradableCount) * 100 : 0
-
-    return {
-      totalTrades: trades.length,
+  // Extract average position time (comes back as "Xh Ym Zs" string)
+  const sumSeconds = statistics.totalPositionTime || 0
+  const tradeCount = statistics.nbTrades || 1
+  const avgDuration = Math.floor((sumSeconds / tradeCount) / 60) // in minutes
+  
+  const stats = {
+      totalTrades: statistics.nbTrades || 0,
       winRate,
       totalPnl,
-      avgDuration: Math.floor(avgDuration / 60) // in minutes
-    }
-  }, [trades])
-
-  if (!stats) return null
+      avgDuration
+  }
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -253,7 +250,7 @@ function EmptyState({
 export function JournalClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { formattedTrades, refreshTrades, updateTrades, isLoading } = useData()
+  const { formattedTrades, updateTrades, accountNumbers } = useData()
   const { tags } = useTags()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -271,118 +268,21 @@ export function JournalClient() {
   const view = searchParams.get('view')
   const tradeIdParam = searchParams.get('tradeId')
 
+  // Pagination via Backend V1 Endpoint
+  const { trades: paginatedTrades, totalCount, statistics, isLoading, refetch } = useJournal({
+    page: currentPage,
+    search: searchTerm,
+    filterBy,
+    selectedTagIds,
+    accountNumbers,
+  })
+
   const matchedTrade = useMemo(() => {
-    if (!tradeIdParam || !formattedTrades) return null
-    return formattedTrades.find((t: any) => t.id === tradeIdParam) || null
-  }, [tradeIdParam, formattedTrades])
+    if (!tradeIdParam) return null
+    return paginatedTrades.find((t: any) => t.id === tradeIdParam) || formattedTrades?.find((t: any) => t.id === tradeIdParam) || null
+  }, [tradeIdParam, paginatedTrades, formattedTrades])
 
-  // Group trades
-  const groupedTrades = useMemo(() => groupTradesByExecution(formattedTrades), [formattedTrades])
-
-  // Filter trades
-  const filteredTrades = useMemo(() => {
-    let trades = groupedTrades
-
-    // Apply smart search with alias support
-    if (searchTerm && searchTerm.trim() !== '') {
-      const term = searchTerm.trim().toLowerCase()
-      const termLength = term.length
-
-      if (termLength <= 2) {
-        trades = trades.filter(trade => {
-          const t = trade as any
-          const instrument = (t.instrument || '').toLowerCase()
-          const symbol = (t.symbol || '').toLowerCase()
-          const comment = (t.comment || '').toLowerCase()
-
-          if (instrument.startsWith(term) || symbol.startsWith(term)) return true
-
-          const aliases = getAssetSearchTerms(t.instrument || t.symbol || '')
-          const aliasMatch = aliases.some(alias => alias.toLowerCase().startsWith(term))
-          if (aliasMatch) return true
-
-          if (comment.includes(term)) return true
-
-          return false
-        })
-      } else if (termLength <= 4) {
-        const tradesWithAliases = trades.map(trade => {
-          const t = trade as any
-          return {
-            ...trade,
-            searchableInstrument: getAssetSearchTerms(t.instrument || t.symbol || '').join(' '),
-          }
-        })
-
-        const fuse = new Fuse(tradesWithAliases, {
-          keys: [
-            { name: 'instrument', weight: 0.4 },
-            { name: 'symbol', weight: 0.3 },
-            { name: 'searchableInstrument', weight: 0.4 },
-            { name: 'comment', weight: 0.1 },
-          ],
-          threshold: 0.2,
-          distance: 50,
-          minMatchCharLength: 1,
-          includeScore: true,
-        })
-
-        const results = fuse.search(term)
-        trades = results.map(result => result.item)
-      } else {
-        const tradesWithAliases = trades.map(trade => {
-          const t = trade as any
-          return {
-            ...trade,
-            searchableInstrument: getAssetSearchTerms(t.instrument || t.symbol || '').join(' '),
-          }
-        })
-
-        const fuse = new Fuse(tradesWithAliases, {
-          keys: [
-            { name: 'instrument', weight: 0.3 },
-            { name: 'symbol', weight: 0.3 },
-            { name: 'searchableInstrument', weight: 0.3 },
-            { name: 'comment', weight: 0.2 },
-          ],
-          threshold: 0.35,
-          distance: 100,
-          minMatchCharLength: 1,
-          includeScore: true,
-        })
-
-        const results = fuse.search(term)
-        trades = results.map(result => result.item)
-      }
-    }
-
-    // Apply additional filters
-    return trades.filter(trade => {
-      const t = trade as any
-      const matchesFilter =
-        filterBy === 'all' ||
-        (filterBy === 'wins' && t.pnl > BREAK_EVEN_THRESHOLD) ||
-        (filterBy === 'losses' && t.pnl < -BREAK_EVEN_THRESHOLD) ||
-        (filterBy === 'buys' && t.side?.toUpperCase() === 'BUY') ||
-        (filterBy === 'sells' && t.side?.toUpperCase() === 'SELL')
-
-      if (selectedTagIds.length > 0) {
-        const tradeTagIds = Array.isArray((trade as any).tags) ? (trade as any).tags : []
-        const hasSelectedTag = selectedTagIds.some(tagId => tradeTagIds.includes(tagId))
-        if (!hasSelectedTag) return false
-      }
-
-      return matchesFilter
-    })
-  }, [groupedTrades, searchTerm, filterBy, selectedTagIds])
-
-  // Pagination
-  const totalPages = Math.ceil(filteredTrades.length / ITEMS_PER_PAGE)
-  const paginatedTrades = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-    const endIndex = startIndex + ITEMS_PER_PAGE
-    return filteredTrades.slice(startIndex, endIndex)
-  }, [filteredTrades, currentPage])
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -393,14 +293,14 @@ export function JournalClient() {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
     try {
-      await refreshTrades()
+      await refetch()
       toast.success('Trades refreshed')
     } catch (error) {
       toast.error('Failed to refresh')
     } finally {
       setIsRefreshing(false)
     }
-  }, [refreshTrades])
+  }, [refetch])
 
   const handleEditTrade = useCallback((trade: Trade) => {
     router.push(`/dashboard/journal?view=edit&tradeId=${trade.id}`)
@@ -420,14 +320,14 @@ export function JournalClient() {
 
     try {
       toast.success('Trade deleted successfully')
-      await refreshTrades()
+      await refetch()
     } catch (error) {
       toast.error('Failed to delete trade')
     } finally {
       setShowDeleteDialog(false)
       setTradeToDelete(null)
     }
-  }, [tradeToDelete, refreshTrades])
+  }, [tradeToDelete, refetch])
 
   const handleSaveTrade = useCallback(async (updatedTrade: Partial<Trade>) => {
     if (!matchedTrade) return
@@ -439,11 +339,11 @@ export function JournalClient() {
       // Close dialog and go back to details
       router.push(`/dashboard/journal?view=details&tradeId=${matchedTrade.id}`)
 
-      await refreshTrades()
+      await refetch()
     } catch (error) {
       toast.error('Failed to update trade')
     }
-  }, [matchedTrade, updateTrades, refreshTrades, router])
+  }, [matchedTrade, updateTrades, refetch, router])
 
   const handleClearFilters = useCallback(() => {
     setSearchTerm('')
@@ -454,7 +354,7 @@ export function JournalClient() {
   const hasFilters = filterBy !== 'all' || selectedTagIds.length > 0
 
   // Show loading skeleton
-  if (isLoading && filteredTrades.length === 0) {
+  if (isLoading && paginatedTrades.length === 0) {
     return <JournalSkeleton />
   }
 
@@ -527,7 +427,7 @@ export function JournalClient() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
       >
-        <JournalStats trades={groupedTrades} />
+        {statistics && <JournalStats statistics={statistics} />}
       </motion.div>
 
       {/* Filters */}
@@ -673,7 +573,7 @@ export function JournalClient() {
 
       {/* Content */}
       <AnimatePresence mode="wait">
-        {filteredTrades.length === 0 ? (
+        {paginatedTrades.length === 0 && !isLoading ? (
           <motion.div
             key="empty"
             initial={{ opacity: 0, y: 20 }}
@@ -721,7 +621,7 @@ export function JournalClient() {
                 className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8"
               >
                 <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-                  Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredTrades.length)} of {filteredTrades.length} trades
+                  Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of {totalCount} trades
                 </div>
                 <div className="flex flex-wrap justify-center items-center gap-2">
                   <Button

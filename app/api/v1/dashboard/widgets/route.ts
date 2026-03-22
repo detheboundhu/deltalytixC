@@ -6,10 +6,14 @@ import {
   calculateEquityCurve,
   calculateNetDailyPnl,
   calculateDailyCumulativePnl,
-  calculateAccountBalanceChart
+  calculateAccountBalanceChart,
+  calculateTradingOverviewKpis,
+  calculateCalendarData,
+  calculateSessionAnalysis
 } from '@/lib/dashboard-math'
 import { prisma } from '@/lib/prisma'
 import { getUserId } from '@/server/auth'
+import { calculateBalanceInfo } from '@/lib/utils/balance-calculator'
 
 export async function GET(request: NextRequest) {
   const type = request.nextUrl.searchParams.get('type')
@@ -66,6 +70,35 @@ export async function GET(request: NextRequest) {
         }
       }
       result = calculateAccountBalanceChart(trades, activeAccounts)
+      break
+    case 'tradingOverview':
+      result = calculateTradingOverviewKpis(trades)
+      break
+    case 'calendarData':
+      result = calculateCalendarData(trades)
+      break
+    case 'sessionAnalysis':
+      result = calculateSessionAnalysis(trades)
+      break
+    case 'accountBalancePnl':
+      const userLookupId = await getUserId()
+      let userAccounts = []
+      if (userLookupId) {
+        const u = await prisma.user.findUnique({ where: { auth_user_id: userLookupId } })
+        if (u) {
+          // fetch all accounts
+          userAccounts = await prisma.account.findMany({
+            where: { userId: u.id }
+          }) as any[]
+        }
+      }
+      
+      const accountNumbers = request.nextUrl.searchParams.get('accounts')?.split(',').filter(Boolean) || []
+      let filteredDbAccounts = userAccounts
+      if (accountNumbers.length > 0) {
+        filteredDbAccounts = userAccounts.filter(acc => accountNumbers.includes(acc.number))
+      }
+      result = calculateBalanceInfo(filteredDbAccounts, trades)
       break
     default:
       return NextResponse.json({ error: 'Unknown widget type' }, { status: 400 })

@@ -1,5 +1,7 @@
-import { Trade } from '@prisma/client'
-import { format, getDay } from 'date-fns'
+import { Trade, Account } from '@prisma/client'
+import { startOfMonth, endOfMonth, parseISO, isWithinInterval, startOfWeek, endOfWeek, format, differenceInDays, getDay } from 'date-fns'
+import { getTradingSession } from '@/lib/time-utils'
+import { classifyTrade } from '@/lib/utils'
 import { CHART_COLORS } from '@/app/dashboard/components/widget-card'
 import { BREAK_EVEN_THRESHOLD } from '@/lib/utils'
 
@@ -367,4 +369,146 @@ export function calculatePerformanceScoreResult(trades: Partial<Trade>[]) {
   ]
 
   return { chartData: radarData, overallScore: scoreResult.overallScore, hasData: true }
+}
+
+
+
+export function calculateTradingOverviewKpis(trades: Partial<Trade>[]) {
+  if (!trades?.length) {
+    return {
+      currentStats: { monthTrades: 0, monthWinRate: 0, weekPnL: 0 },
+      riskStats: { maxDrawdown: 0, largestLoss: 0, avgLoss: 0, lossStreak: 0 },
+      streakData: { currentStreak: 0, isWinning: true, longestWinStreak: 0, longestLoseStreak: 0 }
+    }
+  }
+
+  const now = new Date()
+  const monthStart = startOfMonth(now)
+  const monthEnd = endOfMonth(now)
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 })
+  const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
+
+  const monthTrades = trades.filter(t => {
+    if (!t.entryDate) return false
+    return isWithinInterval(new Date(t.entryDate), { start: monthStart, end: monthEnd })
+  })
+
+  const weekTrades = trades.filter(t => {
+    if (!t.entryDate) return false
+    return isWithinInterval(new Date(t.entryDate), { start: weekStart, end: weekEnd })
+  })
+
+  const monthWins = monthTrades.filter(t => (t.pnl || 0) > 0).length
+  const weekPnL = weekTrades.reduce((sum, t) => sum + (t.pnl || 0), 0)
+
+  const currentStats = { 
+    monthTrades: monthTrades.length, 
+    monthWinRate: monthTrades.length > 0 ? (monthWins / monthTrades.length) * 100 : 0, 
+    weekPnL 
+  }
+
+  let peak = 0, maxDrawdown = 0, runningTotal = 0
+  const sortedByTime = [...trades].sort((a, b) => (new Date(a.entryDate || 0).getTime()) - (new Date(b.entryDate || 0).getTime()))
+  
+  sortedByTime.forEach(trade => {
+    runningTotal += trade.pnl || 0
+    if (runningTotal > peak) peak = runningTotal
+    const dd = peak - runningTotal
+    if (dd > maxDrawdown) maxDrawdown = dd
+  })
+
+  const losses = trades.filter(t => (t.pnl || 0) < 0)
+  const largestLoss = Math.abs(Math.min(...losses.map(t => t.pnl || 0), 0))
+  const avgLoss = losses.length > 0 ? losses.reduce((sum, t) => sum + Math.abs(t.pnl || 0), 0) / losses.length : 0
+
+  let lossStreak = 0
+  for (let i = sortedByTime.length - 1; i >= 0; i--) {
+    if ((sortedByTime[i].pnl || 0) < 0) lossStreak++
+    else break
+  }
+
+  const riskStats = { maxDrawdown, largestLoss, avgLoss, lossStreak }
+
+  const sortedDesc = [...sortedByTime].reverse()
+  let currentStreak = 0
+  const firstResult = (sortedDesc[0].pnl || 0) > 0
+  const isWinning = firstResult
+
+  for (const trade of sortedDesc) {
+    if (((trade.pnl || 0) > 0) === firstResult) currentStreak++
+    else break
+  }
+
+  let longestWinStreak = 0, longestLoseStreak = 0, tempStreak = 0
+  let lastWasWin: boolean | null = null
+
+  for (const trade of sortedByTime) {
+    const isWin = (trade.pnl || 0) > 0
+    if (lastWasWin === null) { tempStreak = 1; lastWasWin = isWin }
+    else if (isWin === lastWasWin) { tempStreak++ }
+    else {
+      if (lastWasWin) longestWinStreak = Math.max(longestWinStreak, tempStreak)
+      else longestLoseStreak = Math.max(longestLoseStreak, tempStreak)
+      tempStreak = 1; lastWasWin = isWin
+    }
+  }
+  if (lastWasWin) longestWinStreak = Math.max(longestWinStreak, tempStreak)
+  else if (lastWasWin === false) longestLoseStreak = Math.max(longestLoseStreak, tempStreak)
+
+  const streakData = { currentStreak, isWinning, longestWinStreak, longestLoseStreak }
+
+  return { currentStats, riskStats, streakData }
+}
+
+export function calculateCalendarData(trades: Partial<Trade>[]) {
+  const data: Record<string, { pnl: number; tradeNumber: number; longNumber: number; shortNumber: number }> = {}
+
+  trades.forEach(trade => {
+    if (!trade.entryDate) return
+
+    const key = format(new Date(trade.entryDate), 'yyyy-MM-dd')
+    if (!data[key]) {
+      data[key] = { pnl: 0, tradeNumber: 0, longNumber: 0, shortNumber: 0 }
+    }
+
+    const netPnl = (trade.pnl || 0) + (trade.commission || 0)
+    data[key].pnl += netPnl
+    data[key].tradeNumber++
+
+    const side = trade.side?.toLowerCase()
+    const isLong = side === 'long' || side === 'buy' || side === 'b'
+    if (isLong) data[key].longNumber++
+    else data[key].shortNumber++
+  })
+
+  return data
+}
+
+export function calculateSessionAnalysis(trades: Partial<Trade>[]) {
+  const stats: Record<string, { trades: number; wins: number; pnl: number }> = {
+      'New York': { trades: 0, wins: 0, pnl: 0 },
+      'London': { trades: 0, wins: 0, pnl: 0 },
+      'Asia': { trades: 0, wins: 0, pnl: 0 },
+      'Outside Session': { trades: 0, wins: 0, pnl: 0 }
+  }
+
+  trades.forEach(trade => {
+      if (!trade.entryDate) return
+
+      try {
+          const session = getTradingSession(trade.entryDate)
+
+          if (session && stats[session]) {
+              stats[session].trades++
+              stats[session].pnl += trade.pnl || 0
+              if (classifyTrade(trade.pnl || 0) === 'win') {
+                  stats[session].wins++
+              }
+          }
+      } catch (e) {
+          // Invalid date, skip
+      }
+  })
+
+  return stats
 }
