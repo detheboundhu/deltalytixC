@@ -28,7 +28,7 @@ const formatCompact = (value: number) => {
 }
 
 // ============================================================================
-// Day Cell — deep green/red fill, prominent P&L, trade count + winrate
+// Day Cell — exact match to reference images
 // ============================================================================
 const DayCell = memo(function DayCell({
   date,
@@ -65,32 +65,32 @@ const DayCell = memo(function DayCell({
     <div
       onClick={!isMiniCalendar && onClick ? onClick : undefined}
       className={cn(
-        "relative flex flex-col items-center justify-center rounded-md border transition-all duration-150 select-none group aspect-square",
-        !isMiniCalendar && "cursor-pointer",
+        "relative flex flex-col items-center justify-center rounded-[6px] border transition-all duration-150 select-none group min-h-[50px] md:min-h-[70px]",
+        !isMiniCalendar && "min-h-[85px] md:min-h-[100px] cursor-pointer",
 
         // No trades — dark neutral
-        !hasTrades && isCurrentMonth && "bg-card/40 border-border/20 hover:border-border/40",
+        !hasTrades && isCurrentMonth && "bg-[#16181d] border-[#22252b] hover:border-[#333842]",
 
-        // Profit — deep green
-        hasTrades && isProfit && "bg-long/20 border-long/30 hover:bg-long/30 hover:border-long/50",
+        // Profit — dark green
+        hasTrades && isProfit && "bg-[#092a1a] border-[#14472a] hover:bg-[#0c3823] hover:border-[#1b5c37]",
 
-        // Loss — deep red
-        hasTrades && isLoss && "bg-short/20 border-short/30 hover:bg-short/30 hover:border-short/50",
+        // Loss — dark red
+        hasTrades && isLoss && "bg-[#3b1212] border-[#591c1c] hover:bg-[#4a1717] hover:border-[#732424]",
 
         // Breakeven
-        hasTrades && isBreakEven && "bg-muted/30 border-border/30",
+        hasTrades && isBreakEven && "bg-[#1f2229] border-[#2c313a]",
 
         // Not current month
-        !isCurrentMonth && "opacity-10 pointer-events-none",
+        !isCurrentMonth && "opacity-20 pointer-events-none",
 
         // Today ring
-        isTodayDate && isCurrentMonth && "ring-1.5 ring-primary ring-offset-1 ring-offset-background",
+        isTodayDate && isCurrentMonth && "ring-1 ring-primary ring-offset-0",
       )}
     >
       {/* Note Icon — top left */}
       {hasNotes && (
-        <div className="absolute top-1 left-1 opacity-60">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/80">
+        <div className="absolute top-1.5 left-1.5 opacity-70">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
@@ -100,36 +100,35 @@ const DayCell = memo(function DayCell({
       {/* Day number — top right  */}
       <span
         className={cn(
-          "absolute top-1 right-1 font-black leading-none",
+          "absolute top-1 right-1.5 font-semibold leading-none",
           isTodayDate
-            ? "text-primary-foreground bg-primary rounded-full w-4.5 h-4.5 flex items-center justify-center text-[9px]"
-            : "text-muted-foreground/30 text-[10px]",
+            ? "text-primary-foreground bg-primary rounded-full w-4.5 h-4.5 flex items-center justify-center text-[10px]"
+            : "text-muted-foreground/60 text-[11px]",
         )}
       >
         {format(date, 'd')}
       </span>
 
       {/* Main Content Container */}
-      <div className="flex flex-col items-center justify-center w-full px-1">
+      <div className="flex flex-col items-center justify-center w-full px-1 mt-3">
         {/* P&L */}
         {hasTrades && visibleStats.pnl && (
           <div
             className={cn(
-              "font-black tracking-tighter text-foreground text-center",
-              isMiniCalendar ? "text-[10px]" : "text-[14px] md:text-[18px]",
-              // Add a slight shadow for better contrast on colored backgrounds
-              "drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]"
+              "font-bold tracking-tight text-center",
+              isMiniCalendar ? "text-[11px]" : "text-[14px] md:text-[16px]",
+              isProfit ? "text-[#3ce07e]" : isLoss ? "text-[#ff4c4c]" : "text-white"
             )}
           >
-            {dayData.pnl > 0 ? "+" : ""}{formatCompact(dayData.pnl)}
+            {dayData.pnl > 0 && !isMiniCalendar ? "" : ""}{isMiniCalendar ? (dayData.pnl > 0 ? "+" : "") : ""}{isMiniCalendar ? formatCompact(dayData.pnl) : (dayData.pnl < 0 ? `-$${Math.abs(dayData.pnl).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : `$${dayData.pnl.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`)}
           </div>
         )}
 
         {/* Trade Count */}
         {hasTrades && visibleStats.trades && (
           <span className={cn(
-            "font-bold text-muted-foreground/80 leading-none",
-            isMiniCalendar ? "text-[7px]" : "text-[9px] md:text-[10px] mt-0.5"
+            "font-medium leading-none text-white/80",
+            isMiniCalendar ? "text-[8px] mt-0.5" : "text-[10px] md:text-[11px] mt-0.5"
           )}>
             {dayData.tradeNumber} trade{dayData.tradeNumber !== 1 ? 's' : ''}
           </span>
@@ -137,18 +136,21 @@ const DayCell = memo(function DayCell({
 
         {/* Secondary Stats Row (R & WinRate) */}
         {hasTrades && !isMiniCalendar && (
-          <div className="flex items-center gap-1 mt-1 opacity-90">
+          <div className="flex items-center justify-center gap-0.5 mt-1.5 w-full">
             {visibleStats.rMultiple && dayData.dailyRMultiple !== undefined && (
               <span className={cn(
-                "text-[8px] md:text-[9px] font-black",
-                isProfit ? "text-long" : isLoss ? "text-short" : "text-muted-foreground"
+                "text-[9px] font-medium opacity-80",
+                isProfit ? "text-[#3ce07e]" : isLoss ? "text-[#ff4c4c]" : "text-white"
               )}>
-                {dayData.dailyRMultiple.toFixed(2)}R
+                {dayData.dailyRMultiple > 0 ? '' : ''}{dayData.dailyRMultiple.toFixed(2)}R{visibleStats.winRate ? ',' : ''}
               </span>
             )}
             {visibleStats.winRate && (
-              <span className="text-[8px] md:text-[9px] font-black text-muted-foreground/60">
-                {winRateValue.toFixed(0)}%
+              <span className={cn(
+                "text-[9px] font-medium opacity-80 ml-0.5",
+                isProfit ? "text-[#3ce07e]" : isLoss ? "text-[#ff4c4c]" : "text-white"
+              )}>
+                {winRateValue.toFixed(1)}%
               </span>
             )}
           </div>
@@ -159,7 +161,7 @@ const DayCell = memo(function DayCell({
 })
 
 // ============================================================================
-// Weekly Summary Card — right sidebar
+// Weekly Summary Card — right sidebar (looks like TradeZella's weekly summary)
 // ============================================================================
 function WeeklySummary({
   weekIndex,
@@ -196,40 +198,34 @@ function WeeklySummary({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-xl border p-2 cursor-pointer transition-all hover:bg-muted/10 group min-h-[85px]",
+        "flex flex-col items-start justify-center rounded-[8px] border p-2.5 cursor-pointer transition-all hover:brightness-110 group min-h-[70px] xl:min-h-[85px]",
         stats.tradedDays === 0
-          ? "bg-card/20 border-border/10"
-          : isPositive
-            ? "bg-long/10 border-long/20"
-            : "bg-short/10 border-short/20",
+          ? "bg-[#16181d] border-[#22252b]"
+          : "bg-[#16181d] border-[#22252b]"
       )}
       onClick={() => onReviewWeek?.(weekDays[0])}
     >
-      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 mb-1">
-        WEEK {weekIndex + 1}
+      <span className="text-[11px] font-medium text-muted-foreground/80 mb-0.5">
+        Week {weekIndex + 1}
       </span>
       <span
         className={cn(
-          "text-base md:text-lg font-black tracking-tighter drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]",
+          "text-sm md:text-base font-bold tracking-tight",
           stats.tradedDays === 0
-            ? "text-muted-foreground/20"
+            ? "text-white"
             : isPositive
-              ? "text-long"
-              : "text-short",
+              ? "text-[#3ce07e]"
+              : "text-[#ff4c4c]",
         )}
       >
-        {stats.tradedDays === 0 ? "$0" : formatCompact(stats.pnl)}
+        {stats.tradedDays === 0 ? "$0" : (stats.pnl < 0 ? `-$${Math.abs(stats.pnl).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : `$${stats.pnl.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`)}
       </span>
-      <span
-        className={cn(
-          "text-[10px] font-bold mt-1 px-2 py-0.5 rounded-md",
-          stats.tradedDays > 0
-            ? "bg-primary/10 text-primary border border-primary/20"
-            : "bg-muted/10 text-muted-foreground/20",
-        )}
-      >
+      <div className={cn(
+        "text-[9px] font-bold mt-1.5 px-1.5 py-0.5 rounded",
+        "bg-primary/20 text-primary border border-primary/30"
+      )}>
         {stats.tradedDays} day{stats.tradedDays !== 1 ? 's' : ''}
-      </span>
+      </div>
     </div>
   )
 }
@@ -285,67 +281,69 @@ export default function MonthlyView({
     : WEEKDAYS
 
   return (
-    <div className="flex h-full">
-      {/* Main Calendar Grid */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Weekday Headers */}
-        <div className={cn("grid gap-1 md:gap-1.5 px-2 md:px-3 pt-3 pb-1", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
-          {displayWeekdays.map((day) => (
-            <div
-              key={day}
-              className="text-center text-[9px] md:text-[10px] font-bold text-muted-foreground/50 tracking-widest uppercase"
-            >
-              {day}
-            </div>
-          ))}
+    <div className="flex h-full w-full overflow-x-auto overflow-y-hidden">
+      <div className={cn("flex flex-1 min-w-[700px] md:min-w-0 h-full", isMiniCalendar && "min-w-[400px]")}>
+        {/* Main Calendar Grid */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Weekday Headers */}
+          <div className={cn("grid gap-1 md:gap-1.5 px-2 md:px-3 pt-3 pb-1", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
+            {displayWeekdays.map((day) => (
+              <div
+                key={day}
+                className="text-center text-[10px] md:text-[11px] font-semibold text-muted-foreground/80 capitalize"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Day Grid */}
+          <div className={cn("flex-1 grid gap-1 md:gap-1.5 p-2 md:p-3 pt-0 auto-rows-fr min-h-0 overflow-y-auto", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
+            {weeks.map((week, weekIndex) => (
+              <React.Fragment key={weekIndex}>
+                {week.map((date) => {
+                  const dateKey = format(date, 'yyyy-MM-dd')
+                  const dayData = calendarData[dateKey]
+                  const isCurrentMonth = isSameMonth(date, currentDate)
+                  const hasNotes = !!notes[dateKey]
+
+                  return (
+                    <DayCell
+                      key={date.toISOString()}
+                      date={date}
+                      dayData={dayData}
+                      hasNotes={hasNotes}
+                      isCurrentMonth={isCurrentMonth}
+                      hideWeekends={hideWeekends}
+                      isMiniCalendar={isMiniCalendar}
+                      onClick={() => onSelectDate?.(date)}
+                    />
+                  )
+                })}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
 
-        {/* Day Grid */}
-        <div className={cn("flex-1 grid gap-1 md:gap-1.5 p-2 md:p-3 pt-0 auto-rows-fr min-h-0 overflow-y-auto", hideWeekends ? "grid-cols-5" : "grid-cols-7")}>
-          {weeks.map((week, weekIndex) => (
-            <React.Fragment key={weekIndex}>
-              {week.map((date) => {
-                const dateKey = format(date, 'yyyy-MM-dd')
-                const dayData = calendarData[dateKey]
-                const isCurrentMonth = isSameMonth(date, currentDate)
-                const hasNotes = !!notes[dateKey]
+        {/* Weekly Summaries Sidebar */}
+        {!isMiniCalendar && (
+          <div className="hidden lg:flex flex-col gap-1.5 w-[110px] xl:w-[125px] p-2 pl-0.5 border-l border-border/10 ml-1">
+            {/* Spacer to align with weekday header */}
+          <div className="h-[26px] shrink-0" />
 
-                return (
-                  <DayCell
-                    key={date.toISOString()}
-                    date={date}
-                    dayData={dayData}
-                    hasNotes={hasNotes}
-                    isCurrentMonth={isCurrentMonth}
-                    hideWeekends={hideWeekends}
-                    isMiniCalendar={isMiniCalendar}
-                    onClick={() => onSelectDate?.(date)}
-                  />
-                )
-              })}
-            </React.Fragment>
+          {weeks.map((week, index) => (
+            <WeeklySummary
+              key={index}
+              weekIndex={index}
+              weekDays={week}
+              calendarData={calendarData}
+              currentDate={currentDate}
+              onReviewWeek={onReviewWeek}
+            />
           ))}
-        </div>
+          </div>
+        )}
       </div>
-
-      {/* Weekly Summaries Sidebar */}
-      {!isMiniCalendar && (
-        <div className="hidden lg:flex flex-col gap-1.5 w-[100px] xl:w-[110px] p-2 pl-0 border-l border-border/20">
-          {/* Spacer to align with weekday header */}
-        <div className="h-[26px] shrink-0" />
-
-        {weeks.map((week, index) => (
-          <WeeklySummary
-            key={index}
-            weekIndex={index}
-            weekDays={week}
-            calendarData={calendarData}
-            currentDate={currentDate}
-            onReviewWeek={onReviewWeek}
-          />
-        ))}
-        </div>
-      )}
     </div>
   )
 }

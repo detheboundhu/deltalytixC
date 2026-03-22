@@ -1,14 +1,17 @@
 'use client'
 
-import React, { useState, useMemo, useCallback } from "react"
+import React, { useState, useMemo, useCallback, useRef } from "react"
 import { format, addMonths, subMonths, isSameMonth } from "date-fns"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Camera } from "lucide-react"
+import html2canvas from 'html2canvas'
+import { toast } from "sonner"
 import { WidgetCard } from '../widget-card'
 import { Button } from "@/components/ui/button"
 import { CalendarData } from "@/app/dashboard/types/calendar"
 import { useData } from "@/context/data-provider"
 import MonthlyView from "./monthly-view"
 import { BREAK_EVEN_THRESHOLD } from "@/lib/utils"
+import { LogoText } from "@/components/logo"
 
 const formatCompact = (value: number) => {
   if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}k`
@@ -27,6 +30,72 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [showWeeklyModal, setShowWeeklyModal] = useState(false)
   const [selectedWeekDate, setSelectedWeekDate] = useState<Date | null>(null)
+
+  const calendarRef = useRef<HTMLDivElement>(null)
+
+  const handleScreenshot = useCallback(async () => {
+    if (!calendarRef.current) return
+
+    try {
+      toast.info("Capturing screenshot...")
+      const canvas = await html2canvas(calendarRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        windowWidth: 600,
+        onclone: (clonedDoc) => {
+          const wrapper = clonedDoc.getElementById('mini-calendar-capture')
+          if (wrapper) {
+            wrapper.style.padding = '50px 60px 70px 60px'
+            wrapper.style.background = 'linear-gradient(135deg, #0f0c29 0%, #302b63 60%, #0a0812 100%)'
+            wrapper.style.borderRadius = '0px'
+            wrapper.style.display = 'flex'
+            wrapper.style.flexDirection = 'column'
+            wrapper.style.alignItems = 'center'
+            wrapper.style.justifyContent = 'center'
+            wrapper.style.width = '800px'
+            wrapper.style.height = 'fit-content'
+
+            const card = wrapper.querySelector('[data-widget-card]') as HTMLElement || wrapper.querySelector('.rounded-2xl') as HTMLElement
+            if (card) {
+              card.style.width = '100%'
+              card.style.maxWidth = '680px'
+              card.style.boxShadow = '0 30px 60px -12px rgba(0,0,0,0.7), 0 0 100px -20px rgba(48,43,99,0.5)'
+              card.style.border = '1px solid hsl(var(--border)/0.5)'
+              card.style.background = 'hsl(var(--background))'
+              card.style.height = 'auto'
+              card.style.minHeight = '400px'
+              card.style.borderRadius = '16px'
+            }
+
+            const watermark = clonedDoc.getElementById('mini-calendar-watermark')
+            if (watermark) {
+              watermark.style.display = 'flex'
+              watermark.style.marginTop = '40px'
+              const svg = watermark.querySelector('svg')
+              if (svg) svg.style.fill = '#ffffff'
+            }
+          }
+        }
+      })
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          toast.error("Failed to capture screenshot")
+          return
+        }
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `mini-calendar-${format(currentDate, 'yyyy-MM-dd')}.png`
+        link.click()
+        URL.revokeObjectURL(url)
+        toast.success("Screenshot saved!")
+      }, 'image/png')
+    } catch (error) {
+      toast.error("Failed to capture screenshot")
+    }
+  }, [currentDate])
 
   // Navigation
   const handlePrev = useCallback(() => setCurrentDate(prev => subMonths(prev, 1)), [])
@@ -56,8 +125,8 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
   }, [calendarData, currentDate])
 
   return (
-    <div className="w-full h-full">
-      <WidgetCard noPadding className="overflow-hidden flex flex-col h-full">
+    <div id="mini-calendar-capture" ref={calendarRef} className="w-full h-full">
+      <WidgetCard noPadding data-widget-card="true" className="overflow-hidden flex flex-col h-full bg-background relative z-10">
         {/* Unified Header: Navigation + Stats */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 px-4 py-3 border-b border-border/20 bg-muted/5 flex-shrink-0">
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -86,8 +155,8 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
             </Button>
           </div>
 
-          <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
-            <span className="text-[10px] font-bold text-muted-foreground mr-1">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <span className="text-[10px] font-bold text-muted-foreground mr-1 hidden lg:inline">
               Monthly stats:
             </span>
 
@@ -103,11 +172,23 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
                 {tradedDaysCount} d
               </div>
             </div>
+
+            <div className="w-px h-3 bg-border/40 mx-1" />
+
+            <Button
+              className="h-7 px-2.5 text-[10px] font-bold gap-1 bg-muted/20 hover:bg-primary/5 hover:text-primary transition-all rounded-md"
+              variant="ghost"
+              size="sm"
+              onClick={handleScreenshot}
+            >
+              <Camera className="h-3.5 w-3.5" />
+              <span className="hidden xl:inline">Snapshot</span>
+            </Button>
           </div>
         </div>
 
         {/* Calendar Grid - uses MonthlyView with hideWeekends */}
-        <div className="flex-1 min-h-0 overflow-y-auto relative">
+        <div className="flex-1 min-h-[220px] overflow-y-auto relative">
           <MonthlyView
             hideWeekends
             currentDate={currentDate}
@@ -116,6 +197,11 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
           />
         </div>
       </WidgetCard>
+      
+      {/* Hidden watermark/logo for screenshots */}
+      <div id="mini-calendar-watermark" className="hidden flex-col items-center justify-center pb-6">
+        <LogoText />
+      </div>
     </div>
   )
 }

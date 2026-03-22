@@ -21,6 +21,7 @@ import { WidgetCard } from "../widget-card"
 // New Components
 import MonthlyView from "./monthly-view"
 import YearlyView from "./yearly-view"
+import { LogoText } from "@/components/logo"
 
 const formatCompact = (value: number) => {
   if (Math.abs(value) >= 1000) return `$${(value / 1000).toFixed(1)}k`
@@ -70,27 +71,43 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
         useCORS: true,
         windowWidth: 1200,
         onclone: (clonedDoc) => {
-          if (screenshotWithGradient) {
-            const wrapper = clonedDoc.getElementById('advanced-calendar-capture')
-            if (wrapper) {
-              wrapper.style.padding = '60px'
+          const wrapper = clonedDoc.getElementById('advanced-calendar-capture')
+          if (wrapper) {
+            wrapper.style.padding = '50px 60px 70px 60px'
+            // Deep premium dark gradient if toggled, otherwise theme background
+            if (screenshotWithGradient) {
+              wrapper.style.background = 'linear-gradient(135deg, #0f0c29 0%, #302b63 60%, #0a0812 100%)'
+            } else {
               wrapper.style.background = 'hsl(var(--background))'
-              wrapper.style.borderRadius = '0px'
-              wrapper.style.display = 'flex'
-              wrapper.style.alignItems = 'center'
-              wrapper.style.justifyContent = 'center'
-              wrapper.style.width = '1320px'
-              wrapper.style.height = 'fit-content'
+            }
+            wrapper.style.borderRadius = '0px'
+            wrapper.style.display = 'flex'
+            wrapper.style.flexDirection = 'column'
+            wrapper.style.alignItems = 'center'
+            wrapper.style.justifyContent = 'center'
+            wrapper.style.width = '1100px' // Cute, tighter size
+            wrapper.style.height = 'fit-content'
 
-              const card = wrapper.querySelector('.rounded-2xl') as HTMLElement
-              if (card) {
-                card.style.width = '1200px'
-                card.style.boxShadow = '0 30px 60px -12px hsl(var(--background)/0.7)'
-                card.style.border = '1px solid hsl(var(--border)/0.5)'
-                card.style.background = 'hsl(var(--background))'
-                card.style.height = 'auto'
-                card.style.minHeight = '700px'
-              }
+            const card = wrapper.querySelector('[data-widget-card]') as HTMLElement || wrapper.querySelector('.rounded-2xl') as HTMLElement
+            if (card) {
+              card.style.width = '100%'
+              card.style.maxWidth = '980px'
+              card.style.boxShadow = screenshotWithGradient 
+                ? '0 30px 60px -12px rgba(0,0,0,0.7), 0 0 100px -20px rgba(48,43,99,0.5)'
+                : '0 30px 60px -12px hsl(var(--foreground)/0.1)'
+              card.style.border = '1px solid hsl(var(--border)/0.5)'
+              card.style.background = 'hsl(var(--background))'
+              card.style.height = 'auto'
+              card.style.minHeight = '600px'
+              card.style.borderRadius = '16px'
+            }
+
+            const watermark = clonedDoc.getElementById('calendar-watermark')
+            if (watermark) {
+              watermark.style.display = 'flex'
+              watermark.style.marginTop = '40px'
+              const svg = watermark.querySelector('svg')
+              if (svg) svg.style.fill = screenshotWithGradient ? '#ffffff' : 'hsl(var(--foreground))'
             }
           }
         }
@@ -201,6 +218,7 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
     <div id="advanced-calendar-capture" ref={calendarRef} data-screenshot-wrap className={cn("h-full w-full", className)}>
       <WidgetCard
         noPadding
+        data-widget-card="true"
         className="overflow-hidden flex flex-col h-full"
       >
         {/* Unified Header: Navigation + Stats + Controls */}
@@ -318,6 +336,11 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
           isLoading={isLoading}
         />
       </WidgetCard>
+
+      {/* Hidden watermark/logo for screenshots */}
+      <div id="calendar-watermark" className="hidden flex-col items-center justify-center pb-6">
+        <LogoText />
+      </div>
 
       <WeeklyModal
         isOpen={showWeeklyModal}
