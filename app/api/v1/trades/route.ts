@@ -28,7 +28,11 @@ import {
   calculateTradeDurationPerformance,
   calculateWeekdayPnl,
   calculatePerformanceScoreResult,
+  calculateTradingOverviewKpis,
+  calculateCalendarData,
+  calculateSessionAnalysis,
 } from '@/lib/dashboard-math'
+import { calculateBalanceInfo } from '@/lib/utils/balance-calculator'
 import { CacheHeaders } from '@/lib/api-cache-headers'
 import { applyRateLimit, apiLimiter } from '@/lib/rate-limiter'
 import { logger } from '@/lib/logger'
@@ -230,6 +234,10 @@ export async function GET(request: NextRequest) {
       tradeDurationPerformance: calculateTradeDurationPerformance(trades),
       weekdayPnl: calculateWeekdayPnl(trades),
       performanceScore: calculatePerformanceScoreResult(trades),
+      tradingOverview: calculateTradingOverviewKpis(trades),
+      sessionAnalysis: calculateSessionAnalysis(trades),
+      calendarData: calculateCalendarData(trades),
+      accountBalancePnl: calculateBalanceInfo(accounts, trades),
     } : null
 
     const total = trades.length
