@@ -55,78 +55,105 @@ const DayCell = memo(function DayCell({
   const isLoss = dayData?.isLoss ?? (dayData?.pnl ? dayData.pnl < -BREAK_EVEN_THRESHOLD : false)
   const isBreakEven = dayData?.isBreakEven ?? (!isProfit && !isLoss && hasTrades)
 
+  const winRateValue = useMemo(() => {
+    if (!dayData?.trades || dayData.trades.length === 0) return 0
+    const winners = dayData.trades.filter(t => (Number(t.pnl) + Number(t.commission || 0)) > BREAK_EVEN_THRESHOLD).length
+    return (winners / dayData.trades.length) * 100
+  }, [dayData])
+
   return (
     <div
       onClick={!isMiniCalendar && onClick ? onClick : undefined}
       className={cn(
-        "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-md border transition-all duration-150 select-none group min-h-0",
+        "relative flex flex-col items-center justify-center rounded-md border transition-all duration-150 select-none group aspect-square",
         !isMiniCalendar && "cursor-pointer",
 
         // No trades — dark neutral
-        !hasTrades && isCurrentMonth && "bg-card/50 border-border/30 hover:border-border/60",
+        !hasTrades && isCurrentMonth && "bg-card/40 border-border/20 hover:border-border/40",
 
         // Profit — deep green
-        hasTrades && isProfit && "bg-long/15 border-long/25 hover:bg-long/25 hover:border-long/40",
+        hasTrades && isProfit && "bg-long/20 border-long/30 hover:bg-long/30 hover:border-long/50",
 
         // Loss — deep red
-        hasTrades && isLoss && "bg-short/15 border-short/25 hover:bg-short/25 hover:border-short/40",
+        hasTrades && isLoss && "bg-short/20 border-short/30 hover:bg-short/30 hover:border-short/50",
 
         // Breakeven
         hasTrades && isBreakEven && "bg-muted/30 border-border/30",
 
         // Not current month
-        !isCurrentMonth && "opacity-15 pointer-events-none",
+        !isCurrentMonth && "opacity-10 pointer-events-none",
 
         // Today ring
-        isTodayDate && isCurrentMonth && "ring-1.5 ring-primary/60 ring-offset-1 ring-offset-background",
+        isTodayDate && isCurrentMonth && "ring-1.5 ring-primary ring-offset-1 ring-offset-background",
       )}
     >
+      {/* Note Icon — top left */}
+      {hasNotes && (
+        <div className="absolute top-1 left-1 opacity-60">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/80">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        </div>
+      )}
+
       {/* Day number — top right  */}
       <span
         className={cn(
-          "absolute top-1 right-1.5 text-[10px] md:text-[11px] font-bold leading-none",
+          "absolute top-1 right-1 font-black leading-none",
           isTodayDate
-            ? "text-primary-foreground bg-primary rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center text-[9px] md:text-[10px]"
-            : "text-muted-foreground/50",
+            ? "text-primary-foreground bg-primary rounded-full w-4.5 h-4.5 flex items-center justify-center text-[9px]"
+            : "text-muted-foreground/30 text-[10px]",
         )}
       >
         {format(date, 'd')}
       </span>
 
+      {/* Main Content Container */}
+      <div className="flex flex-col items-center justify-center w-full px-1">
+        {/* P&L */}
+        {hasTrades && visibleStats.pnl && (
+          <div
+            className={cn(
+              "font-black tracking-tighter text-foreground text-center",
+              isMiniCalendar ? "text-[10px]" : "text-[14px] md:text-[18px]",
+              // Add a slight shadow for better contrast on colored backgrounds
+              "drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]"
+            )}
+          >
+            {dayData.pnl > 0 ? "+" : ""}{formatCompact(dayData.pnl)}
+          </div>
+        )}
 
+        {/* Trade Count */}
+        {hasTrades && visibleStats.trades && (
+          <span className={cn(
+            "font-bold text-muted-foreground/80 leading-none",
+            isMiniCalendar ? "text-[7px]" : "text-[9px] md:text-[10px] mt-0.5"
+          )}>
+            {dayData.tradeNumber} trade{dayData.tradeNumber !== 1 ? 's' : ''}
+          </span>
+        )}
 
-      {/* P&L — centered, prominent */}
-      {hasTrades && visibleStats.pnl && (
-        <div
-          className={cn(
-            "font-black tracking-tighter text-[11px] md:text-[15px] leading-none mt-1",
-            isProfit ? "text-long" : isLoss ? "text-short" : "text-muted-foreground",
-          )}
-        >
-          {formatCompact(dayData.pnl)}
-        </div>
-      )}
-
-      {/* Secondary metrics — trade count + winrate */}
-      {hasTrades && !hideWeekends && (
-        <div className="hidden md:flex flex-col items-center gap-0 mt-0.5">
-          {visibleStats.trades && (
-            <span className="text-[9px] font-semibold text-muted-foreground/60">
-              {dayData.tradeNumber} trade{dayData.tradeNumber !== 1 ? 's' : ''}
-            </span>
-          )}
-          {visibleStats.winRate && dayData.trades && dayData.trades.length > 0 && (
-            <span className="text-[9px] font-semibold text-muted-foreground/60">
-              {((dayData.trades.filter(t => (Number(t.pnl) + Number(t.commission || 0)) > BREAK_EVEN_THRESHOLD).length / dayData.trades.length) * 100).toFixed(1)}%
-            </span>
-          )}
-          {visibleStats.rMultiple && dayData.dailyRMultiple !== undefined && (
-            <span className="text-[9px] font-semibold text-muted-foreground/60">
-              {dayData.dailyRMultiple.toFixed(2)}R
-            </span>
-          )}
-        </div>
-      )}
+        {/* Secondary Stats Row (R & WinRate) */}
+        {hasTrades && !isMiniCalendar && (
+          <div className="flex items-center gap-1 mt-1 opacity-90">
+            {visibleStats.rMultiple && dayData.dailyRMultiple !== undefined && (
+              <span className={cn(
+                "text-[8px] md:text-[9px] font-black",
+                isProfit ? "text-long" : isLoss ? "text-short" : "text-muted-foreground"
+              )}>
+                {dayData.dailyRMultiple.toFixed(2)}R
+              </span>
+            )}
+            {visibleStats.winRate && (
+              <span className="text-[8px] md:text-[9px] font-black text-muted-foreground/60">
+                {winRateValue.toFixed(0)}%
+              </span>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 })
@@ -169,23 +196,23 @@ function WeeklySummary({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-lg border p-2 cursor-pointer transition-all hover:shadow-sm min-h-[70px]",
+        "flex flex-col items-center justify-center rounded-xl border p-2 cursor-pointer transition-all hover:bg-muted/10 group min-h-[85px]",
         stats.tradedDays === 0
-          ? "bg-card/30 border-border/20"
+          ? "bg-card/20 border-border/10"
           : isPositive
-            ? "bg-long/5 border-long/15"
-            : "bg-short/5 border-short/15",
+            ? "bg-long/10 border-long/20"
+            : "bg-short/10 border-short/20",
       )}
       onClick={() => onReviewWeek?.(weekDays[0])}
     >
-      <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/50 mb-0.5">
-        Week {weekIndex + 1}
+      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 mb-1">
+        WEEK {weekIndex + 1}
       </span>
       <span
         className={cn(
-          "text-sm md:text-base font-black tracking-tighter",
+          "text-base md:text-lg font-black tracking-tighter drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]",
           stats.tradedDays === 0
-            ? "text-muted-foreground/30"
+            ? "text-muted-foreground/20"
             : isPositive
               ? "text-long"
               : "text-short",
@@ -195,10 +222,10 @@ function WeeklySummary({
       </span>
       <span
         className={cn(
-          "text-[9px] font-bold mt-0.5 px-1.5 py-0.5 rounded-full",
+          "text-[10px] font-bold mt-1 px-2 py-0.5 rounded-md",
           stats.tradedDays > 0
-            ? "bg-primary/10 text-primary"
-            : "bg-muted/30 text-muted-foreground/40",
+            ? "bg-primary/10 text-primary border border-primary/20"
+            : "bg-muted/10 text-muted-foreground/20",
         )}
       >
         {stats.tradedDays} day{stats.tradedDays !== 1 ? 's' : ''}
