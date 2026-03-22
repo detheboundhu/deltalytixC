@@ -36,6 +36,7 @@ const DayCell = memo(function DayCell({
   hasNotes,
   isCurrentMonth,
   hideWeekends,
+  isMiniCalendar,
   onClick,
 }: {
   date: Date
@@ -43,7 +44,8 @@ const DayCell = memo(function DayCell({
   hasNotes: boolean
   isCurrentMonth: boolean
   hideWeekends?: boolean
-  onClick: () => void
+  isMiniCalendar?: boolean
+  onClick?: () => void
 }) {
   const { visibleStats } = useCalendarViewStore()
   const isTodayDate = isToday(date)
@@ -57,8 +59,10 @@ const DayCell = memo(function DayCell({
 
   return (
     <div
+      onClick={!isMiniCalendar && onClick ? onClick : undefined}
       className={cn(
-        "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-md border cursor-pointer transition-all duration-150 select-none group min-h-0",
+        "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-md border transition-all duration-150 select-none group min-h-0",
+        !isMiniCalendar && "cursor-pointer",
 
         // No trades — dark neutral
         !hasTrades && isCurrentMonth && "bg-card/50 border-border/30 hover:border-border/60",
@@ -78,7 +82,6 @@ const DayCell = memo(function DayCell({
         // Today ring
         isTodayDate && isCurrentMonth && "ring-1.5 ring-primary/60 ring-offset-1 ring-offset-background",
       )}
-      onClick={onClick}
     >
       {/* Day number — top right  */}
       <span
@@ -215,12 +218,14 @@ export default function MonthlyView({
   onSelectDate,
   onReviewWeek,
   hideWeekends = false,
+  isMiniCalendar = false,
 }: {
   currentDate: Date
   calendarData: CalendarData
-  onSelectDate: (date: Date) => void
+  onSelectDate?: (date: Date) => void
   onReviewWeek?: (weekDate: Date) => void
   hideWeekends?: boolean
+  isMiniCalendar?: boolean
 }) {
   const timezone = useUserStore((state) => state.timezone)
   const { notes } = useCalendarNotes()
@@ -288,6 +293,7 @@ export default function MonthlyView({
                     hasNotes={hasNotes}
                     isCurrentMonth={isCurrentMonth}
                     hideWeekends={hideWeekends}
+                    isMiniCalendar={isMiniCalendar}
                     onClick={() => onSelectDate?.(date)}
                   />
                 )
@@ -298,8 +304,9 @@ export default function MonthlyView({
       </div>
 
       {/* Weekly Summaries Sidebar */}
-      <div className="hidden lg:flex flex-col gap-1.5 w-[100px] xl:w-[110px] p-2 pl-0 border-l border-border/20">
-        {/* Spacer to align with weekday header */}
+      {!isMiniCalendar && (
+        <div className="hidden lg:flex flex-col gap-1.5 w-[100px] xl:w-[110px] p-2 pl-0 border-l border-border/20">
+          {/* Spacer to align with weekday header */}
         <div className="h-[26px] shrink-0" />
 
         {weeks.map((week, index) => (
@@ -312,7 +319,8 @@ export default function MonthlyView({
             onReviewWeek={onReviewWeek}
           />
         ))}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -43,6 +43,7 @@ export default function DayOfWeekPerformanceWidget() {
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))', fontWeight: 700 }}
+            minTickGap={20}
           />
           <YAxis
             hide

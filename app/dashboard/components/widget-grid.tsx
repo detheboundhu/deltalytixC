@@ -169,7 +169,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
         w: Math.min(l.w, 6),
         x: l.x >= 6 ? 0 : l.x,
       })),
-      sm: desktopLayout.map(l => ({ ...l, w: 1, x: 0 })), // Stack on mobile
+      sm: desktopLayout.map(l => ({ ...l, w: 1, minW: 1, x: 0 })), // Stack strictly on mobile
     }
   }, [gridWidgets, isEditMode])
 

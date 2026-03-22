@@ -627,7 +627,8 @@ export default function ReportsPage() {
                         </TabsContent>
 
                         <TabsContent value="spreadsheet" className="focus-visible:outline-none">
-                            <div className="border border-border/40 rounded-xl overflow-hidden bg-card/50">
+                            <div className="border border-border/40 rounded-xl overflow-x-auto no-scrollbar bg-card/50">
+                              <div className="min-w-[700px] w-full">
                                 <Table>
                                     <TableHeader className="bg-muted/30">
                                         <TableRow className="border-border/40 hover:bg-transparent">
@@ -677,6 +678,7 @@ export default function ReportsPage() {
                                         })}
                                     </TableBody>
                                 </Table>
+                              </div>
                             </div>
                         </TabsContent>
 

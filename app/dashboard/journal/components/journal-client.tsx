@@ -723,7 +723,7 @@ export function JournalClient() {
                 <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
                   Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredTrades.length)} of {filteredTrades.length} trades
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap justify-center items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"

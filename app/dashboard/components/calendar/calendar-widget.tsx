@@ -233,8 +233,8 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
         className="overflow-hidden flex flex-col h-full"
       >
         {/* Unified Header: Navigation + Stats + Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 px-5 py-3 border-b border-border/20 bg-muted/5 flex-shrink-0">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-row items-center justify-between gap-3 px-3 sm:px-5 py-2 sm:py-3 border-b border-border/20 bg-muted/5 flex-shrink-0 overflow-x-auto">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Navigation Group */}
             <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30 font-bold shrink-0">
               <Button variant="ghost" size="icon" onClick={handlePrev} className="h-6 w-6 hover:bg-background" aria-label="Previous">
@@ -263,8 +263,8 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
             </Button>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-            <div className="hidden sm:flex items-center gap-1.5">
+          <div className="flex items-center gap-3 shrink-0 justify-end">
+            <div className="flex items-center gap-1.5 shrink-0">
               <span className="text-[10px] font-bold text-muted-foreground mr-1">
                 {viewMode === 'daily' ? 'Monthly stats:' : 'Yearly stats:'}
               </span>
@@ -318,8 +318,9 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
         </div>
 
         {/* Calendar Content */}
-        <div className="flex-1 min-h-0 overflow-hidden relative">
-          {viewMode === 'daily' ? (
+        <div className="flex-1 min-h-[300px] overflow-auto relative">
+          <div className="min-w-[600px] h-full flex flex-col">
+            {viewMode === 'daily' ? (
             <MonthlyView
               currentDate={currentDate}
               calendarData={localCalendarData}
@@ -334,7 +335,8 @@ const CalendarPnl = memo(function CalendarPnl({ className }: CalendarPnlProps) {
               year={getYear(currentDate)}
               calendarData={localCalendarData}
             />
-          )}
+            )}
+          </div>
         </div>
 
         <CalendarModal

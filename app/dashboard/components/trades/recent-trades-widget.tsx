@@ -45,10 +45,10 @@ export default function RecentTradesWidget() {
     <WidgetCard title="Recent Trades">
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="grid grid-cols-12 gap-2 pb-2 border-b border-border/30 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 shrink-0">
-          <div className="col-span-5">Date</div>
-          <div className="col-span-4">Symbol</div>
-          <div className="col-span-3 text-right">P&L</div>
+        <div className="flex items-center justify-between gap-3 sm:gap-4 pb-2 border-b border-border/30 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 shrink-0">
+          <div className="w-[70px] sm:w-[80px] shrink-0">Date</div>
+          <div className="flex-1 text-left">Symbol</div>
+          <div className="w-[70px] sm:w-[80px] text-right shrink-0">P&L</div>
         </div>
 
         {/* Trades List */}
@@ -84,17 +84,17 @@ export default function RecentTradesWidget() {
               return (
                 <div
                   key={trade.id || index}
-                  className="grid grid-cols-12 gap-2 py-2 text-xs hover:bg-muted/30 rounded-lg transition-colors"
+                  className="flex items-center justify-between gap-3 sm:gap-4 py-2 text-xs hover:bg-muted/30 rounded-lg transition-colors px-1"
                 >
-                  <div className="col-span-5 text-muted-foreground/60 font-medium">
+                  <div className="w-[70px] sm:w-[80px] text-muted-foreground/60 font-medium shrink-0">
                     {formatDate(trade.entryDate)}
                   </div>
-                  <div className="col-span-4 font-bold truncate" title={trade.symbol || trade.instrument}>
+                  <div className="flex-1 font-bold truncate text-left" title={trade.symbol || trade.instrument}>
                     {trade.symbol || trade.instrument}
                   </div>
                   <div
                     className={cn(
-                      'col-span-3 text-right font-bold font-mono',
+                      'w-[70px] sm:w-[80px] text-right font-bold font-mono shrink-0',
                       isProfitable
                         ? 'text-long'
                         : isLoss

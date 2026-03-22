@@ -5,8 +5,6 @@ import { format, addMonths, subMonths, isSameMonth } from "date-fns"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { WidgetCard } from '../widget-card'
 import { Button } from "@/components/ui/button"
-import { CalendarModal } from "./daily-modal"
-import { WeeklyModal } from "./weekly-modal"
 import { CalendarData } from "@/app/dashboard/types/calendar"
 import { useData } from "@/context/data-provider"
 import MonthlyView from "./monthly-view"
@@ -114,30 +112,10 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
             hideWeekends
             currentDate={currentDate}
             calendarData={calendarData}
-            onSelectDate={setSelectedDate}
-            onReviewWeek={(date) => {
-              setSelectedWeekDate(date)
-              setShowWeeklyModal(true)
-            }}
+            isMiniCalendar={true}
           />
         </div>
-
-        <CalendarModal
-          isOpen={selectedDate !== null}
-          onOpenChange={(open) => !open && setSelectedDate(null)}
-          selectedDate={selectedDate}
-          dayData={selectedDate ? calendarData[format(selectedDate, 'yyyy-MM-dd')] : undefined}
-          isLoading={isLoading}
-        />
       </WidgetCard>
-
-      <WeeklyModal
-        isOpen={showWeeklyModal}
-        onOpenChange={setShowWeeklyModal}
-        selectedDate={selectedWeekDate || new Date()}
-        calendarData={calendarData}
-        isLoading={isLoading}
-      />
     </div>
   )
 }

@@ -30,6 +30,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { SidebarTrigger } from '@/components/ui/sidebar'
+import { Logo } from '@/components/logo'
 import { Badge } from '@/components/ui/badge'
 
 export default function Navbar() {
@@ -62,8 +64,13 @@ export default function Navbar() {
       transition={{ duration: 0.25, ease: "easeOut" }}
     >
       <div className="flex items-center justify-between w-full px-4 h-12">
-        {/* Left: empty — sidebar has its own trigger at bottom */}
-        <div className="flex items-center" />
+        {/* Left: Sidebar mobile trigger & logo */}
+        <div className="flex items-center gap-3">
+          <SidebarTrigger className="md:hidden w-8 h-8" />
+          <Link href="/dashboard" className="md:hidden flex items-center">
+            <Logo className="h-6 w-6" />
+          </Link>
+        </div>
 
         {/* Right: Account Selector + Filters + Template + Import + Notifications + Theme + Profile */}
         <div className="flex items-center gap-1.5">

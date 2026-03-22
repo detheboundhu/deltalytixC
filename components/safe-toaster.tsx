@@ -34,10 +34,10 @@ interface CustomToastProps {
 }
 
 const variantStyles: Record<Variant, string> = {
-  default: 'bg-card border-border text-foreground',
-  success: 'bg-card border-green-600/50',
-  error: 'bg-card border-destructive/50',
-  warning: 'bg-card border-amber-600/50',
+  default: 'bg-background border-border text-foreground',
+  success: 'bg-background border-green-600/50',
+  error: 'bg-background border-destructive/50',
+  warning: 'bg-background border-amber-600/50',
 }
 
 const titleColor: Record<Variant, string> = {
@@ -161,7 +161,7 @@ export function SafeToaster() {
       position="bottom-right"
       theme={theme as 'light' | 'dark' | 'system'}
       toastOptions={{
-        className: 'bg-card text-foreground border border-border rounded-xl shadow-md p-3 text-xs',
+        className: 'bg-background text-foreground border border-border rounded-xl opacity-100 shadow-md p-3 text-xs',
         descriptionClassName: 'text-muted-foreground text-xs',
       }}
     />

@@ -52,6 +52,7 @@ export default function EquityCurveWidget() {
             tickLine={false}
             tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
             interval="preserveStartEnd"
+            minTickGap={30}
           />
           <YAxis
             axisLine={false}
