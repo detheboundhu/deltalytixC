@@ -229,6 +229,21 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Touch manipulation for better mobile interaction */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Ensure tables don't break layout on mobile */
 @media (max-width: 768px) {
   table {
@@ -237,22 +252,34 @@ html {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Minimum touch target size (48px per WCAG) */
+  /* Minimum touch target size (44px per Apple HIG, 48px per WCAG) */
   button,
   [role="button"],
   a,
   input[type="checkbox"],
   input[type="radio"] {
-    min-height: 36px;
-    min-width: 36px;
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  /* Smaller buttons can still exist if explicitly sized */
+  button.h-6,
+  button.h-7,
+  button.h-8,
+  [role="button"].h-6,
+  [role="button"].h-7,
+  [role="button"].h-8 {
+    min-height: unset;
+    min-width: unset;
   }
 
   /* Prevent dialogs from overflowing on small screens */
   [data-radix-dialog-content],
   [role="dialog"] {
-    max-width: calc(100vw - 2rem) !important;
-    max-height: calc(100vh - 4rem) !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    max-height: calc(100vh - 3rem) !important;
     overflow-y: auto;
+    margin: 0.75rem;
   }
 
   /* Ensure cards and containers don't overflow */
@@ -260,6 +287,32 @@ html {
   [class*="CardContent"] {
     overflow-x: hidden;
     word-break: break-word;
+  }
+
+  /* Improve KPI widget text sizing on mobile */
+  .kpi-value {
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
+  }
+
+  /* Ensure widget cards have proper padding */
+  .widget-card {
+    padding: 0.75rem;
+  }
+}
+
+/* Small mobile screens */
+@media (max-width: 480px) {
+  /* Even more compact dialogs */
+  [data-radix-dialog-content],
+  [role="dialog"] {
+    max-width: calc(100vw - 1rem) !important;
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+
+  /* Compact spacing for very small screens */
+  .space-y-3 > * + * {
+    margin-top: 0.5rem;
   }
 }
 
@@ -269,6 +322,11 @@ html {
   .fixed,
   .absolute {
     max-width: 100vw;
+  }
+
+  /* Improve grid layouts on tablets */
+  .react-grid-layout {
+    min-height: auto !important;
   }
 }
 

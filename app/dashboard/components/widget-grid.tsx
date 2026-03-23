@@ -311,17 +311,18 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
 
   return (
     <div className={cn('space-y-3', className)}>
-      {/* KPI Row — Flex container, separate from grid */}
-      <div className="px-4 pt-4">
+      {/* KPI Row — Responsive grid: stacked on mobile, 5-col on desktop */}
+      <div className="px-3 sm:px-4 pt-3 sm:pt-4">
         <div
           className={cn(
             'relative',
             isEditMode && 'border-2 border-dashed border-border/50 rounded-xl p-2'
           )}
         >
-          <div className="flex overflow-x-auto lg:grid lg:grid-cols-5 gap-3 pb-2 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          {/* Mobile: 2-col grid that stacks, Tablet: 3-col, Desktop: 5-col */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
             {kpiLayout.map((widget, index) => (
-              <div key={`kpi-slot-${index}`} className="relative w-[85vw] sm:w-[320px] lg:w-auto shrink-0 snap-center lg:snap-align-none">
+              <div key={`kpi-slot-${index}`} className="relative">
                 {widget ? (
                   <div className="relative group h-full">
                     {/* Edit mode controls */}
@@ -356,9 +357,9 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
                       </CardContent>
                     </Card>
                   )
-                )}
-              </div>
-            ))}
+              )}
+            </div>
+          ))}
           </div>
         </div>
       </div>
