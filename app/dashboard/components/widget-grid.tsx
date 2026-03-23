@@ -376,7 +376,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
           margin={GRID_MARGIN}
           containerPadding={[8, 8]}
           dragConfig={{ enabled: isEditMode, handle: '.widget-drag-handle' }}
-          resizeConfig={{ enabled: isEditMode, handles: ['se'] }}
+          resizeConfig={{ enabled: isEditMode, handles: ['s', 'w', 'e', 'n', 'sw', 'nw', 'se', 'ne'] }}
           compactor={verticalCompactor}
           onLayoutChange={handleLayoutChange as any}
         >
@@ -385,7 +385,7 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
             if (!config) return null
 
             return (
-              <div key={widget.i} className="group">
+              <div key={widget.i} className={cn("group", isEditMode && "ring-1 ring-border/30 ring-inset rounded-2xl hover:ring-primary/40 transition-all")}>
                 <div className="relative h-full w-full">
                   {/* Edit mode overlay controls */}
                   {isEditMode && (
@@ -401,6 +401,15 @@ export default function WidgetGrid({ className }: WidgetGridProps) {
                       >
                         <X className="h-3 w-3" />
                       </Button>
+                      {/* Resize hint indicator - bottom right */}
+                      <div className="absolute bottom-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <div className="flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded px-1.5 py-0.5 border border-border/50 shadow-sm">
+                          <svg className="w-3 h-3 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                          </svg>
+                          <span className="text-[9px] font-bold text-muted-foreground uppercase">Resize</span>
+                        </div>
+                      </div>
                     </>
                   )}
 
