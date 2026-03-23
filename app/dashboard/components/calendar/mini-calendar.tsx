@@ -188,7 +188,7 @@ function MiniCalendar({ calendarData }: MiniCalendarProps) {
         </div>
 
         {/* Calendar Grid - uses MonthlyView */}
-        <div className="flex-1 min-h-[350px] md:min-h-[400px] overflow-y-auto relative">
+        <div className="flex-1 min-h-0 overflow-y-auto relative">
           <MonthlyView
             hideWeekends
             currentDate={currentDate}
